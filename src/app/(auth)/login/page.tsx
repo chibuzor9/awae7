@@ -4,6 +4,7 @@ import { Suspense, useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
 
 function LoginForm() {
   const router = useRouter();
@@ -52,6 +53,17 @@ function LoginForm() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+          <OAuthButtons />
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-3 text-gray-500">or continue with email</span>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div

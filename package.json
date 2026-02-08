@@ -17,7 +17,6 @@
     "@supabase/supabase-js": "^2.95.3",
     "axe-core": "^4.11.1",
     "clsx": "^2.1.1",
-    "handlebars": "^4.7.9",
     "jspdf": "^4.1.0",
     "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.563.0",
@@ -31,7 +30,6 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/handlebars": "^4.1.0",
     "@types/node": "^20",
     "@types/pg": "^8.16.0",
     "@types/react": "^19",
