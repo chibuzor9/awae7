@@ -35,7 +35,8 @@ export interface EmailConfirmationData {
  * Load and compile a Handlebars template
  */
 function loadTemplate(templateName: string): HandlebarsTemplateDelegate {
-  const templatePath = join(process.cwd(), "src", "lib", "email", "templates", `${templateName}.hbs`);
+  // Use path relative to source file for better bundling compatibility
+  const templatePath = join(__dirname, "templates", `${templateName}.hbs`);
   const templateContent = readFileSync(templatePath, "utf-8");
   return Handlebars.compile(templateContent);
 }
@@ -99,7 +100,13 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
   //   html: options.html,
   // });
 
-  throw new Error("Email sending not configured. Please set up an email service provider.");
+  throw new Error(
+    "Email sending not configured. Please set up an email service provider by:\n" +
+    "1. Installing an email library (e.g., npm install resend)\n" +
+    "2. Setting environment variables (RESEND_API_KEY, EMAIL_FROM, etc.)\n" +
+    "3. Implementing the sendEmail function in src/lib/email/index.ts\n" +
+    "See README.md for detailed setup instructions."
+  );
 }
 
 /**
