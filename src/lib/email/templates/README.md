@@ -1,36 +1,49 @@
-# Email Templates
+# Email Templates (Custom SMTP)
 
-This directory contains Handlebars email templates for AWAE7.
+This directory contains Handlebars email templates for **marketing and engagement emails** sent via custom SMTP.
 
-## Available Templates
+> **📋 Architecture Note**: AWAE7 uses a dual email system:
+> - **Supabase** handles all authentication emails (`/supabase-email-templates/`)
+> - **Custom SMTP** handles marketing/engagement emails (this folder)
+> 
+> See `/supabase-email-templates/ARCHITECTURE.md` for full details.
+
+## Templates for Custom SMTP
+
+These templates are for **non-authentication** communications:
 
 ### 1. Welcome Email (`welcome.hbs`)
-Sent when a new user signs up.
+Sent after user completes signup (post-email-verification) via custom SMTP.
+
+**When to send**: After Supabase confirms the user's email
+**Purpose**: Onboarding, feature highlights, getting started guide
 
 **Variables:**
 - `username`: User's display name
 - `email`: User's email address
-- `confirmationUrl`: Optional email confirmation link
 - `siteUrl`: Base URL of the application
 
-### 2. Email Confirmation (`email-confirmation.hbs`)
-Sent to verify user's email address.
+### 2. Newsletter/Engagement Templates
+Add additional templates here for:
+- Weekly accessibility tips
+- Feature announcements
+- Evaluation completion notifications
+- Educational content series
 
-**Variables:**
-- `username`: User's display name
-- `email`: User's email address
-- `confirmationUrl`: Email confirmation link
-- `siteUrl`: Base URL of the application
+## Why Separate from Supabase?
 
-### 3. Password Reset (`password-reset.hbs`)
-Sent when user requests a password reset.
+**Authentication emails** (signup confirmation, password reset, etc.) should go through Supabase because:
+- ✅ No SMTP configuration needed
+- ✅ Reliable delivery through Supabase infrastructure
+- ✅ Built-in security and rate limiting
+- ✅ Easy to update without code deployment
 
-**Variables:**
-- `username`: User's display name
-- `email`: User's email address
-- `resetUrl`: Password reset link
-- `siteUrl`: Base URL of the application
-- `expiryHours`: Number of hours until link expires
+**Marketing/engagement emails** should use custom SMTP because:
+- ✅ Full control over sending logic
+- ✅ Can track opens, clicks, and engagement
+- ✅ Integrate with marketing automation
+- ✅ Send rich, branded content
+- ✅ No limits on email types or frequency
 
 ## Usage
 
