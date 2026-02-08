@@ -23,17 +23,19 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 ## Environment Setup
 
 1. Copy `.env.example` to `.env.local`:
+
 ```bash
 cp .env.example .env.local
 ```
 
 2. Configure your environment variables:
-   - **Database**: Add your `DATABASE_URL` for PostgreSQL
-   - **Supabase**: Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - **Email**: Choose and configure an email service provider (see Email Configuration below)
-   - **Site URL**: Set `NEXT_PUBLIC_SITE_URL` to your application URL
+    - **Database**: Add your `DATABASE_URL` for PostgreSQL
+    - **Supabase**: Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+    - **Email**: Choose and configure an email service provider (see Email Configuration below)
+    - **Site URL**: Set `NEXT_PUBLIC_SITE_URL` to your application URL
 
 3. Generate Prisma client and push schema to database:
+
 ```bash
 npx prisma generate
 npx prisma db push
@@ -44,7 +46,9 @@ npx prisma db push
 AWAE7 uses a **dual email system** for optimal user experience:
 
 ### Supabase Auth Emails (No Setup Required)
+
 Authentication emails are handled by Supabase automatically:
+
 - ✅ Signup confirmation
 - ✅ Password reset
 - ✅ Magic link login
@@ -57,16 +61,19 @@ Authentication emails are handled by Supabase automatically:
 See `/supabase-email-templates/ARCHITECTURE.md` for full details.
 
 ### Custom SMTP (Optional - For Marketing Emails)
+
 For non-auth emails (welcome messages, newsletters), configure custom SMTP:
 
 **1. Choose an Email Service Provider**
 
 **Recommended: Resend** (simplest setup)
+
 ```bash
 npm install resend
 ```
 
 Add to `.env.local`:
+
 ```
 RESEND_API_KEY="re_your_api_key"
 EMAIL_FROM="AWAE7 <hello@yourdomain.com>"
@@ -77,32 +84,33 @@ EMAIL_FROM="AWAE7 <hello@yourdomain.com>"
 Update `src/lib/email/index.ts` to use your chosen provider. Example with Resend:
 
 ```typescript
-import { Resend } from 'resend';
+import { Resend } from 'resend'
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
-  const resend = new Resend(process.env.RESEND_API_KEY);
-  
-  await resend.emails.send({
-    from: process.env.EMAIL_FROM!,
-    to: options.to,
-    subject: options.subject,
-    html: options.html,
-  });
+	const resend = new Resend(process.env.RESEND_API_KEY)
+
+	await resend.emails.send({
+		from: process.env.EMAIL_FROM!,
+		to: options.to,
+		subject: options.subject,
+		html: options.html,
+	})
 }
 ```
 
 **3. Send Marketing Emails**
 
 Use the welcome email after user completes signup:
+
 ```typescript
-import { sendWelcomeEmail } from '@/lib/email';
+import { sendWelcomeEmail } from '@/lib/email'
 
 // After Supabase confirms user's email
 await sendWelcomeEmail({
-  username: user.name,
-  email: user.email,
-  siteUrl: 'https://awae7.com'
-});
+	username: user.name,
+	email: user.email,
+	siteUrl: 'https://awae7.com',
+})
 ```
 
 Add more templates in `/src/lib/email/templates/` for newsletters, tips, etc.
@@ -110,6 +118,7 @@ Add more templates in `/src/lib/email/templates/` for newsletters, tips, etc.
 ## Architecture Benefits
 
 **Why separate auth from marketing emails?**
+
 - 🔒 Auth emails always work (no SMTP issues blocking signups)
 - ⚡ Faster onboarding (Supabase handles auth instantly)
 - 🎯 Better deliverability (auth through Supabase, marketing through dedicated SMTP)
@@ -124,6 +133,7 @@ To replace default Supabase emails with custom templates:
 3. Use the provided templates in this project instead
 
 The custom templates provide:
+
 - Professional branding matching AWAE7
 - Responsive design for all devices
 - Clear call-to-action buttons
