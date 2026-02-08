@@ -164,13 +164,7 @@ export interface WcagCard {
   principle: WcagPrinciple;
   level: WcagLevel;
   description: string;
-  explanation: string;
-  implementationExamples: {
-    good: string;
-    bad: string;
-  };
-  commonViolations: string[];
-  remediationStrategies: string[];
+  url: string;
 }
 
 // ---------- History ----------
