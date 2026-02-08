@@ -20,6 +20,94 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Environment Setup
+
+1. Copy `.env.example` to `.env.local`:
+```bash
+cp .env.example .env.local
+```
+
+2. Configure your environment variables:
+   - **Database**: Add your `DATABASE_URL` for PostgreSQL
+   - **Supabase**: Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - **Email**: Choose and configure an email service provider (see Email Configuration below)
+   - **Site URL**: Set `NEXT_PUBLIC_SITE_URL` to your application URL
+
+3. Generate Prisma client and push schema to database:
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+## Email Configuration
+
+AWAE7 uses custom Handlebars email templates for a professional user experience. To enable email functionality:
+
+### 1. Choose an Email Service Provider
+
+**Recommended: Resend** (simplest setup)
+```bash
+npm install resend
+```
+
+Add to `.env.local`:
+```
+RESEND_API_KEY="re_your_api_key"
+EMAIL_FROM="AWAE7 <noreply@yourdomain.com>"
+```
+
+**Alternative: SendGrid**
+```bash
+npm install @sendgrid/mail
+```
+
+Add to `.env.local`:
+```
+SENDGRID_API_KEY="SG.your_api_key"
+EMAIL_FROM="noreply@yourdomain.com"
+```
+
+### 2. Implement Email Sending
+
+Update `src/lib/email/index.ts` to use your chosen provider. Example with Resend:
+
+```typescript
+import { Resend } from 'resend';
+
+export async function sendEmail(options: EmailOptions): Promise<void> {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  
+  await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to: options.to,
+    subject: options.subject,
+    html: options.html,
+  });
+}
+```
+
+### 3. Available Email Templates
+
+- **Welcome Email**: Sent when users sign up
+- **Email Confirmation**: Verify user email addresses
+- **Password Reset**: Secure password reset flow
+
+Templates are located in `src/lib/email/templates/` and can be customized.
+
+## Supabase Auth Email Customization
+
+To replace default Supabase emails with custom templates:
+
+1. In Supabase Dashboard, go to **Authentication → Email Templates**
+2. Disable built-in email templates
+3. Use the provided templates in this project instead
+
+The custom templates provide:
+- Professional branding matching AWAE7
+- Responsive design for all devices
+- Clear call-to-action buttons
+- Accessibility-friendly markup
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
