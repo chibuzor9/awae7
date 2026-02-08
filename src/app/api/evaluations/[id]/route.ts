@@ -82,17 +82,17 @@ export async function GET(
 						| 'serious'
 						| 'moderate'
 						| 'minor',
-                    category: 'other' as const,
+					category: 'other' as const,
 					nodes: v.elementSelector
 						? [
 								{
 									html: v.htmlSnippet ?? '',
 									target: [v.elementSelector],
 									failureSummary: v.description,
-                                impact: null,
-                                any: [],
-                                all: [],
-                                none: [],
+									impact: null,
+									any: [],
+									all: [],
+									none: [],
 								},
 							]
 						: [],
@@ -104,26 +104,26 @@ export async function GET(
 				targetUrl: evaluation.targetUrl,
 				timestamp: evaluation.timestamp.toISOString(),
 				axeCoreVersion: evaluation.axeCoreVersion,
-                testEnvironment: {
-                    userAgent: '',
-                    windowWidth: 0,
-                    windowHeight: 0,
-                    orientationAngle: 0,
-                    orientationType: '',
-                },
+				testEnvironment: {
+					userAgent: '',
+					windowWidth: 0,
+					windowHeight: 0,
+					orientationAngle: 0,
+					orientationType: '',
+				},
 				overallScore: evaluation.overallScore,
 				totalViolations: evaluation.totalViolations,
-                totalIncomplete: 0,
-                totalPasses: 0,
-                totalInapplicable: 0,
+				totalIncomplete: 0,
+				totalPasses: 0,
+				totalInapplicable: 0,
 				criticalCount: evaluation.criticalCount,
 				seriousCount: evaluation.seriousCount,
 				moderateCount: evaluation.moderateCount,
 				minorCount: evaluation.minorCount,
 				violations,
 				passes: [],
-                incomplete: [],
-                inapplicable: [],
+				incomplete: [],
+				inapplicable: [],
 			}
 		}
 

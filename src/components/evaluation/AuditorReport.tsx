@@ -894,40 +894,41 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 													</td>
 													<td className="px-4 py-3 text-center">
 														<span className="text-green-600 font-semibold tabular-nums">
-															{cb.passCount}
+															{cb.passedRules}
 														</span>
 													</td>
 													<td className="px-4 py-3 text-center">
 														<span
 															className={cn(
 																'font-semibold tabular-nums',
-																cb.failCount > 0
+																cb.failedRules >
+																	0
 																	? 'text-red-600'
 																	: 'text-gray-400'
 															)}
 														>
-															{cb.failCount}
+															{cb.failedRules}
 														</span>
 													</td>
 													<td className="px-4 py-3 text-center">
 														<span
 															className={cn(
 																'font-semibold tabular-nums',
-																cb.needsReviewCount >
+																cb.needsReviewRules >
 																	0
 																	? 'text-amber-600'
 																	: 'text-gray-400'
 															)}
 														>
 															{
-																cb.needsReviewCount
+																cb.needsReviewRules
 															}
 														</span>
 													</td>
 													<td className="px-4 py-3 text-center">
 														<span className="text-gray-400 tabular-nums">
 															{
-																cb.inapplicableCount
+																cb.inapplicableRules
 															}
 														</span>
 													</td>

@@ -23,20 +23,20 @@ export type WcagLevel = 'A' | 'AA' | 'AAA' | 'best-practice'
 
 /** axe-core `cat.*` tag categories */
 export type WcagCategory =
-    | 'aria'
-    | 'color'
-    | 'forms'
-    | 'keyboard'
-    | 'language'
-    | 'name-role-value'
-    | 'parsing'
-    | 'semantics'
-    | 'sensory-and-visual-cues'
-    | 'structure'
-    | 'tables'
-    | 'text-alternatives'
-    | 'time-and-media'
-    | 'other'
+	| 'aria'
+	| 'color'
+	| 'forms'
+	| 'keyboard'
+	| 'language'
+	| 'name-role-value'
+	| 'parsing'
+	| 'semantics'
+	| 'sensory-and-visual-cues'
+	| 'structure'
+	| 'tables'
+	| 'text-alternatives'
+	| 'time-and-media'
+	| 'other'
 
 export interface EvaluationRequest {
 	url: string
@@ -46,28 +46,28 @@ export interface EvaluationRequest {
 
 /** A reference to a related DOM node returned by an axe check. */
 export interface RelatedNode {
-    html: string
-    target: string[]
+	html: string
+	target: string[]
 }
 
 /** Result of an individual axe-core check (within any / all / none arrays). */
 export interface CheckResult {
-    id: string
-    impact: string | null
-    message: string
-    data: Record<string, unknown> | null
-    relatedNodes: RelatedNode[]
+	id: string
+	impact: string | null
+	message: string
+	data: Record<string, unknown> | null
+	relatedNodes: RelatedNode[]
 }
 
 // ---------- Test environment ----------
 
 /** Browser / OS metadata captured by axe-core at evaluation time. */
 export interface TestEnvironment {
-    userAgent: string
-    windowWidth: number
-    windowHeight: number
-    orientationAngle: number
-    orientationType: string
+	userAgent: string
+	windowWidth: number
+	windowHeight: number
+	orientationAngle: number
+	orientationType: string
 }
 
 // ---------- Evaluation result ----------
@@ -77,20 +77,20 @@ export interface EvaluationResult {
 	targetUrl: string
 	timestamp: string
 	axeCoreVersion: string
-    testEnvironment: TestEnvironment
+	testEnvironment: TestEnvironment
 	overallScore: number
 	totalViolations: number
-    totalIncomplete: number
-    totalPasses: number
-    totalInapplicable: number
+	totalIncomplete: number
+	totalPasses: number
+	totalInapplicable: number
 	criticalCount: number
 	seriousCount: number
 	moderateCount: number
 	minorCount: number
 	violations: ViolationItem[]
 	passes: PassItem[]
-    incomplete: IncompleteItem[]
-    inapplicable: InapplicableItem[]
+	incomplete: IncompleteItem[]
+	inapplicable: InapplicableItem[]
 }
 
 export interface ViolationItem {
@@ -102,7 +102,7 @@ export interface ViolationItem {
 	wcagLevel: WcagLevel
 	wcagPrinciple: WcagPrinciple
 	severity: Severity
-    category: WcagCategory
+	category: WcagCategory
 	nodes: ViolationNode[]
 }
 
@@ -110,10 +110,10 @@ export interface ViolationNode {
 	html: string
 	target: string[]
 	failureSummary: string
-    impact: string | null
-    any: CheckResult[]
-    all: CheckResult[]
-    none: CheckResult[]
+	impact: string | null
+	any: CheckResult[]
+	all: CheckResult[]
+	none: CheckResult[]
 }
 
 export interface PassItem {
@@ -122,47 +122,47 @@ export interface PassItem {
 	wcagCriterion: string
 	wcagLevel: WcagLevel
 	wcagPrinciple: WcagPrinciple
-    category: WcagCategory
+	category: WcagCategory
 }
 
 // ---------- Incomplete / Inapplicable ----------
 
 export interface IncompleteItem {
-    ruleId: string
-    description: string
-    helpUrl: string
-    wcagCriterion: string
-    wcagLevel: WcagLevel
-    wcagPrinciple: WcagPrinciple
-    severity: Severity
-    category: WcagCategory
-    nodes: IncompleteNode[]
+	ruleId: string
+	description: string
+	helpUrl: string
+	wcagCriterion: string
+	wcagLevel: WcagLevel
+	wcagPrinciple: WcagPrinciple
+	severity: Severity
+	category: WcagCategory
+	nodes: IncompleteNode[]
 }
 
 export interface IncompleteNode {
-    html: string
-    target: string[]
-    impact: string | null
-    any: CheckResult[]
-    all: CheckResult[]
-    none: CheckResult[]
+	html: string
+	target: string[]
+	impact: string | null
+	any: CheckResult[]
+	all: CheckResult[]
+	none: CheckResult[]
 }
 
 export interface InapplicableItem {
-    ruleId: string
-    description: string
-    helpUrl: string
-    wcagCriterion: string
-    wcagLevel: WcagLevel
-    wcagPrinciple: WcagPrinciple
-    category: WcagCategory
+	ruleId: string
+	description: string
+	helpUrl: string
+	wcagCriterion: string
+	wcagLevel: WcagLevel
+	wcagPrinciple: WcagPrinciple
+	category: WcagCategory
 }
 
 // ---------- Report Types ----------
 export interface DeveloperReport {
 	summary: ReportSummary
 	violations: DeveloperViolation[]
-    incompleteItems: DeveloperIncompleteItem[]
+	incompleteItems: DeveloperIncompleteItem[]
 	filters: ReportFilters
 }
 
@@ -173,38 +173,38 @@ export interface DeveloperViolation {
 	wcagCriterion: string
 	wcagLevel: WcagLevel
 	wcagPrinciple: WcagPrinciple
-    category: WcagCategory
+	category: WcagCategory
 	helpUrl: string
 	elements: {
 		selector: string
 		htmlSnippet: string
 		failureSummary: string
-        checkData?: Record<string, unknown>
+		checkData?: Record<string, unknown>
 	}[]
 	remediation: string
 }
 
 export interface DeveloperIncompleteItem {
-    ruleId: string
-    severity: Severity
-    description: string
-    wcagCriterion: string
-    wcagLevel: WcagLevel
-    wcagPrinciple: WcagPrinciple
-    category: WcagCategory
-    helpUrl: string
-    reason: string
-    elementCount: number
+	ruleId: string
+	severity: Severity
+	description: string
+	wcagCriterion: string
+	wcagLevel: WcagLevel
+	wcagPrinciple: WcagPrinciple
+	category: WcagCategory
+	helpUrl: string
+	reason: string
+	elementCount: number
 }
 
 export interface AuditorReport {
 	summary: ReportSummary
 	complianceMatrix: ComplianceEntry[]
 	principleBreakdown: PrincipleBreakdown[]
-    categoryBreakdown: CategoryBreakdown[]
+	categoryBreakdown: CategoryBreakdown[]
 	violations: AuditorViolation[]
-    incompleteItems: AuditorIncompleteItem[]
-    inapplicableRules: InapplicableItem[]
+	incompleteItems: AuditorIncompleteItem[]
+	inapplicableRules: InapplicableItem[]
 	filters: ReportFilters
 }
 
@@ -213,7 +213,7 @@ export interface ComplianceEntry {
 	title: string
 	level: WcagLevel
 	principle: WcagPrinciple
-    status: 'pass' | 'fail' | 'needs-review' | 'not-tested'
+	status: 'pass' | 'fail' | 'needs-review' | 'not-tested'
 	violationCount: number
 }
 
@@ -222,18 +222,18 @@ export interface PrincipleBreakdown {
 	totalCriteria: number
 	passedCriteria: number
 	failedCriteria: number
-    needsReviewCriteria: number
+	needsReviewCriteria: number
 	compliancePercentage: number
 }
 
 export interface CategoryBreakdown {
-    category: WcagCategory
-    label: string
-    totalRules: number
-    passedRules: number
-    failedRules: number
-    needsReviewRules: number
-    inapplicableRules: number
+	category: WcagCategory
+	label: string
+	totalRules: number
+	passedRules: number
+	failedRules: number
+	needsReviewRules: number
+	inapplicableRules: number
 }
 
 export interface AuditorViolation {
@@ -243,21 +243,21 @@ export interface AuditorViolation {
 	wcagCriterion: string
 	wcagLevel: WcagLevel
 	wcagPrinciple: WcagPrinciple
-    category: WcagCategory
+	category: WcagCategory
 	instanceCount: number
 	formalDescription: string
 }
 
 export interface AuditorIncompleteItem {
-    ruleId: string
-    severity: Severity
-    description: string
-    wcagCriterion: string
-    wcagLevel: WcagLevel
-    wcagPrinciple: WcagPrinciple
-    category: WcagCategory
-    instanceCount: number
-    reason: string
+	ruleId: string
+	severity: Severity
+	description: string
+	wcagCriterion: string
+	wcagLevel: WcagLevel
+	wcagPrinciple: WcagPrinciple
+	category: WcagCategory
+	instanceCount: number
+	reason: string
 }
 
 export interface EndUserReport {
@@ -267,7 +267,7 @@ export interface EndUserReport {
 	scoreColor: string
 	categories: EndUserCategory[]
 	priorities: string[]
-    needsReviewCount: number
+	needsReviewCount: number
 }
 
 export interface EndUserCategory {
@@ -276,30 +276,30 @@ export interface EndUserCategory {
 	score: number
 	description: string
 	issueCount: number
-    needsReviewCount: number
+	needsReviewCount: number
 }
 
 export interface ReportSummary {
 	targetUrl: string
 	evaluationDate: string
 	totalViolations: number
-    totalIncomplete: number
-    totalPasses: number
-    totalInapplicable: number
+	totalIncomplete: number
+	totalPasses: number
+	totalInapplicable: number
 	overallScore: number
 	criticalCount: number
 	seriousCount: number
 	moderateCount: number
 	minorCount: number
 	axeCoreVersion: string
-    testEnvironment: TestEnvironment
+	testEnvironment: TestEnvironment
 }
 
 export interface ReportFilters {
 	severity: Severity[]
 	principle: WcagPrinciple[]
 	level: WcagLevel[]
-    category: WcagCategory[]
+	category: WcagCategory[]
 }
 
 // ---------- WCAG Card ----------
