@@ -1,6 +1,23 @@
 # Supabase Email Templates for AWAE7
 
-This folder contains professional HTML email templates designed for direct use in Supabase Authentication → Email Templates.
+This folder contains professional HTML email templates designed for **authentication and security flows** via Supabase Dashboard.
+
+> **📋 Architecture Note**: AWAE7 uses a dual email system:
+> - **Supabase** handles all authentication emails (this folder)
+> - **Custom SMTP** handles marketing/engagement emails (`/src/lib/email/templates/`)
+> 
+> See [ARCHITECTURE.md](./ARCHITECTURE.md) for full details on this separation.
+
+## Quick Start
+
+1. Go to Supabase Dashboard → **Authentication** → **Email Templates**
+2. Select an email type
+3. Copy the corresponding HTML file from this folder
+4. Paste into Supabase editor
+5. Update subject line (recommendations below)
+6. Save
+
+**No code deployment or SMTP configuration needed!**
 
 ## Templates Included
 

@@ -41,9 +41,25 @@ npx prisma db push
 
 ## Email Configuration
 
-AWAE7 uses custom Handlebars email templates for a professional user experience. To enable email functionality:
+AWAE7 uses a **dual email system** for optimal user experience:
 
-### 1. Choose an Email Service Provider
+### Supabase Auth Emails (No Setup Required)
+Authentication emails are handled by Supabase automatically:
+- ✅ Signup confirmation
+- ✅ Password reset
+- ✅ Magic link login
+- ✅ Email change verification
+- ✅ User invitations
+- ✅ Reauthentication/OTP
+
+**To customize**: Copy templates from `/supabase-email-templates/` into Supabase Dashboard → Authentication → Email Templates
+
+See `/supabase-email-templates/ARCHITECTURE.md` for full details.
+
+### Custom SMTP (Optional - For Marketing Emails)
+For non-auth emails (welcome messages, newsletters), configure custom SMTP:
+
+**1. Choose an Email Service Provider**
 
 **Recommended: Resend** (simplest setup)
 ```bash
@@ -53,21 +69,10 @@ npm install resend
 Add to `.env.local`:
 ```
 RESEND_API_KEY="re_your_api_key"
-EMAIL_FROM="AWAE7 <noreply@yourdomain.com>"
+EMAIL_FROM="AWAE7 <hello@yourdomain.com>"
 ```
 
-**Alternative: SendGrid**
-```bash
-npm install @sendgrid/mail
-```
-
-Add to `.env.local`:
-```
-SENDGRID_API_KEY="SG.your_api_key"
-EMAIL_FROM="noreply@yourdomain.com"
-```
-
-### 2. Implement Email Sending
+**2. Implement Email Sending**
 
 Update `src/lib/email/index.ts` to use your chosen provider. Example with Resend:
 
@@ -86,13 +91,29 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
 }
 ```
 
-### 3. Available Email Templates
+**3. Send Marketing Emails**
 
-- **Welcome Email**: Sent when users sign up
-- **Email Confirmation**: Verify user email addresses
-- **Password Reset**: Secure password reset flow
+Use the welcome email after user completes signup:
+```typescript
+import { sendWelcomeEmail } from '@/lib/email';
 
-Templates are located in `src/lib/email/templates/` and can be customized.
+// After Supabase confirms user's email
+await sendWelcomeEmail({
+  username: user.name,
+  email: user.email,
+  siteUrl: 'https://awae7.com'
+});
+```
+
+Add more templates in `/src/lib/email/templates/` for newsletters, tips, etc.
+
+## Architecture Benefits
+
+**Why separate auth from marketing emails?**
+- 🔒 Auth emails always work (no SMTP issues blocking signups)
+- ⚡ Faster onboarding (Supabase handles auth instantly)
+- 🎯 Better deliverability (auth through Supabase, marketing through dedicated SMTP)
+- 🛠️ Easy customization (update Supabase templates without code deployment)
 
 ## Supabase Auth Email Customization
 

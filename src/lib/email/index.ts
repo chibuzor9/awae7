@@ -12,22 +12,6 @@ export interface EmailOptions {
 export interface WelcomeEmailData {
   username: string;
   email: string;
-  confirmationUrl?: string;
-  siteUrl: string;
-}
-
-export interface PasswordResetEmailData {
-  username: string;
-  email: string;
-  resetUrl: string;
-  siteUrl: string;
-  expiryHours: number;
-}
-
-export interface EmailConfirmationData {
-  username: string;
-  email: string;
-  confirmationUrl: string;
   siteUrl: string;
 }
 
@@ -42,26 +26,10 @@ function loadTemplate(templateName: string): HandlebarsTemplateDelegate {
 }
 
 /**
- * Generate welcome email HTML
+ * Generate welcome email HTML (sent after Supabase confirms user email)
  */
 export function generateWelcomeEmail(data: WelcomeEmailData): string {
   const template = loadTemplate("welcome");
-  return template(data);
-}
-
-/**
- * Generate password reset email HTML
- */
-export function generatePasswordResetEmail(data: PasswordResetEmailData): string {
-  const template = loadTemplate("password-reset");
-  return template(data);
-}
-
-/**
- * Generate email confirmation HTML
- */
-export function generateEmailConfirmationEmail(data: EmailConfirmationData): string {
-  const template = loadTemplate("email-confirmation");
   return template(data);
 }
 
@@ -110,7 +78,8 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
 }
 
 /**
- * Send welcome email to new user
+ * Send welcome email to new user (after Supabase email confirmation)
+ * This is sent via custom SMTP, not Supabase
  */
 export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<void> {
   const html = generateWelcomeEmail(data);
@@ -118,32 +87,6 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<void> {
   await sendEmail({
     to: data.email,
     subject: "Welcome to AWAE7 - Let's Get Started! 🎉",
-    html,
-  });
-}
-
-/**
- * Send password reset email
- */
-export async function sendPasswordResetEmail(data: PasswordResetEmailData): Promise<void> {
-  const html = generatePasswordResetEmail(data);
-  
-  await sendEmail({
-    to: data.email,
-    subject: "Reset Your AWAE7 Password 🔒",
-    html,
-  });
-}
-
-/**
- * Send email confirmation
- */
-export async function sendEmailConfirmation(data: EmailConfirmationData): Promise<void> {
-  const html = generateEmailConfirmationEmail(data);
-  
-  await sendEmail({
-    to: data.email,
-    subject: "Confirm Your AWAE7 Email Address ✉️",
     html,
   });
 }
