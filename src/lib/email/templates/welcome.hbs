@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to AWAE7</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333333;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 20px;
+      text-align: center;
+      color: #ffffff;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 600;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .content h2 {
+      color: #667eea;
+      font-size: 24px;
+      margin-top: 0;
+    }
+    .content p {
+      margin: 16px 0;
+      font-size: 16px;
+    }
+    .button {
+      display: inline-block;
+      padding: 14px 32px;
+      background-color: #667eea;
+      color: #ffffff !important;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      margin: 24px 0;
+    }
+    .features {
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+    .features ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .features li {
+      margin: 8px 0;
+      color: #555555;
+    }
+    .footer {
+      background-color: #f8f9fa;
+      padding: 24px 30px;
+      text-align: center;
+      font-size: 14px;
+      color: #666666;
+    }
+    .footer a {
+      color: #667eea;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎉 Welcome to AWAE7</h1>
+    </div>
+    
+    <div class="content">
+      <h2>Hi {{username}}!</h2>
+      
+      <p>Welcome to AWAE7 - your comprehensive web accessibility evaluation and analysis platform. We're thrilled to have you on board!</p>
+      
+      <p>Your account has been successfully created with the email: <strong>{{email}}</strong></p>
+      
+      {{#if confirmationUrl}}
+      <p>To get started, please confirm your email address by clicking the button below:</p>
+      
+      <div style="text-align: center;">
+        <a href="{{confirmationUrl}}" class="button">Confirm Email Address</a>
+      </div>
+      
+      <p style="font-size: 14px; color: #666;">If the button doesn't work, copy and paste this link into your browser:<br>
+      <a href="{{confirmationUrl}}" style="color: #667eea; word-break: break-all;">{{confirmationUrl}}</a></p>
+      {{/if}}
+      
+      <div class="features">
+        <p><strong>What you can do with AWAE7:</strong></p>
+        <ul>
+          <li>Run comprehensive WCAG 2.2 accessibility evaluations</li>
+          <li>Get detailed reports tailored to your role (Developer, Auditor, or End User)</li>
+          <li>Learn from our interactive WCAG 2.2 card deck</li>
+          <li>Track evaluation history and progress over time</li>
+          <li>Export reports in multiple formats (CSV, JSON, PDF)</li>
+        </ul>
+      </div>
+      
+      <p>Need help getting started? Check out our documentation or contact our support team.</p>
+      
+      <p>Happy testing!<br>
+      <strong>The AWAE7 Team</strong></p>
+    </div>
+    
+    <div class="footer">
+      <p>This email was sent to {{email}} because you signed up for AWAE7.</p>
+      <p><a href="{{siteUrl}}">Visit AWAE7</a> | <a href="{{siteUrl}}/help">Help Center</a></p>
+    </div>
+  </div>
+</body>
+</html>
