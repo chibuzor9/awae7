@@ -22,6 +22,7 @@ import type {
 	Severity,
 	WcagPrinciple,
 	WcagLevel,
+	WcagCategory,
 } from '@/types'
 
 /* ---- Types ---- */
@@ -40,7 +41,24 @@ const ALL_PRINCIPLES: WcagPrinciple[] = [
 	'Understandable',
 	'Robust',
 ]
-const ALL_LEVELS: WcagLevel[] = ['A', 'AA']
+const ALL_LEVELS: WcagLevel[] = ['A', 'AA', 'AAA', 'best-practice']
+
+const CATEGORY_LABELS: Partial<Record<WcagCategory, string>> = {
+	color: 'Color',
+	forms: 'Forms',
+	keyboard: 'Keyboard',
+	language: 'Language',
+	'name-role-value': 'Name / Role / Value',
+	parsing: 'Parsing',
+	semantics: 'Semantics',
+	'sensory-and-visual-cues': 'Sensory & Visual',
+	structure: 'Structure',
+	tables: 'Tables',
+	'text-alternatives': 'Text Alternatives',
+	'time-and-media': 'Time & Media',
+	aria: 'ARIA',
+	other: 'Other',
+}
 
 const severityConfig: Record<
 	Severity,
@@ -141,6 +159,8 @@ export default function DeveloperReport({
 }: DeveloperReportProps) {
 	const { summary, violations } = report
 
+	const incompleteItems = report.incompleteItems ?? []
+
 	/* -- Filter state -- */
 	const [activeSeverities, setActiveSeverities] = useState<Set<Severity>>(
 		() => new Set(ALL_SEVERITIES)
@@ -150,6 +170,9 @@ export default function DeveloperReport({
 	>(() => new Set(ALL_PRINCIPLES))
 	const [activeLevels, setActiveLevels] = useState<Set<WcagLevel>>(
 		() => new Set(ALL_LEVELS)
+	)
+	const [activeCategories, setActiveCategories] = useState<Set<WcagCategory>>(
+		() => new Set(report.filters?.category ?? [])
 	)
 
 	/* -- Toggle helpers -- */
@@ -183,6 +206,10 @@ export default function DeveloperReport({
 		(l: WcagLevel) => toggleFilter(setActiveLevels, l),
 		[toggleFilter]
 	)
+	const toggleCategory = useCallback(
+		(c: WcagCategory) => toggleFilter(setActiveCategories, c),
+		[toggleFilter]
+	)
 
 	/* -- Filtered violations -- */
 	const filteredViolations = useMemo(
@@ -191,16 +218,27 @@ export default function DeveloperReport({
 				v =>
 					activeSeverities.has(v.severity) &&
 					activePrinciples.has(v.wcagPrinciple) &&
-					activeLevels.has(v.wcagLevel)
+					activeLevels.has(v.wcagLevel) &&
+					(activeCategories.size === 0 ||
+						!v.category ||
+						activeCategories.has(v.category))
 			),
-		[violations, activeSeverities, activePrinciples, activeLevels]
+		[
+			violations,
+			activeSeverities,
+			activePrinciples,
+			activeLevels,
+			activeCategories,
+		]
 	)
 
+	const allCategories = report.filters?.category ?? []
 	const activeFilterCount =
 		ALL_SEVERITIES.length -
 		activeSeverities.size +
 		(ALL_PRINCIPLES.length - activePrinciples.size) +
-		(ALL_LEVELS.length - activeLevels.size)
+		(ALL_LEVELS.length - activeLevels.size) +
+		(allCategories.length - activeCategories.size)
 
 	const hasActiveFilters = activeFilterCount > 0
 
@@ -208,7 +246,8 @@ export default function DeveloperReport({
 		setActiveSeverities(new Set(ALL_SEVERITIES))
 		setActivePrinciples(new Set(ALL_PRINCIPLES))
 		setActiveLevels(new Set(ALL_LEVELS))
-	}, [])
+		setActiveCategories(new Set(allCategories))
+	}, [allCategories])
 
 	/* ---- Render ---- */
 
@@ -290,6 +329,24 @@ export default function DeveloperReport({
 									? 'violation'
 									: 'violations'}{' '}
 								found
+								{(summary.totalIncomplete ?? 0) > 0 && (
+									<>
+										{' · '}
+										<span className="font-semibold text-amber-600">
+											{summary.totalIncomplete}
+										</span>{' '}
+										needs review
+									</>
+								)}
+								{(summary.totalPasses ?? 0) > 0 && (
+									<>
+										{' · '}
+										<span className="font-semibold text-green-600">
+											{summary.totalPasses}
+										</span>{' '}
+										passed
+									</>
+								)}
 							</p>
 						</div>
 					</div>
@@ -416,13 +473,41 @@ export default function DeveloperReport({
 							{ALL_LEVELS.map(l => (
 								<FilterPill
 									key={l}
-									label={`Level ${l}`}
+									label={
+										l === 'best-practice'
+											? 'Best Practice'
+											: `Level ${l}`
+									}
 									isActive={activeLevels.has(l)}
 									onToggle={() => toggleLevel(l)}
 								/>
 							))}
 						</div>
 					</fieldset>
+
+					{/* Category filters */}
+					{allCategories.length > 0 && (
+						<fieldset>
+							<legend className="mb-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+								Category
+							</legend>
+							<div
+								className="flex flex-wrap gap-2"
+								role="group"
+								aria-label="Filter by category"
+							>
+								{allCategories.map(c => (
+									<FilterPill
+										key={c}
+										label={CATEGORY_LABELS[c] ?? c}
+										isActive={activeCategories.has(c)}
+										onToggle={() => toggleCategory(c)}
+										activeClass="bg-purple-600 text-white"
+									/>
+								))}
+							</div>
+						</fieldset>
+					)}
 				</CardBody>
 			</Card>
 
@@ -451,6 +536,7 @@ export default function DeveloperReport({
 								helpUrl={violation.helpUrl}
 								elements={violation.elements}
 								remediation={violation.remediation}
+								category={violation.category}
 								onWcagCardClick={onWcagCardClick}
 							/>
 						))}
@@ -483,6 +569,64 @@ export default function DeveloperReport({
 					</Card>
 				)}
 			</section>
+
+			{/* ==================== Needs Review (Incomplete) ==================== */}
+			{incompleteItems.length > 0 && (
+				<section aria-label="Needs review items">
+					<Card>
+						<CardHeader>
+							<h3 className="text-sm font-semibold text-gray-900">
+								Needs Manual Review
+								<span className="ml-1.5 text-gray-500 font-normal">
+									({incompleteItems.length})
+								</span>
+							</h3>
+							<p className="mt-0.5 text-xs text-gray-500">
+								These items could not be fully evaluated
+								automatically and require manual verification.
+							</p>
+						</CardHeader>
+						<CardBody className="p-0">
+							<ul
+								className="divide-y divide-gray-100"
+								role="list"
+							>
+								{incompleteItems.map(item => (
+									<li key={item.ruleId} className="px-6 py-4">
+										<div className="flex flex-wrap items-center gap-2 mb-1">
+											<Badge variant="warning">
+												{item.severity}
+											</Badge>
+											<code className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs">
+												{item.ruleId}
+											</code>
+											<Badge variant="info">
+												{item.wcagCriterion} (
+												{item.wcagLevel})
+											</Badge>
+										</div>
+										<p className="text-sm text-gray-800">
+											{item.description}
+										</p>
+										{item.reason && (
+											<p className="mt-1 text-xs text-amber-700 bg-amber-50 rounded px-2 py-1 inline-block">
+												{item.reason}
+											</p>
+										)}
+										<p className="mt-1 text-xs text-gray-500">
+											{item.elementCount}{' '}
+											{item.elementCount === 1
+												? 'element'
+												: 'elements'}{' '}
+											to review
+										</p>
+									</li>
+								))}
+							</ul>
+						</CardBody>
+					</Card>
+				</section>
+			)}
 		</div>
 	)
 }

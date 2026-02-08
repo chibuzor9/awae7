@@ -5,14 +5,25 @@ import { ChevronDown, ChevronRight, ExternalLink, Code2 } from 'lucide-react'
 import { Card, CardBody } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { cn } from '@/lib/utils'
-import type { Severity, WcagLevel, WcagPrinciple } from '@/types'
+import type { Severity, WcagLevel, WcagPrinciple, WcagCategory } from '@/types'
 
 /* ---- Types ---- */
+
+interface CheckData {
+	contrastRatio?: number
+	fgColor?: string
+	bgColor?: string
+	fontSize?: string
+	fontWeight?: string
+	expectedContrastRatio?: string
+	[key: string]: unknown
+}
 
 interface ViolationElement {
 	selector: string
 	htmlSnippet: string
 	failureSummary: string
+	checkData?: CheckData
 }
 
 export interface ViolationCardProps {
@@ -25,6 +36,7 @@ export interface ViolationCardProps {
 	helpUrl: string
 	elements: ViolationElement[]
 	remediation: string
+	category?: WcagCategory
 	onWcagCardClick?: (criterionNumber: string) => void
 }
 
@@ -56,6 +68,7 @@ export function ViolationCard({
 	helpUrl,
 	elements,
 	remediation,
+	category,
 	onWcagCardClick,
 }: ViolationCardProps) {
 	const [isExpanded, setIsExpanded] = useState(false)
@@ -91,7 +104,7 @@ export function ViolationCard({
 			<button
 				type="button"
 				onClick={toggle}
-				aria-expanded={isExpanded}
+				aria-expanded={isExpanded ? 'true' : 'false'}
 				aria-controls={`violation-details-${ruleId}`}
 				className="flex w-full items-start gap-3 px-6 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-xl"
 			>
@@ -120,8 +133,14 @@ export function ViolationCard({
 						</Badge>
 
 						<Badge variant="info">
-							WCAG {wcagCriterion} ({wcagLevel})
+							{wcagLevel === 'best-practice'
+								? 'Best Practice'
+								: `WCAG ${wcagCriterion} (${wcagLevel})`}
 						</Badge>
+
+						{category && (
+							<Badge variant="default">{category}</Badge>
+						)}
 
 						<span className="text-xs text-gray-500">
 							({elements.length}{' '}
@@ -214,6 +233,134 @@ export function ViolationCard({
 										<p className="text-sm text-gray-700 leading-relaxed">
 											{el.failureSummary}
 										</p>
+
+										{/* Check data (e.g. color contrast) */}
+										{el.checkData &&
+											Object.keys(el.checkData).length >
+												0 && (
+												<div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
+													<p className="mb-1.5 text-xs font-medium text-blue-700">
+														Measured Values
+													</p>
+													<div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+														{el.checkData
+															.contrastRatio !=
+															null && (
+															<>
+																<span className="text-gray-600">
+																	Contrast
+																	Ratio
+																</span>
+																<span className="font-mono font-semibold text-gray-900">
+																	{Number(
+																		el
+																			.checkData
+																			.contrastRatio
+																	).toFixed(
+																		2
+																	)}
+																	:1
+																</span>
+															</>
+														)}
+														{el.checkData
+															.expectedContrastRatio && (
+															<>
+																<span className="text-gray-600">
+																	Required
+																</span>
+																<span className="font-mono text-gray-900">
+																	{
+																		el
+																			.checkData
+																			.expectedContrastRatio
+																	}
+																</span>
+															</>
+														)}
+														{el.checkData
+															.fgColor && (
+															<>
+																<span className="text-gray-600">
+																	Foreground
+																</span>
+																<span className="flex items-center gap-1.5 font-mono text-gray-900">
+																	<span
+																		className="inline-block h-3 w-3 rounded border border-gray-300"
+																		style={{
+																			backgroundColor:
+																				el
+																					.checkData
+																					.fgColor,
+																		}}
+																		aria-hidden="true"
+																	/>
+																	{
+																		el
+																			.checkData
+																			.fgColor
+																	}
+																</span>
+															</>
+														)}
+														{el.checkData
+															.bgColor && (
+															<>
+																<span className="text-gray-600">
+																	Background
+																</span>
+																<span className="flex items-center gap-1.5 font-mono text-gray-900">
+																	<span
+																		className="inline-block h-3 w-3 rounded border border-gray-300"
+																		style={{
+																			backgroundColor:
+																				el
+																					.checkData
+																					.bgColor,
+																		}}
+																		aria-hidden="true"
+																	/>
+																	{
+																		el
+																			.checkData
+																			.bgColor
+																	}
+																</span>
+															</>
+														)}
+														{el.checkData
+															.fontSize && (
+															<>
+																<span className="text-gray-600">
+																	Font Size
+																</span>
+																<span className="font-mono text-gray-900">
+																	{
+																		el
+																			.checkData
+																			.fontSize
+																	}
+																</span>
+															</>
+														)}
+														{el.checkData
+															.fontWeight && (
+															<>
+																<span className="text-gray-600">
+																	Font Weight
+																</span>
+																<span className="font-mono text-gray-900">
+																	{
+																		el
+																			.checkData
+																			.fontWeight
+																	}
+																</span>
+															</>
+														)}
+													</div>
+												</div>
+											)}
 									</li>
 								))}
 							</ul>

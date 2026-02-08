@@ -26,14 +26,8 @@ if (fs.existsSync(envPath)) {
 }
 
 export default defineConfig({
-	earlyAccess: true,
 	schema: path.join(__dirname, 'prisma', 'schema.prisma'),
 	datasource: {
 		url: process.env.DIRECT_URL!,
-	},
-	migrate: {
-		async datasourceUrl() {
-			return process.env.DIRECT_URL!
-		},
 	},
 })

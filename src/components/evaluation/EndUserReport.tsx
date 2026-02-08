@@ -107,7 +107,8 @@ function getInterpretation(score: number): {
 
 // ---------- Component ----------
 export default function EndUserReport({ report }: EndUserReportProps) {
-	const { score, scoreLabel, categories, priorities } = report
+	const { score, scoreLabel, categories, priorities, needsReviewCount } =
+		report
 	const interpretation = getInterpretation(score)
 
 	return (
@@ -126,6 +127,13 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 				</p>
 				<p className="mt-1 text-sm text-gray-500">
 					out of 100 possible points
+					{(needsReviewCount ?? 0) > 0 && (
+						<span className="block mt-1 text-amber-600">
+							{needsReviewCount}{' '}
+							{needsReviewCount === 1 ? 'area' : 'areas'} need
+							manual review
+						</span>
+					)}
 				</p>
 			</section>
 
@@ -275,7 +283,12 @@ function CategoryCard({ category }: { category: EndUserCategory }) {
 						{category.issueCount === 0
 							? 'No issues'
 							: `${category.issueCount} ${category.issueCount === 1 ? 'issue' : 'issues'}`}
-					</Badge>
+					</Badge>{' '}
+					{(category.needsReviewCount ?? 0) > 0 && (
+						<Badge variant="warning">
+							{category.needsReviewCount} to review
+						</Badge>
+					)}{' '}
 				</div>
 
 				{/* Description */}

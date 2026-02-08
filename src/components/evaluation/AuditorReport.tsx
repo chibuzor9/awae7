@@ -23,6 +23,7 @@ import type {
 	Severity,
 	WcagPrinciple,
 	WcagLevel,
+	CategoryBreakdown,
 } from '@/types'
 
 // ---------- Props ----------
@@ -38,7 +39,7 @@ const PRINCIPLES: WcagPrinciple[] = [
 	'Robust',
 ]
 
-const LEVELS: WcagLevel[] = ['A', 'AA']
+const LEVELS: WcagLevel[] = ['A', 'AA', 'AAA', 'best-practice']
 
 const SEVERITIES: Severity[] = ['critical', 'serious', 'moderate', 'minor']
 
@@ -67,12 +68,14 @@ function severityBadgeVariant(
 
 function statusBadgeVariant(
 	status: ComplianceEntry['status']
-): 'success' | 'error' | 'default' {
+): 'success' | 'error' | 'warning' | 'default' {
 	switch (status) {
 		case 'pass':
 			return 'success'
 		case 'fail':
 			return 'error'
+		case 'needs-review':
+			return 'warning'
 		case 'not-tested':
 			return 'default'
 	}
@@ -84,6 +87,8 @@ function statusLabel(status: ComplianceEntry['status']): string {
 			return 'Pass'
 		case 'fail':
 			return 'Fail'
+		case 'needs-review':
+			return 'Needs Review'
 		case 'not-tested':
 			return 'Not Tested'
 	}
@@ -109,6 +114,9 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 		complianceMatrix,
 		violations,
 		filters,
+		categoryBreakdown,
+		incompleteItems,
+		inapplicableRules,
 	} = report
 
 	// --- Compliance Matrix state ---
@@ -379,7 +387,7 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 									/>
 								</div>
 
-								{/* Passed / Failed counts */}
+								{/* Passed / Failed / Needs Review counts */}
 								<div className="flex items-center justify-between text-xs text-gray-600">
 									<span className="flex items-center gap-1">
 										<CheckCircle2
@@ -395,6 +403,15 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 										/>
 										{pb.failedCriteria} failed
 									</span>
+									{(pb.needsReviewCriteria ?? 0) > 0 && (
+										<span className="flex items-center gap-1">
+											<AlertTriangle
+												className="h-3.5 w-3.5 text-amber-500"
+												aria-hidden="true"
+											/>
+											{pb.needsReviewCriteria} review
+										</span>
+									)}
 								</div>
 								<p className="text-xs text-gray-500">
 									{pb.passedCriteria}/{pb.totalCriteria}{' '}
@@ -620,6 +637,13 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 																aria-hidden="true"
 															/>
 														)}
+														{entry.status ===
+															'needs-review' && (
+															<AlertTriangle
+																className="h-3 w-3 mr-1"
+																aria-hidden="true"
+															/>
+														)}
 														{statusLabel(
 															entry.status
 														)}
@@ -805,6 +829,211 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 					</CardBody>
 				</Card>
 			</section>
+
+			{/* ============ CATEGORY BREAKDOWN ============ */}
+			{categoryBreakdown && categoryBreakdown.length > 0 && (
+				<section aria-labelledby="category-breakdown-heading">
+					<Card>
+						<CardHeader>
+							<h2
+								id="category-breakdown-heading"
+								className="text-lg font-semibold text-gray-900"
+							>
+								Category Breakdown
+							</h2>
+							<p className="text-sm text-gray-500 mt-1">
+								Results grouped by axe-core rule category
+							</p>
+						</CardHeader>
+						<CardBody className="p-0">
+							<div className="overflow-x-auto">
+								<table className="w-full text-sm">
+									<thead>
+										<tr className="border-b border-gray-200 bg-gray-50">
+											<th
+												scope="col"
+												className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide"
+											>
+												Category
+											</th>
+											<th
+												scope="col"
+												className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wide"
+											>
+												Pass
+											</th>
+											<th
+												scope="col"
+												className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wide"
+											>
+												Fail
+											</th>
+											<th
+												scope="col"
+												className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wide"
+											>
+												Review
+											</th>
+											<th
+												scope="col"
+												className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wide"
+											>
+												N/A
+											</th>
+										</tr>
+									</thead>
+									<tbody className="divide-y divide-gray-100">
+										{categoryBreakdown.map(
+											(cb: CategoryBreakdown) => (
+												<tr
+													key={cb.category}
+													className="hover:bg-gray-50 transition-colors"
+												>
+													<td className="px-4 py-3 text-gray-900 font-medium">
+														{cb.label}
+													</td>
+													<td className="px-4 py-3 text-center">
+														<span className="text-green-600 font-semibold tabular-nums">
+															{cb.passCount}
+														</span>
+													</td>
+													<td className="px-4 py-3 text-center">
+														<span
+															className={cn(
+																'font-semibold tabular-nums',
+																cb.failCount > 0
+																	? 'text-red-600'
+																	: 'text-gray-400'
+															)}
+														>
+															{cb.failCount}
+														</span>
+													</td>
+													<td className="px-4 py-3 text-center">
+														<span
+															className={cn(
+																'font-semibold tabular-nums',
+																cb.needsReviewCount >
+																	0
+																	? 'text-amber-600'
+																	: 'text-gray-400'
+															)}
+														>
+															{
+																cb.needsReviewCount
+															}
+														</span>
+													</td>
+													<td className="px-4 py-3 text-center">
+														<span className="text-gray-400 tabular-nums">
+															{
+																cb.inapplicableCount
+															}
+														</span>
+													</td>
+												</tr>
+											)
+										)}
+									</tbody>
+								</table>
+							</div>
+						</CardBody>
+					</Card>
+				</section>
+			)}
+
+			{/* ============ NEEDS REVIEW (INCOMPLETE) ============ */}
+			{incompleteItems && incompleteItems.length > 0 && (
+				<section aria-labelledby="incomplete-heading">
+					<Card>
+						<CardHeader>
+							<div className="flex items-center gap-2">
+								<AlertTriangle
+									className="h-5 w-5 text-amber-500"
+									aria-hidden="true"
+								/>
+								<h2
+									id="incomplete-heading"
+									className="text-lg font-semibold text-gray-900"
+								>
+									Needs Manual Review (
+									{incompleteItems.length})
+								</h2>
+							</div>
+							<p className="text-sm text-gray-500 mt-1">
+								Rules that could not be fully evaluated by
+								automated testing
+							</p>
+						</CardHeader>
+						<CardBody className="p-0">
+							<ul
+								className="divide-y divide-gray-100"
+								role="list"
+							>
+								{incompleteItems.map(item => (
+									<li key={item.ruleId} className="px-6 py-4">
+										<div className="flex flex-wrap items-center gap-2 mb-1">
+											<Badge
+												variant="warning"
+												className="capitalize"
+											>
+												{item.severity}
+											</Badge>
+											<span className="font-mono text-xs text-gray-500">
+												{item.ruleId}
+											</span>
+											<Badge variant="info">
+												{item.wcagCriterion} (Level{' '}
+												{item.wcagLevel})
+											</Badge>
+										</div>
+										<p className="text-sm text-gray-900">
+											{item.description}
+										</p>
+										<p className="mt-1 text-xs text-gray-500">
+											{item.instanceCount}{' '}
+											{item.instanceCount === 1
+												? 'element'
+												: 'elements'}{' '}
+											to review
+										</p>
+									</li>
+								))}
+							</ul>
+						</CardBody>
+					</Card>
+				</section>
+			)}
+
+			{/* ============ INAPPLICABLE RULES ============ */}
+			{inapplicableRules && inapplicableRules.length > 0 && (
+				<section aria-labelledby="inapplicable-heading">
+					<Card>
+						<CardHeader>
+							<h2
+								id="inapplicable-heading"
+								className="text-lg font-semibold text-gray-900"
+							>
+								Not Applicable ({inapplicableRules.length}{' '}
+								rules)
+							</h2>
+							<p className="text-sm text-gray-500 mt-1">
+								Rules that did not apply to any elements on this
+								page
+							</p>
+						</CardHeader>
+						<CardBody>
+							<div className="flex flex-wrap gap-2">
+								{inapplicableRules.map(rule => (
+									<Badge key={rule.ruleId} variant="default">
+										{rule.ruleId}
+									</Badge>
+								))}
+							</div>
+						</CardBody>
+					</Card>
+				</section>
+			)}
 		</div>
 	)
 }

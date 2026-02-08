@@ -26,7 +26,7 @@ export default function EvaluatePage() {
 	const [error, setError] = useState<string | null>(null)
 	const [results, setResults] = useState<EvaluationData | null>(null)
 
-	async function handleSubmit(url: string) {
+	async function handleUrlSubmit(url: string) {
 		setLoading(true)
 		setError(null)
 		setResults(null)
@@ -59,6 +59,41 @@ export default function EvaluatePage() {
 		}
 	}
 
+	async function handleFileSubmit(file: File) {
+		setLoading(true)
+		setError(null)
+		setResults(null)
+
+		try {
+			const formData = new FormData()
+			formData.append('file', file)
+
+			const response = await fetch('/api/evaluate', {
+				method: 'POST',
+				body: formData,
+			})
+
+			const data = await response.json()
+
+			if (!response.ok) {
+				const message =
+					data?.error ?? 'Something went wrong. Please try again.'
+				throw new Error(message)
+			}
+
+			setResults(data as EvaluationData)
+		} catch (err: unknown) {
+			const message =
+				err instanceof Error
+					? err.message
+					: 'An unexpected error occurred.'
+			setError(message)
+			toast.error(message)
+		} finally {
+			setLoading(false)
+		}
+	}
+
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
@@ -68,15 +103,19 @@ export default function EvaluatePage() {
 						Evaluate Website Accessibility
 					</h1>
 					<p className="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">
-						Enter a URL below to run an automated WCAG 2.2
-						accessibility audit. You will receive tailored reports
-						for developers, auditors, and end users.
+						Enter a URL or upload an HTML file to run an automated
+						WCAG 2.2 accessibility audit. You will receive tailored
+						reports for developers, auditors, and end users.
 					</p>
 				</header>
 
 				{/* ---- Form ---- */}
 				<section aria-label="Evaluation form" className="mb-12">
-					<EvaluationForm onSubmit={handleSubmit} loading={loading} />
+					<EvaluationForm
+						onSubmitUrl={handleUrlSubmit}
+						onSubmitFile={handleFileSubmit}
+						loading={loading}
+					/>
 				</section>
 
 				{/* ---- Loading State ---- */}
