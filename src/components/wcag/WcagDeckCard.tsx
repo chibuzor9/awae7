@@ -153,8 +153,8 @@ export default function WcagDeckCard({ card, onSelect }: WcagDeckCardProps) {
           </div>
 
           {/* Description / explanation */}
-          <p className="flex-1 text-sm leading-relaxed text-gray-600">
-            {card.explanation}
+          <p className="flex-1 text-sm leading-relaxed text-gray-600 whitespace-pre-line">
+            {card.description}
           </p>
 
           {/* Learn more button */}
