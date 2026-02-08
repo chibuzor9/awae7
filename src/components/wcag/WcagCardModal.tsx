@@ -86,6 +86,7 @@ export default function WcagCardModal({
             >
               Learn more about {card.criterionNumber}
               <span aria-hidden="true">→</span>
+              <span className="sr-only">(opens in new window)</span>
             </a>
           </section>
         )}
