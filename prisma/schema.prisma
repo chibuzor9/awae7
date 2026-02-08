@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String       @id @default(uuid())
+  email         String       @unique
+  username      String
+  preferredRole String       @default("end-user")
+  createdAt     DateTime     @default(now())
+  lastLogin     DateTime?
+  evaluations   Evaluation[]
+
+  @@map("users")
+}
+
+model Evaluation {
+  id              String      @id @default(uuid())
+  userId          String?
+  targetUrl       String
+  timestamp       DateTime    @default(now())
+  axeCoreVersion  String
+  totalViolations Int
+  criticalCount   Int         @default(0)
+  seriousCount    Int         @default(0)
+  moderateCount   Int         @default(0)
+  minorCount      Int         @default(0)
+  overallScore    Float
+  rawResults      Json?
+  user            User?       @relation(fields: [userId], references: [id])
+  violations      Violation[]
+
+  @@map("evaluations")
+}
+
+model Violation {
+  id                  String     @id @default(uuid())
+  evaluationId        String
+  ruleId              String
+  wcagCriterion       String
+  wcagLevel           String
+  wcagPrinciple       String
+  severity            String
+  elementSelector     String?
+  htmlSnippet         String?
+  description         String
+  remediationGuidance String?
+  evaluation          Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+
+  @@map("violations")
+}
