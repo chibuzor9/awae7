@@ -9,6 +9,54 @@ export const wcagCards: WcagCard[] = [
     level: "A",
     description: `All images and other non-text content (like icons, charts, audio, CAPTCHAs, or controls) must have a descriptive text alternative that conveys their meaning. Purely decorative content can be hidden from assistive technologies (e.g. using an empty **_alt_** attribute).`,
     url: "https://a11y.fans/111-en/",
+    explanation: `All non-text content needs text alternatives so screen readers and assistive technologies can convey their meaning. This includes images, icons, charts, form controls, and audio CAPTCHAs. Decorative images should be marked so they're ignored by assistive technology.`,
+    implementationExamples: {
+      good: `<!-- Informative image with descriptive alt text -->
+<img src="chart.png" alt="Bar chart showing 40% increase in sales from Q1 to Q2 2024" />
+
+<!-- Decorative image properly hidden -->
+<img src="decorative-border.png" alt="" role="presentation" />
+
+<!-- Icon button with accessible name -->
+<button aria-label="Search">
+  <svg aria-hidden="true"><path d="..."/></svg>
+</button>
+
+<!-- Complex image with detailed description -->
+<figure>
+  <img src="process-diagram.png" alt="Product development workflow" />
+  <figcaption>
+    The diagram shows 5 stages: Research, Design, Development, Testing, and Launch.
+  </figcaption>
+</figure>`,
+      bad: `<!-- Missing alt attribute -->
+<img src="important-chart.png" />
+
+<!-- Non-descriptive alt text -->
+<img src="sales-data.png" alt="image" />
+
+<!-- Icon button without accessible name -->
+<button><svg><path d="..."/></svg></button>
+
+<!-- Decorative image not hidden -->
+<img src="decorative-border.png" alt="decorative border" />`,
+    },
+    commonViolations: [
+      "Images missing alt attributes entirely",
+      "Generic alt text like 'image', 'photo', or 'icon'",
+      "Decorative images not marked with empty alt or role='presentation'",
+      "Complex charts or infographics without detailed text descriptions",
+      "CAPTCHAs without audio or text alternatives",
+      "Icon buttons without aria-label or visible text",
+    ],
+    remediationStrategies: [
+      "Add descriptive alt text to all informative images",
+      "Use empty alt='' for purely decorative images",
+      "Provide detailed descriptions for complex images using aria-describedby or figcaption",
+      "Ensure all icon buttons have aria-label or visually hidden text",
+      "Use SVG title elements or aria-label for inline SVG graphics",
+      "Test with a screen reader to verify alt text quality",
+    ],
   },
   {
     criterionId: "1.2.1",
@@ -203,6 +251,65 @@ without using system-wide controls.`,
 * 4.5:1 for normal text, or
 * 3:1 for large text (over 24px, or bold and over 19px).`,
     url: "https://a11y.fans/143-en/",
+    explanation: `Sufficient color contrast ensures text is readable for users with low vision, color blindness, or viewing in bright conditions. The contrast ratio is calculated based on the relative luminance of text and background colors.`,
+    implementationExamples: {
+      good: `/* High contrast text */
+.text {
+  color: #333333; /* Dark gray */
+  background: #FFFFFF; /* White */
+  /* Contrast ratio: 12.6:1 ✓ */
+}
+
+/* Large text with sufficient contrast */
+.heading {
+  color: #595959; /* Medium gray */
+  background: #FFFFFF;
+  font-size: 24px;
+  /* Contrast ratio: 7:1 ✓ */
+}
+
+/* Dark mode with good contrast */
+.dark-text {
+  color: #E0E0E0; /* Light gray */
+  background: #1A1A1A; /* Near black */
+  /* Contrast ratio: 10.8:1 ✓ */
+}`,
+      bad: `/* Insufficient contrast */
+.text {
+  color: #999999; /* Light gray */
+  background: #FFFFFF; /* White */
+  /* Contrast ratio: 2.8:1 ✗ FAILS */
+}
+
+/* Light text on light background */
+.button {
+  color: #CCCCCC;
+  background: #EEEEEE;
+  /* Contrast ratio: 1.3:1 ✗ FAILS */
+}
+
+/* Placeholder text too light */
+input::placeholder {
+  color: #BBBBBB;
+  /* Often fails contrast requirements */
+}`,
+    },
+    commonViolations: [
+      "Light gray text (#999 or lighter) on white backgrounds",
+      "Placeholder text with insufficient contrast",
+      "Disabled form controls that are hard to read",
+      "Link text that blends with surrounding text",
+      "Text overlaid on images without sufficient background",
+      "Success/error messages with only color indicators",
+    ],
+    remediationStrategies: [
+      "Use contrast checking tools (WebAIM, Chrome DevTools) to verify ratios",
+      "Aim for 4.5:1 for normal text (under 24px), 3:1 for large text",
+      "Test designs with color blindness simulators",
+      "Ensure focus indicators have at least 3:1 contrast against background",
+      "Consider using WCAG AAA standards (7:1) for better accessibility",
+      "Add text shadows or backgrounds when overlaying text on images",
+    ],
   },
   {
     criterionId: "1.4.4",
@@ -322,6 +429,66 @@ without content being hidden, cut off, or broken.`,
     level: "A",
     description: `All functionality must be operable using a keyboard alone, unless the task requires freehand input (e.g. drawing).`,
     url: "https://a11y.fans/211-en/",
+    explanation: `Users who cannot use a mouse—including those with motor disabilities, blind users with screen readers, and power users—must be able to operate all functionality with a keyboard. This includes navigation, form controls, custom widgets, and interactive elements.`,
+    implementationExamples: {
+      good: `<!-- Native button is keyboard accessible -->
+<button onclick="submitForm()">Submit</button>
+
+<!-- Custom widget with proper keyboard support -->
+<div 
+  role="button" 
+  tabindex="0"
+  onkeydown="if(event.key==='Enter'||event.key===' ') handleClick()"
+  onclick="handleClick()">
+  Custom Button
+</div>
+
+<!-- Dropdown with keyboard navigation -->
+<select name="options">
+  <option value="1">Option 1</option>
+  <option value="2">Option 2</option>
+</select>
+
+<!-- Modal with focus management -->
+<dialog open>
+  <button onclick="closeModal()">Close</button>
+</dialog>`,
+      bad: `<!-- Click-only div without keyboard support -->
+<div onclick="handleClick()">
+  Clickable Item
+</div>
+
+<!-- Missing tabindex and keyboard handlers -->
+<div class="button" onclick="submit()">
+  Submit
+</div>
+
+<!-- Mouse-only interactions -->
+<div onmouseover="showTooltip()" onmouseout="hideTooltip()">
+  Hover for info
+</div>
+
+<!-- Custom select without keyboard support -->
+<div class="dropdown" onclick="toggle()">
+  <span>Select option</span>
+</div>`,
+    },
+    commonViolations: [
+      "Using div or span elements with onclick without keyboard handlers",
+      "Custom dropdowns/menus without arrow key navigation",
+      "Interactive elements missing tabindex='0'",
+      "Modal dialogs that trap focus incorrectly",
+      "Drag-and-drop interfaces without keyboard alternatives",
+      "Hover-only tooltips and menus without keyboard triggers",
+    ],
+    remediationStrategies: [
+      "Use native HTML elements (button, a, input) whenever possible",
+      "Add tabindex='0' to make custom elements focusable",
+      "Implement keyboard event handlers (keydown, keyup) for Enter and Space",
+      "Provide arrow key navigation for complex widgets (menus, tabs, grids)",
+      "Manage focus properly in modals and dynamic content",
+      "Test all functionality using only Tab, Shift+Tab, Enter, Space, and arrow keys",
+    ],
   },
   {
     criterionId: "2.1.2",

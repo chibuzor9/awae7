@@ -165,6 +165,13 @@ export interface WcagCard {
   level: WcagLevel;
   description: string;
   url: string;
+  explanation?: string;
+  implementationExamples?: {
+    good: string;
+    bad: string;
+  };
+  commonViolations?: string[];
+  remediationStrategies?: string[];
 }
 
 // ---------- History ----------
