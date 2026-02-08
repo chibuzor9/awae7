@@ -14,8 +14,8 @@ export default function WcagCardsPage() {
 						WCAG 2.2 Card Deck
 					</h1>
 					<p className="mt-2 text-gray-600">
-						Browse all WCAG 2.2 Level A and AA success criteria as
-						interactive cards
+						Browse all WCAG 2.2 Level A, AA and AAA success criteria
+						as interactive cards
 					</p>
 				</header>
 				<WcagCardDeck />

@@ -5,9 +5,8 @@ import { Search, Filter, Layers } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { cn } from '@/lib/utils'
 import WcagDeckCard from '@/components/wcag/WcagDeckCard'
-import WcagCardModal from '@/components/wcag/WcagCardModal'
 import { wcagCards } from '@/data/wcag-cards'
-import type { WcagCard, WcagPrinciple, WcagLevel } from '@/types'
+import type { WcagPrinciple, WcagLevel } from '@/types'
 
 /* ---- Constants ---- */
 
@@ -18,7 +17,20 @@ const principles: WcagPrinciple[] = [
 	'Robust',
 ]
 
-const levels: WcagLevel[] = ['A', 'AA']
+const levels: WcagLevel[] = ['A', 'AA', 'AAA']
+
+const principleOrder: Record<WcagPrinciple, number> = {
+	Perceivable: 1,
+	Operable: 2,
+	Understandable: 3,
+	Robust: 4,
+}
+
+const levelOrder: Record<string, number> = {
+	A: 1,
+	AA: 2,
+	AAA: 3,
+}
 
 const principleActiveColors: Record<WcagPrinciple, string> = {
 	Perceivable: 'bg-blue-600 text-white',
@@ -34,6 +46,12 @@ const principleHoverColors: Record<WcagPrinciple, string> = {
 	Robust: 'hover:bg-orange-100 hover:text-orange-800',
 }
 
+/* ---- Sort helper ---- */
+
+function parseCriterion(num: string): number[] {
+	return num.split('.').map(Number)
+}
+
 /* ---- Component ---- */
 
 export default function WcagCardDeck() {
@@ -42,14 +60,12 @@ export default function WcagCardDeck() {
 	const [selectedPrinciple, setSelectedPrinciple] =
 		useState<WcagPrinciple | null>(null)
 	const [selectedLevel, setSelectedLevel] = useState<WcagLevel | null>(null)
-	const [selectedCard, setSelectedCard] = useState<WcagCard | null>(null)
-	const [modalOpen, setModalOpen] = useState(false)
 
-	/* Filter cards */
+	/* Filter & sort cards: principle → level → criterion number */
 	const filteredCards = useMemo(() => {
 		const query = searchQuery.toLowerCase().trim()
 
-		return wcagCards.filter(card => {
+		const filtered = wcagCards.filter(card => {
 			/* Principle filter */
 			if (selectedPrinciple && card.principle !== selectedPrinciple)
 				return false
@@ -72,19 +88,26 @@ export default function WcagCardDeck() {
 
 			return true
 		})
+
+		/* Sort: Principle (P→O→U→R) → Level (A→AA→AAA) → Criterion number */
+		return filtered.sort((a, b) => {
+			const pA = principleOrder[a.principle]
+			const pB = principleOrder[b.principle]
+			if (pA !== pB) return pA - pB
+
+			const lA = levelOrder[a.level] ?? 99
+			const lB = levelOrder[b.level] ?? 99
+			if (lA !== lB) return lA - lB
+
+			const numsA = parseCriterion(a.criterionNumber)
+			const numsB = parseCriterion(b.criterionNumber)
+			for (let i = 0; i < Math.max(numsA.length, numsB.length); i++) {
+				const diff = (numsA[i] ?? 0) - (numsB[i] ?? 0)
+				if (diff !== 0) return diff
+			}
+			return 0
+		})
 	}, [searchQuery, selectedPrinciple, selectedLevel])
-
-	/* Card select handler (opens modal) */
-	const handleCardSelect = useCallback((card: WcagCard) => {
-		setSelectedCard(card)
-		setModalOpen(true)
-	}, [])
-
-	/* Modal close handler */
-	const handleModalClose = useCallback(() => {
-		setModalOpen(false)
-		setSelectedCard(null)
-	}, [])
 
 	/* Principle toggle */
 	const handlePrincipleToggle = useCallback((principle: WcagPrinciple) => {
@@ -203,11 +226,7 @@ export default function WcagCardDeck() {
 			{filteredCards.length > 0 ? (
 				<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 					{filteredCards.map(card => (
-						<WcagDeckCard
-							key={card.criterionId}
-							card={card}
-							onSelect={handleCardSelect}
-						/>
+						<WcagDeckCard key={card.criterionId} card={card} />
 					))}
 				</div>
 			) : (
@@ -239,13 +258,6 @@ export default function WcagCardDeck() {
 					</button>
 				</div>
 			)}
-
-			{/* ======== Detail Modal ======== */}
-			<WcagCardModal
-				card={selectedCard}
-				isOpen={modalOpen}
-				onClose={handleModalClose}
-			/>
 		</div>
 	)
 }

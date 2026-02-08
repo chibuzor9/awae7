@@ -22,6 +22,7 @@ export interface RawAxeCheck {
 export interface RawAxeNode {
 	html: string
 	target: string[]
+	ancestry: string[]
 	impact: string | null
 	failureSummary: string
 	any: RawAxeCheck[]
@@ -45,7 +46,7 @@ export interface RawAxePass {
 	help: string
 	helpUrl: string
 	tags: string[]
-	nodes: { html: string; target: string[] }[]
+	nodes: { html: string; target: string[]; ancestry: string[] }[]
 }
 
 export interface RawAxeIncomplete {
@@ -202,9 +203,16 @@ export async function evaluateUrl(url: string): Promise<RawEvaluationResult> {
 		]
 
 		let axeResults
+		const axeOptions = {
+			resultTypes: ['violations', 'passes', 'incomplete', 'inapplicable'] as const,
+			ancestry: true,
+			preload: true,
+		}
+
 		try {
 			axeResults = await new AxeBuilder({ page })
 				.withTags(axeTags)
+				.options(axeOptions as any)
 				.analyze()
 		} catch (axeError: unknown) {
 			const msg =
@@ -220,6 +228,7 @@ export async function evaluateUrl(url: string): Promise<RawEvaluationResult> {
 				await page.waitForTimeout(1_000)
 				axeResults = await new AxeBuilder({ page })
 					.withTags(axeTags)
+					.options(axeOptions as any)
 					.analyze()
 			} else {
 				throw axeError
@@ -252,6 +261,7 @@ export async function evaluateUrl(url: string): Promise<RawEvaluationResult> {
 			nodes: v.nodes.map(n => ({
 				html: n.html,
 				target: n.target.map(String),
+				ancestry: Array.isArray((n as any).ancestry) ? (n as any).ancestry.map(String) : [],
 				impact: (n as any).impact ?? null,
 				failureSummary: n.failureSummary ?? '',
 				any: mapChecks((n as any).any),
@@ -269,6 +279,7 @@ export async function evaluateUrl(url: string): Promise<RawEvaluationResult> {
 			nodes: p.nodes.map(n => ({
 				html: n.html,
 				target: n.target.map(String),
+				ancestry: Array.isArray((n as any).ancestry) ? (n as any).ancestry.map(String) : [],
 			})),
 		}))
 
@@ -284,6 +295,7 @@ export async function evaluateUrl(url: string): Promise<RawEvaluationResult> {
 			nodes: (i.nodes ?? []).map((n: any) => ({
 				html: n.html ?? '',
 				target: Array.isArray(n.target) ? n.target.map(String) : [],
+				ancestry: Array.isArray(n.ancestry) ? n.ancestry.map(String) : [],
 				impact: n.impact ?? null,
 				failureSummary: n.failureSummary ?? '',
 				any: mapChecks(n.any),
@@ -435,6 +447,11 @@ export async function evaluateHtml(
 
 		const axeResults = await new AxeBuilder({ page })
 			.withTags(axeTags)
+			.options({
+				resultTypes: ['violations', 'passes', 'incomplete', 'inapplicable'] as const,
+				ancestry: true,
+				preload: true,
+			} as any)
 			.analyze()
 
 		// ---- Helper: map axe check results ----
@@ -463,6 +480,7 @@ export async function evaluateHtml(
 			nodes: v.nodes.map(n => ({
 				html: n.html,
 				target: n.target.map(String),
+				ancestry: Array.isArray((n as any).ancestry) ? (n as any).ancestry.map(String) : [],
 				impact: (n as any).impact ?? null,
 				failureSummary: n.failureSummary ?? '',
 				any: mapChecks((n as any).any),
@@ -480,6 +498,7 @@ export async function evaluateHtml(
 			nodes: p.nodes.map(n => ({
 				html: n.html,
 				target: n.target.map(String),
+				ancestry: Array.isArray((n as any).ancestry) ? (n as any).ancestry.map(String) : [],
 			})),
 		}))
 
@@ -495,6 +514,7 @@ export async function evaluateHtml(
 			nodes: (i.nodes ?? []).map((n: any) => ({
 				html: n.html ?? '',
 				target: Array.isArray(n.target) ? n.target.map(String) : [],
+				ancestry: Array.isArray(n.ancestry) ? n.ancestry.map(String) : [],
 				impact: n.impact ?? null,
 				failureSummary: n.failureSummary ?? '',
 				any: mapChecks(n.any),
