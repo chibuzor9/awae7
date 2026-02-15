@@ -56,7 +56,7 @@ function HistorySkeleton() {
 			{Array.from({ length: 3 }).map((_, i) => (
 				<Card key={i} className="animate-pulse">
 					<CardBody className="flex items-center gap-6">
-						<div className="h-[80px] w-[80px] rounded-full bg-gray-200 shrink-0" />
+						<div className="h-20 w-20 shrink-0 rounded-full bg-gray-200" />
 						<div className="flex-1 space-y-3">
 							<div className="h-4 w-3/4 rounded bg-gray-200" />
 							<div className="h-3 w-1/2 rounded bg-gray-200" />
@@ -133,13 +133,19 @@ function severityBadge(label: string, count: number) {
 	)
 }
 
+function scoreLabelClass(score: number): string {
+	if (score >= 90) return 'text-green-600'
+	if (score >= 70) return 'text-lime-600'
+	if (score >= 50) return 'text-amber-600'
+	if (score >= 30) return 'text-orange-600'
+	return 'text-red-600'
+}
+
 // ---------------------------------------------------------------------------
 // Main Page
 // ---------------------------------------------------------------------------
 
 export default function HistoryPage() {
-	const router = useRouter()
-
 	// List state
 	const [evaluations, setEvaluations] = useState<EvaluationHistoryItem[]>([])
 	const [pagination, setPagination] = useState<PaginationInfo | null>(null)
@@ -243,22 +249,22 @@ export default function HistoryPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gray-50">
+		<div className="min-h-full bg-transparent">
 			<div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
 				{/* ---- Header ---- */}
 				<header className="mb-10">
 					<div className="flex items-center gap-3 mb-3">
-						<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+						<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-(--accent-soft)">
 							<History
-								className="h-5 w-5 text-blue-600"
+								className="h-5 w-5 text-(--accent)"
 								aria-hidden="true"
 							/>
 						</div>
-						<h1 className="text-3xl font-bold tracking-tight text-gray-900">
+						<h1 className="text-3xl font-semibold tracking-tight text-slate-900">
 							Evaluation History
 						</h1>
 					</div>
-					<p className="text-lg text-gray-600">
+					<p className="text-base text-slate-600 sm:text-lg">
 						Review your past accessibility evaluations. Click on any
 						evaluation to view the full report with developer,
 						auditor, and end-user perspectives.
@@ -305,9 +311,7 @@ export default function HistoryPage() {
 					<>
 						<div className="space-y-4">
 							{evaluations.map(ev => {
-								const { label, color } = getScoreLabel(
-									ev.overallScore
-								)
+								const { label } = getScoreLabel(ev.overallScore)
 								const isSelected = selectedId === ev.id
 								const cachedDetail = detailCache[ev.id] ?? null
 
@@ -404,8 +408,12 @@ export default function HistoryPage() {
 												{/* Score label & action */}
 												<div className="shrink-0 text-right">
 													<p
-														className="text-sm font-bold"
-														style={{ color }}
+														className={cn(
+															'text-sm font-bold',
+															scoreLabelClass(
+																ev.overallScore
+															)
+														)}
 													>
 														{label}
 													</p>

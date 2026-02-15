@@ -1,11 +1,13 @@
 'use client'
 
 import {
+	CheckCircle2,
 	Eye,
 	MousePointer,
 	BookOpen,
 	Shield,
 	Lightbulb,
+	AlertTriangle,
 	ArrowRight,
 	type LucideIcon,
 } from 'lucide-react'
@@ -107,9 +109,19 @@ function getInterpretation(score: number): {
 
 // ---------- Component ----------
 export default function EndUserReport({ report }: EndUserReportProps) {
-	const { score, scoreLabel, categories, priorities, needsReviewCount } =
-		report
+	const {
+		score,
+		scoreLabel,
+		categories,
+		priorities,
+		needsReviewCount,
+		summary,
+	} = report
 	const interpretation = getInterpretation(score)
+
+	const attentionCategories = [...categories]
+		.filter(category => category.issueCount > 0 || category.score < 80)
+		.sort((a, b) => b.issueCount - a.issueCount)
 
 	return (
 		<div className="space-y-8">
@@ -135,6 +147,104 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 						</span>
 					)}
 				</p>
+			</section>
+
+			{/* ============ ISSUE SNAPSHOT ============ */}
+			<section aria-labelledby="snapshot-heading">
+				<Card>
+					<CardHeader>
+						<h2
+							id="snapshot-heading"
+							className="text-lg font-semibold text-gray-900"
+						>
+							Issue Snapshot
+						</h2>
+						<p className="text-sm text-gray-500 mt-1">
+							Quick summary of what needs attention now.
+						</p>
+					</CardHeader>
+					<CardBody className="space-y-4">
+						<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+							<div className="rounded-lg border border-red-200 bg-red-50 p-3">
+								<p className="text-xs text-red-700">Critical</p>
+								<p className="text-lg font-bold text-red-700">
+									{summary.criticalCount}
+								</p>
+							</div>
+							<div className="rounded-lg border border-orange-200 bg-orange-50 p-3">
+								<p className="text-xs text-orange-700">
+									Serious
+								</p>
+								<p className="text-lg font-bold text-orange-700">
+									{summary.seriousCount}
+								</p>
+							</div>
+							<div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+								<p className="text-xs text-amber-700">
+									Moderate
+								</p>
+								<p className="text-lg font-bold text-amber-700">
+									{summary.moderateCount}
+								</p>
+							</div>
+							<div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+								<p className="text-xs text-blue-700">Minor</p>
+								<p className="text-lg font-bold text-blue-700">
+									{summary.minorCount}
+								</p>
+							</div>
+						</div>
+
+						<div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+							<div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+								<AlertTriangle
+									className="h-4 w-4"
+									aria-hidden="true"
+								/>
+								<span>
+									{summary.totalViolations} detected issues,{' '}
+									{needsReviewCount} require manual review
+								</span>
+							</div>
+							<div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+								<CheckCircle2
+									className="h-4 w-4"
+									aria-hidden="true"
+								/>
+								<span>
+									{summary.totalPasses} accessibility checks
+									passed
+								</span>
+							</div>
+						</div>
+
+						{attentionCategories.length > 0 && (
+							<div>
+								<p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+									Areas needing attention first
+								</p>
+								<ul className="space-y-2">
+									{attentionCategories
+										.slice(0, 4)
+										.map(category => (
+											<li
+												key={category.name}
+												className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm"
+											>
+												<span className="font-medium text-gray-800">
+													{category.name}
+												</span>
+												<span className="tabular-nums text-gray-600">
+													{category.issueCount} issues
+													· {category.score}/100
+												</span>
+											</li>
+										))}
+								</ul>
+							</div>
+						)}
+					</CardBody>
+				</Card>
 			</section>
 
 			{/* ============ WHAT THIS MEANS ============ */}
@@ -309,21 +419,27 @@ function CategoryCard({ category }: { category: EndUserCategory }) {
 							{category.score}/100
 						</span>
 					</div>
-					<div
-						className="h-2 w-full bg-gray-100 rounded-full overflow-hidden"
-						role="progressbar"
-						aria-valuenow={category.score}
-						aria-valuemin={0}
-						aria-valuemax={100}
-						aria-label={`${category.name} score: ${category.score} out of 100`}
-					>
-						<div
-							className={cn(
-								'h-full rounded-full transition-all duration-500',
-								getScoreBarColor(category.score)
-							)}
-							style={{ width: `${category.score}%` }}
-						/>
+					<div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+						<svg
+							className="h-full w-full"
+							viewBox="0 0 100 2"
+							preserveAspectRatio="none"
+							aria-hidden="true"
+						>
+							<rect
+								x="0"
+								y="0"
+								width={Math.max(
+									0,
+									Math.min(100, category.score)
+								)}
+								height="2"
+								className={cn(
+									'transition-all duration-500',
+									getScoreBarColor(category.score)
+								)}
+							/>
+						</svg>
 					</div>
 				</div>
 			</CardBody>

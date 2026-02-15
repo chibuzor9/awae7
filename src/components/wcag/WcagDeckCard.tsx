@@ -8,25 +8,32 @@ import type { WcagCard, WcagPrinciple } from '@/types'
 
 /* ---- Principle colour mapping (exact accents from SVG card assets) ---- */
 
-const principleAccentHex: Record<WcagPrinciple, string> = {
-	Perceivable: '#B60000', // red
-	Operable: '#1651A9', // blue
-	Understandable: '#186312', // green
-	Robust: '#535035', // brown
+const principleBorderClass: Record<WcagPrinciple, string> = {
+	Perceivable: 'border-[#B60000]',
+	Operable: 'border-[#1651A9]',
+	Understandable: 'border-[#186312]',
+	Robust: 'border-[#535035]',
 }
 
-const principleBackBg: Record<WcagPrinciple, string> = {
-	Perceivable: '#B60000',
-	Operable: '#1651A9',
-	Understandable: '#186312',
-	Robust: '#535035',
+const principleBackBgClass: Record<WcagPrinciple, string> = {
+	Perceivable: 'bg-[#B600000D]',
+	Operable: 'bg-[#1651A90D]',
+	Understandable: 'bg-[#1863120D]',
+	Robust: 'bg-[#5350350D]',
 }
 
-const principleTextAccent: Record<WcagPrinciple, string> = {
-	Perceivable: '#B60000',
-	Operable: '#1651A9',
-	Understandable: '#186312',
-	Robust: '#535035',
+const principleTextClass: Record<WcagPrinciple, string> = {
+	Perceivable: 'text-[#B60000]',
+	Operable: 'text-[#1651A9]',
+	Understandable: 'text-[#186312]',
+	Robust: 'text-[#535035]',
+}
+
+const principleTagBgClass: Record<WcagPrinciple, string> = {
+	Perceivable: 'bg-[#B600001A]',
+	Operable: 'bg-[#1651A91A]',
+	Understandable: 'bg-[#1863121A]',
+	Robust: 'bg-[#5350351A]',
 }
 
 /* ---- Helper: derive SVG path from criterion number ---- */
@@ -56,10 +63,12 @@ export interface WcagDeckCardProps {
 
 export default function WcagDeckCard({ card }: WcagDeckCardProps) {
 	const [isFlipped, setIsFlipped] = useState(false)
+	const [imageLoaded, setImageLoaded] = useState(false)
 
-	const accentHex = principleAccentHex[card.principle]
-	const backBgHex = principleBackBg[card.principle]
-	const textAccentHex = principleTextAccent[card.principle]
+	const borderClass = principleBorderClass[card.principle]
+	const backBgClass = principleBackBgClass[card.principle]
+	const textClass = principleTextClass[card.principle]
+	const tagBgClass = principleTagBgClass[card.principle]
 
 	const toggleFlip = useCallback(() => {
 		setIsFlipped(prev => !prev)
@@ -77,8 +86,9 @@ export default function WcagDeckCard({ card }: WcagDeckCardProps) {
 
 	return (
 		<div
-			className="group h-[420px] w-full cursor-pointer"
-			style={{ perspective: '1000px' }}
+			className={cn(
+				'group aspect-2/3 w-full cursor-pointer perspective-[1000px]'
+			)}
 			onClick={toggleFlip}
 			onKeyDown={handleKeyDown}
 			role="button"
@@ -92,19 +102,16 @@ export default function WcagDeckCard({ card }: WcagDeckCardProps) {
 			{/* Card wrapper for 3D flip transform */}
 			<div
 				className={cn(
-					'relative h-full w-full transition-transform duration-500 ease-in-out',
-					isFlipped && '[transform:rotateY(180deg)]'
+					'relative h-full w-full transform-3d transition-transform duration-500 ease-in-out',
+					isFlipped && 'transform-[rotateY(180deg)]'
 				)}
-				style={{ transformStyle: 'preserve-3d' }}
 			>
 				{/* ======== FRONT SIDE — SVG Card Image ======== */}
 				<div
-					className="absolute inset-0 overflow-hidden rounded-xl border-2 bg-white shadow-sm transition-shadow group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-blue-500 group-focus-visible:ring-offset-2"
-					style={{
-						backfaceVisibility: 'hidden',
-						borderColor: accentHex,
-					}}
-					aria-hidden={isFlipped}
+					className={cn(
+						'absolute inset-0 overflow-hidden rounded-[5.2%] border-2 bg-white shadow-sm transition-colors group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-blue-500 group-focus-visible:ring-offset-2 backface-hidden',
+						imageLoaded ? 'border-transparent' : borderClass
+					)}
 				>
 					<Image
 						src={getSvgPath(
@@ -114,8 +121,10 @@ export default function WcagDeckCard({ card }: WcagDeckCardProps) {
 						)}
 						alt={`WCAG ${card.criterionNumber} — ${card.title}`}
 						fill
-						className="object-contain p-1"
+						className="object-contain"
 						sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+						onLoad={() => setImageLoaded(true)}
+						onError={() => setImageLoaded(false)}
 					/>
 
 					{/* Flip hint overlay */}
@@ -127,56 +136,52 @@ export default function WcagDeckCard({ card }: WcagDeckCardProps) {
 
 				{/* ======== BACK SIDE — Comprehensive Description ======== */}
 				<div
-					className="absolute inset-0 flex flex-col gap-3 overflow-y-auto rounded-xl border-2 p-5 shadow-sm transition-shadow group-hover:shadow-md"
-					style={{
-						backfaceVisibility: 'hidden',
-						transform: 'rotateY(180deg)',
-						borderColor: accentHex,
-						backgroundColor: `${backBgHex}0D`,
-					}}
-					aria-hidden={!isFlipped}
+					className={cn(
+						'absolute inset-0 rounded-[5.2%] border-2 shadow-sm transition-shadow group-hover:shadow-md backface-hidden transform-[rotateY(180deg)]',
+						borderClass,
+						backBgClass
+					)}
 				>
-					{/* Header */}
-					<div className="flex items-start justify-between gap-2">
-						<h3
-							className="text-sm font-bold"
-							style={{ color: textAccentHex }}
+					<div className="flex h-full flex-col gap-3 overflow-y-auto rounded-[calc(5.2%-2px)] p-5 pr-4 [scrollbar-gutter:stable] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+						{/* Header */}
+						<div className="flex items-start justify-between gap-2">
+							<h3 className={cn('text-sm font-bold', textClass)}>
+								{card.criterionNumber} &mdash; {card.title}
+							</h3>
+							<span className="shrink-0 rounded-full bg-gray-900 px-2 py-0.5 text-[10px] font-bold text-white">
+								{card.level}
+							</span>
+						</div>
+
+						{/* Principle tag */}
+						<span
+							className={cn(
+								'self-start rounded-full px-2.5 py-0.5 text-[10px] font-semibold',
+								textClass,
+								tagBgClass
+							)}
 						>
-							{card.criterionNumber} &mdash; {card.title}
-						</h3>
-						<span className="shrink-0 rounded-full bg-gray-900 px-2 py-0.5 text-[10px] font-bold text-white">
-							{card.level}
+							{card.principle}
+						</span>
+
+						{/* Description */}
+						<p className="flex-1 text-sm leading-relaxed whitespace-pre-line text-gray-700">
+							{card.description}
+						</p>
+
+						{/* Explanation (if available) */}
+						{card.explanation && (
+							<p className="border-t border-gray-200 pt-2 text-xs italic leading-relaxed text-gray-600">
+								{card.explanation}
+							</p>
+						)}
+
+						{/* Flip-back hint */}
+						<span className="mt-auto flex items-center gap-1 self-end text-xs text-gray-600">
+							<RotateCcw className="h-3 w-3" aria-hidden="true" />
+							Click to flip back
 						</span>
 					</div>
-
-					{/* Principle tag */}
-					<span
-						className="self-start rounded-full px-2.5 py-0.5 text-[10px] font-semibold"
-						style={{
-							color: textAccentHex,
-							backgroundColor: `${backBgHex}1A`,
-						}}
-					>
-						{card.principle}
-					</span>
-
-					{/* Description */}
-					<p className="flex-1 text-sm leading-relaxed text-gray-700 whitespace-pre-line">
-						{card.description}
-					</p>
-
-					{/* Explanation (if available) */}
-					{card.explanation && (
-						<p className="border-t border-gray-200 pt-2 text-xs italic leading-relaxed text-gray-600">
-							{card.explanation}
-						</p>
-					)}
-
-					{/* Flip-back hint */}
-					<span className="mt-auto flex items-center gap-1 self-end text-xs text-gray-400">
-						<RotateCcw className="h-3 w-3" aria-hidden="true" />
-						Click to flip back
-					</span>
 				</div>
 			</div>
 		</div>

@@ -78,6 +78,7 @@ export interface EvaluationResult {
 	timestamp: string
 	axeCoreVersion: string
 	testEnvironment: TestEnvironment
+	fullSourceHtml?: string
 	overallScore: number
 	totalViolations: number
 	totalIncomplete: number
@@ -109,6 +110,7 @@ export interface ViolationItem {
 export interface ViolationNode {
 	html: string
 	target: string[]
+	sourceContext?: string[]
 	failureSummary: string
 	impact: string | null
 	any: CheckResult[]
@@ -142,6 +144,7 @@ export interface IncompleteItem {
 export interface IncompleteNode {
 	html: string
 	target: string[]
+	sourceContext?: string[]
 	impact: string | null
 	any: CheckResult[]
 	all: CheckResult[]
@@ -161,6 +164,7 @@ export interface InapplicableItem {
 // ---------- Report Types ----------
 export interface DeveloperReport {
 	summary: ReportSummary
+	fullSourceHtml?: string
 	violations: DeveloperViolation[]
 	incompleteItems: DeveloperIncompleteItem[]
 	filters: ReportFilters
@@ -178,6 +182,7 @@ export interface DeveloperViolation {
 	elements: {
 		selector: string
 		htmlSnippet: string
+		sourceContext?: string[]
 		failureSummary: string
 		checkData?: Record<string, unknown>
 	}[]

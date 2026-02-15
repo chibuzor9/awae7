@@ -6,19 +6,19 @@ import { cn } from '@/lib/utils'
 
 const variantClasses = {
 	primary:
-		'bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500',
+		'bg-[var(--accent)] text-white hover:bg-[var(--accent-strong)] focus-visible:ring-[var(--accent)] shadow-sm',
 	secondary:
-		'bg-gray-600 text-white hover:bg-gray-700 focus-visible:ring-gray-500',
+		'bg-slate-900 text-white hover:bg-slate-800 focus-visible:ring-slate-600',
 	outline:
-		'border border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50 focus-visible:ring-gray-400',
-	ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 focus-visible:ring-gray-400',
+		'border border-[var(--border)] bg-white text-slate-700 hover:bg-[var(--accent-soft)] focus-visible:ring-[var(--accent)]',
+	ghost: 'bg-transparent text-slate-700 hover:bg-[var(--accent-soft)] focus-visible:ring-[var(--accent)]',
 	danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500',
 } as const
 
 const sizeClasses = {
-	sm: 'px-3 py-1.5 text-sm',
-	md: 'px-4 py-2 text-base',
-	lg: 'px-6 py-3 text-lg',
+	sm: 'px-3 py-1.5 text-xs',
+	md: 'px-4 py-2 text-sm',
+	lg: 'px-6 py-2.5 text-base',
 } as const
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -53,7 +53,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 					sizeClasses[size],
 					className
 				)}
-				aria-busy={loading || undefined}
 				{...props}
 			>
 				{loading && (

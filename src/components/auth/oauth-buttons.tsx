@@ -27,7 +27,7 @@ export function OAuthButtons() {
 				type="button"
 				disabled={loading !== null}
 				onClick={() => handleOAuthSignIn('google')}
-				className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+				className="flex w-full items-center justify-center gap-3 rounded-lg border border-(--border) bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-(--accent-soft) disabled:cursor-not-allowed disabled:opacity-60"
 			>
 				{loading === 'google' ? (
 					<Spinner />
@@ -58,7 +58,7 @@ export function OAuthButtons() {
 				type="button"
 				disabled={loading !== null}
 				onClick={() => handleOAuthSignIn('github')}
-				className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+				className="flex w-full items-center justify-center gap-3 rounded-lg border border-(--border) bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-(--accent-soft) disabled:cursor-not-allowed disabled:opacity-60"
 			>
 				{loading === 'github' ? (
 					<Spinner />
@@ -80,7 +80,7 @@ export function OAuthButtons() {
 function Spinner() {
 	return (
 		<svg
-			className="h-5 w-5 animate-spin text-gray-500"
+			className="h-5 w-5 animate-spin text-(--accent)"
 			xmlns="http://www.w3.org/2000/svg"
 			fill="none"
 			viewBox="0 0 24 24"

@@ -22,8 +22,31 @@ interface CheckData {
 interface ViolationElement {
 	selector: string
 	htmlSnippet: string
+	sourceContext?: string[]
 	failureSummary: string
 	checkData?: CheckData
+}
+
+function renderCodeBlock(snippet: string, keyPrefix: string) {
+	return (
+		<pre className="overflow-x-auto rounded bg-gray-950 px-3 py-2 font-mono text-xs leading-relaxed">
+			<code>
+				{snippet.split('\n').map((line, lineIndex) => (
+					<div
+						key={`${keyPrefix}-line-${lineIndex}`}
+						className="grid grid-cols-[2rem_1fr] gap-2"
+					>
+						<span className="select-none text-right text-[10px] text-slate-500">
+							{lineIndex + 1}
+						</span>
+						<span>
+							{renderHtmlLine(line, `${keyPrefix}-${lineIndex}`)}
+						</span>
+					</div>
+				))}
+			</code>
+		</pre>
+	)
 }
 
 export interface ViolationCardProps {
@@ -54,6 +77,138 @@ const severityBorderColor: Record<Severity, string> = {
 	serious: 'border-l-orange-500',
 	moderate: 'border-l-amber-500',
 	minor: 'border-l-blue-500',
+}
+
+function renderHtmlLine(line: string, keyPrefix: string): React.ReactNode {
+	if (!line.includes('<')) {
+		return <span className="text-emerald-300">{line}</span>
+	}
+
+	const parts: React.ReactNode[] = []
+	let cursor = 0
+	let chunkIndex = 0
+
+	while (cursor < line.length) {
+		const open = line.indexOf('<', cursor)
+
+		if (open === -1) {
+			parts.push(
+				<span
+					key={`${keyPrefix}-text-${chunkIndex++}`}
+					className="text-emerald-300"
+				>
+					{line.slice(cursor)}
+				</span>
+			)
+			break
+		}
+
+		if (open > cursor) {
+			parts.push(
+				<span
+					key={`${keyPrefix}-text-${chunkIndex++}`}
+					className="text-emerald-300"
+				>
+					{line.slice(cursor, open)}
+				</span>
+			)
+		}
+
+		const close = line.indexOf('>', open)
+		if (close === -1) {
+			parts.push(
+				<span
+					key={`${keyPrefix}-raw-${chunkIndex++}`}
+					className="text-sky-300"
+				>
+					{line.slice(open)}
+				</span>
+			)
+			break
+		}
+
+		const tagRaw = line.slice(open, close + 1)
+		const tagMatch = tagRaw.match(
+			/^<(\/)?([A-Za-z][\w:-]*)([\s\S]*?)(\/?)>$/
+		)
+
+		if (!tagMatch) {
+			parts.push(
+				<span
+					key={`${keyPrefix}-tag-${chunkIndex++}`}
+					className="text-sky-300"
+				>
+					{tagRaw}
+				</span>
+			)
+			cursor = close + 1
+			continue
+		}
+
+		const [, slash = '', tagName = '', attrs = '', selfClose = ''] =
+			tagMatch
+		const attrParts: React.ReactNode[] = []
+		const attrRegex = /([^\s=]+)(?:\s*=\s*("[^"]*"|'[^']*'|[^\s"'>]+))?/g
+		let attrMatch: RegExpExecArray | null
+		let attrIndex = 0
+
+		while ((attrMatch = attrRegex.exec(attrs)) !== null) {
+			const attrName = attrMatch[1]
+			const attrValue = attrMatch[2]
+			attrParts.push(
+				<span
+					key={`${keyPrefix}-attr-space-${attrIndex}`}
+					className="text-slate-400"
+				>
+					{' '}
+				</span>
+			)
+			attrParts.push(
+				<span
+					key={`${keyPrefix}-attr-name-${attrIndex}`}
+					className="text-amber-300"
+				>
+					{attrName}
+				</span>
+			)
+
+			if (attrValue != null) {
+				attrParts.push(
+					<span
+						key={`${keyPrefix}-attr-eq-${attrIndex}`}
+						className="text-slate-300"
+					>
+						=
+					</span>
+				)
+				attrParts.push(
+					<span
+						key={`${keyPrefix}-attr-val-${attrIndex}`}
+						className="text-lime-300"
+					>
+						{attrValue}
+					</span>
+				)
+			}
+
+			attrIndex += 1
+		}
+
+		parts.push(
+			<span key={`${keyPrefix}-tag-${chunkIndex++}`}>
+				<span className="text-slate-300">{'<'}</span>
+				{slash && <span className="text-slate-300">/</span>}
+				<span className="text-sky-300">{tagName}</span>
+				{attrParts}
+				{selfClose && <span className="text-slate-300">/</span>}
+				<span className="text-slate-300">{'>'}</span>
+			</span>
+		)
+
+		cursor = close + 1
+	}
+
+	return parts
 }
 
 /* ---- Component ---- */
@@ -104,7 +259,6 @@ export function ViolationCard({
 			<button
 				type="button"
 				onClick={toggle}
-				aria-expanded={isExpanded ? 'true' : 'false'}
 				aria-controls={`violation-details-${ruleId}`}
 				className="flex w-full items-start gap-3 px-6 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-xl"
 			>
@@ -222,9 +376,43 @@ export function ViolationCard({
 										<p className="mb-1 mt-3 text-xs font-medium text-gray-500">
 											HTML Snippet
 										</p>
-										<pre className="overflow-x-auto rounded bg-gray-900 px-3 py-2 font-mono text-xs text-green-400 leading-relaxed">
-											<code>{el.htmlSnippet}</code>
-										</pre>
+										{renderCodeBlock(
+											el.htmlSnippet,
+											`${el.selector}-${index}-snippet`
+										)}
+
+										{(el.sourceContext?.length ?? 0) >
+											0 && (
+											<details className="mt-3 rounded-lg border border-gray-200 bg-white px-3 py-2">
+												<summary className="cursor-pointer text-xs font-medium text-gray-700">
+													Show surrounding parent
+													blocks (
+													{el.sourceContext?.length})
+												</summary>
+												<div className="mt-3 space-y-3">
+													{el.sourceContext?.map(
+														(
+															contextSnippet,
+															contextIndex
+														) => (
+															<div
+																key={`${el.selector}-${index}-context-${contextIndex}`}
+															>
+																<p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-gray-500">
+																	Parent{' '}
+																	{contextIndex +
+																		1}
+																</p>
+																{renderCodeBlock(
+																	contextSnippet,
+																	`${el.selector}-${index}-context-${contextIndex}`
+																)}
+															</div>
+														)
+													)}
+												</div>
+											</details>
+										)}
 
 										{/* Failure summary */}
 										<p className="mb-1 mt-3 text-xs font-medium text-gray-500">
@@ -285,16 +473,23 @@ export function ViolationCard({
 																	Foreground
 																</span>
 																<span className="flex items-center gap-1.5 font-mono text-gray-900">
-																	<span
-																		className="inline-block h-3 w-3 rounded border border-gray-300"
-																		style={{
-																			backgroundColor:
+																	<svg
+																		className="h-3 w-3 rounded border border-gray-300"
+																		viewBox="0 0 12 12"
+																		aria-hidden="true"
+																	>
+																		<rect
+																			x="0"
+																			y="0"
+																			width="12"
+																			height="12"
+																			fill={String(
 																				el
 																					.checkData
-																					.fgColor,
-																		}}
-																		aria-hidden="true"
-																	/>
+																					.fgColor
+																			)}
+																		/>
+																	</svg>
 																	{
 																		el
 																			.checkData
@@ -310,16 +505,23 @@ export function ViolationCard({
 																	Background
 																</span>
 																<span className="flex items-center gap-1.5 font-mono text-gray-900">
-																	<span
-																		className="inline-block h-3 w-3 rounded border border-gray-300"
-																		style={{
-																			backgroundColor:
+																	<svg
+																		className="h-3 w-3 rounded border border-gray-300"
+																		viewBox="0 0 12 12"
+																		aria-hidden="true"
+																	>
+																		<rect
+																			x="0"
+																			y="0"
+																			width="12"
+																			height="12"
+																			fill={String(
 																				el
 																					.checkData
-																					.bgColor,
-																		}}
-																		aria-hidden="true"
-																	/>
+																					.bgColor
+																			)}
+																		/>
+																	</svg>
 																	{
 																		el
 																			.checkData

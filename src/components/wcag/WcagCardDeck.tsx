@@ -153,7 +153,6 @@ export default function WcagCardDeck() {
 									onClick={() =>
 										handlePrincipleToggle(principle)
 									}
-									aria-pressed={isActive}
 									className={cn(
 										'cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
 										isActive
@@ -189,7 +188,6 @@ export default function WcagCardDeck() {
 									key={level}
 									type="button"
 									onClick={() => handleLevelToggle(level)}
-									aria-pressed={isActive}
 									className={cn(
 										'cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
 										isActive
@@ -207,7 +205,7 @@ export default function WcagCardDeck() {
 
 			{/* ======== Card count ======== */}
 			<p
-				className="text-sm text-gray-500"
+				className="text-sm text-slate-600"
 				role="status"
 				aria-live="polite"
 			>
@@ -233,14 +231,14 @@ export default function WcagCardDeck() {
 				<div className="flex flex-col items-center justify-center py-16 text-center">
 					<div className="mb-4 rounded-full bg-gray-100 p-4">
 						<Search
-							className="h-8 w-8 text-gray-400"
+							className="h-8 w-8 text-slate-500"
 							aria-hidden="true"
 						/>
 					</div>
 					<h3 className="text-lg font-semibold text-gray-900">
 						No criteria found
 					</h3>
-					<p className="mt-1 max-w-md text-sm text-gray-500">
+					<p className="mt-1 max-w-md text-sm text-slate-600">
 						No WCAG criteria match your current search or filters.
 						Try adjusting your search term or clearing the filters
 						to see more results.

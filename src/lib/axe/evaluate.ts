@@ -23,6 +23,7 @@ export interface RawAxeNode {
 	html: string
 	target: string[]
 	ancestry: string[]
+	sourceContext?: string[]
 	impact: string | null
 	failureSummary: string
 	any: RawAxeCheck[]
@@ -80,6 +81,7 @@ export interface RawEvaluationResult {
 	timestamp: string
 	axeCoreVersion: string
 	testEnvironment: RawTestEnvironment
+	fullSourceHtml?: string
 	violations: RawAxeViolation[]
 	passes: RawAxePass[]
 	incomplete: RawAxeIncomplete[]
@@ -96,6 +98,85 @@ function isValidUrl(input: string): boolean {
 	} catch {
 		return false
 	}
+}
+
+async function resolveNodeHtmlFromPage(
+	page: Page,
+	rawNode: any
+): Promise<string> {
+	const selectors = Array.isArray(rawNode?.target)
+		? rawNode.target.map(String)
+		: []
+
+	for (const selector of selectors) {
+		if (!selector) continue
+
+		try {
+			const outerHtml = await page.evaluate(sel => {
+				try {
+					const element = document.querySelector(sel)
+					return element?.outerHTML ?? null
+				} catch {
+					return null
+				}
+			}, selector)
+
+			if (outerHtml && outerHtml.trim()) {
+				return outerHtml
+			}
+		} catch {
+			continue
+		}
+	}
+
+	return rawNode?.html ?? ''
+}
+
+async function resolveAncestorHtmlContext(
+	page: Page,
+	rawNode: any,
+	currentNodeHtml: string
+): Promise<string[]> {
+	const ancestry = Array.isArray(rawNode?.ancestry)
+		? rawNode.ancestry.map(String)
+		: []
+
+	if (ancestry.length === 0) return []
+
+	const contextSnippets: string[] = []
+	const seen = new Set<string>()
+
+	for (let index = ancestry.length - 1; index >= 0; index -= 1) {
+		const selector = ancestry[index]
+		if (!selector || seen.has(selector)) continue
+		seen.add(selector)
+
+		try {
+			const outerHtml = await page.evaluate(sel => {
+				try {
+					const element = document.querySelector(sel)
+					return element?.outerHTML ?? null
+				} catch {
+					return null
+				}
+			}, selector)
+
+			if (!outerHtml || !outerHtml.trim()) continue
+			if (outerHtml === currentNodeHtml) continue
+
+			contextSnippets.push(
+				outerHtml.length > 4000
+					? `${outerHtml.slice(0, 4000)}\n<!-- truncated -->`
+					: outerHtml
+			)
+
+			if (contextSnippets.length >= 3) break
+		} catch {
+			continue
+		}
+	}
+
+	return contextSnippets
 }
 
 // ---------------------------------------------------------------------------
@@ -150,10 +231,39 @@ export async function evaluateUrl(url: string): Promise<RawEvaluationResult> {
 
 		// ---- Navigate ----
 		try {
-			await page.goto(trimmedUrl, {
+			const response = await page.goto(trimmedUrl, {
 				waitUntil: 'domcontentloaded',
 				timeout: 30_000,
 			})
+
+			if (response) {
+				const status = response.status()
+
+				if (status === 404) {
+					throw new Error(
+						`Resource not found (404) for "${trimmedUrl}". The page does not exist.`
+					)
+				}
+
+				if (status === 401 || status === 403) {
+					throw new Error(
+						`Access denied (${status}) for "${trimmedUrl}". The site blocked access or requires authentication.`
+					)
+				}
+
+				if (status >= 500) {
+					throw new Error(
+						`Server returned ${status} for "${trimmedUrl}". The site may be temporarily unavailable.`
+					)
+				}
+
+				if (status >= 400) {
+					throw new Error(
+						`Failed to retrieve page. Server returned ${status} for "${trimmedUrl}".`
+					)
+				}
+			}
+
 			// Wait for the page to fully settle (handles redirects, late JS navigations)
 			await page
 				.waitForLoadState('networkidle', { timeout: 15_000 })
@@ -173,12 +283,40 @@ export async function evaluateUrl(url: string): Promise<RawEvaluationResult> {
 
 			if (
 				message.includes('net::ERR_NAME_NOT_RESOLVED') ||
+				message.includes('net::ERR_DNS')
+			) {
+				throw new Error(
+					`DNS lookup failed for "${trimmedUrl}". Check the domain name and try again.`
+				)
+			}
+
+			if (
 				message.includes('net::ERR_CONNECTION_REFUSED') ||
-				message.includes('net::ERR_CONNECTION_TIMED_OUT') ||
 				message.includes('net::ERR_ADDRESS_UNREACHABLE')
 			) {
 				throw new Error(
-					`Unable to reach "${trimmedUrl}". The site may be down or the URL is incorrect.`
+					`Connection refused by "${trimmedUrl}". The host is reachable but not accepting connections.`
+				)
+			}
+
+			if (message.includes('net::ERR_CONNECTION_TIMED_OUT')) {
+				throw new Error(
+					`Connection timed out while reaching "${trimmedUrl}". The host may be slow or unreachable.`
+				)
+			}
+
+			if (message.includes('net::ERR_INTERNET_DISCONNECTED')) {
+				throw new Error(
+					'Network is offline. Please check your internet connection and try again.'
+				)
+			}
+
+			if (
+				message.includes('net::ERR_SSL') ||
+				message.includes('net::ERR_CERT')
+			) {
+				throw new Error(
+					`Secure connection failed for "${trimmedUrl}" due to an SSL/TLS certificate issue.`
 				)
 			}
 
@@ -204,7 +342,12 @@ export async function evaluateUrl(url: string): Promise<RawEvaluationResult> {
 
 		let axeResults
 		const axeOptions = {
-			resultTypes: ['violations', 'passes', 'incomplete', 'inapplicable'] as const,
+			resultTypes: [
+				'violations',
+				'passes',
+				'incomplete',
+				'inapplicable',
+			] as const,
 			ancestry: true,
 			preload: true,
 		}
@@ -251,24 +394,40 @@ export async function evaluateUrl(url: string): Promise<RawEvaluationResult> {
 			}))
 
 		// ---- Build result ----
-		const violations: RawAxeViolation[] = axeResults.violations.map(v => ({
-			id: v.id,
-			impact: v.impact ?? 'minor',
-			description: v.description,
-			help: v.help,
-			helpUrl: v.helpUrl,
-			tags: v.tags,
-			nodes: v.nodes.map(n => ({
-				html: n.html,
-				target: n.target.map(String),
-				ancestry: Array.isArray((n as any).ancestry) ? (n as any).ancestry.map(String) : [],
-				impact: (n as any).impact ?? null,
-				failureSummary: n.failureSummary ?? '',
-				any: mapChecks((n as any).any),
-				all: mapChecks((n as any).all),
-				none: mapChecks((n as any).none),
-			})),
-		}))
+		const violations: RawAxeViolation[] = await Promise.all(
+			axeResults.violations.map(async v => ({
+				id: v.id,
+				impact: v.impact ?? 'minor',
+				description: v.description,
+				help: v.help,
+				helpUrl: v.helpUrl,
+				tags: v.tags,
+				nodes: await Promise.all(
+					v.nodes.map(async n => {
+						const nodeHtml = await resolveNodeHtmlFromPage(page, n)
+						const sourceContext = await resolveAncestorHtmlContext(
+							page,
+							n,
+							nodeHtml
+						)
+
+						return {
+							html: nodeHtml,
+							target: n.target.map(String),
+							ancestry: Array.isArray((n as any).ancestry)
+								? (n as any).ancestry.map(String)
+								: [],
+							sourceContext,
+							impact: (n as any).impact ?? null,
+							failureSummary: n.failureSummary ?? '',
+							any: mapChecks((n as any).any),
+							all: mapChecks((n as any).all),
+							none: mapChecks((n as any).none),
+						}
+					})
+				),
+			}))
+		)
 
 		const passes: RawAxePass[] = axeResults.passes.map(p => ({
 			id: p.id,
@@ -279,30 +438,48 @@ export async function evaluateUrl(url: string): Promise<RawEvaluationResult> {
 			nodes: p.nodes.map(n => ({
 				html: n.html,
 				target: n.target.map(String),
-				ancestry: Array.isArray((n as any).ancestry) ? (n as any).ancestry.map(String) : [],
+				ancestry: Array.isArray((n as any).ancestry)
+					? (n as any).ancestry.map(String)
+					: [],
 			})),
 		}))
 
-		const incomplete: RawAxeIncomplete[] = (
-			axeResults.incomplete ?? []
-		).map((i: any) => ({
-			id: i.id,
-			impact: i.impact ?? 'moderate',
-			description: i.description,
-			help: i.help,
-			helpUrl: i.helpUrl,
-			tags: i.tags,
-			nodes: (i.nodes ?? []).map((n: any) => ({
-				html: n.html ?? '',
-				target: Array.isArray(n.target) ? n.target.map(String) : [],
-				ancestry: Array.isArray(n.ancestry) ? n.ancestry.map(String) : [],
-				impact: n.impact ?? null,
-				failureSummary: n.failureSummary ?? '',
-				any: mapChecks(n.any),
-				all: mapChecks(n.all),
-				none: mapChecks(n.none),
-			})),
-		}))
+		const incomplete: RawAxeIncomplete[] = await Promise.all(
+			(axeResults.incomplete ?? []).map(async (i: any) => ({
+				id: i.id,
+				impact: i.impact ?? 'moderate',
+				description: i.description,
+				help: i.help,
+				helpUrl: i.helpUrl,
+				tags: i.tags,
+				nodes: await Promise.all(
+					(i.nodes ?? []).map(async (n: any) => {
+						const nodeHtml = await resolveNodeHtmlFromPage(page, n)
+						const sourceContext = await resolveAncestorHtmlContext(
+							page,
+							n,
+							nodeHtml
+						)
+
+						return {
+							html: nodeHtml,
+							target: Array.isArray(n.target)
+								? n.target.map(String)
+								: [],
+							ancestry: Array.isArray(n.ancestry)
+								? n.ancestry.map(String)
+								: [],
+							sourceContext,
+							impact: n.impact ?? null,
+							failureSummary: n.failureSummary ?? '',
+							any: mapChecks(n.any),
+							all: mapChecks(n.all),
+							none: mapChecks(n.none),
+						}
+					})
+				),
+			}))
+		)
 
 		const inapplicable: RawAxeInapplicable[] = (
 			axeResults.inapplicable ?? []
@@ -323,11 +500,14 @@ export async function evaluateUrl(url: string): Promise<RawEvaluationResult> {
 			orientationType: axeResults.testEnvironment?.orientationType ?? '',
 		}
 
+		const fullSourceHtml = await page.content()
+
 		return {
 			url: trimmedUrl,
 			timestamp: new Date().toISOString(),
 			axeCoreVersion: axeResults.testEngine.version,
 			testEnvironment: testEnv,
+			fullSourceHtml,
 			violations,
 			passes,
 			incomplete,
@@ -335,26 +515,25 @@ export async function evaluateUrl(url: string): Promise<RawEvaluationResult> {
 		}
 	} catch (error: unknown) {
 		// Re-throw our own errors as-is; wrap unexpected errors
-		if (error instanceof Error && error.message.startsWith('Invalid URL')) {
-			throw error
-		}
-		if (
-			error instanceof Error &&
-			error.message.startsWith('Navigation timed')
-		) {
-			throw error
-		}
-		if (
-			error instanceof Error &&
-			error.message.startsWith('Unable to reach')
-		) {
-			throw error
-		}
-		if (
-			error instanceof Error &&
-			error.message.startsWith('Failed to navigate')
-		) {
-			throw error
+		if (error instanceof Error) {
+			const knownPrefix = [
+				'Invalid URL',
+				'Navigation timed out',
+				'DNS lookup failed',
+				'Connection refused',
+				'Connection timed out',
+				'Network is offline',
+				'Secure connection failed',
+				'Resource not found',
+				'Access denied',
+				'Server returned',
+				'Failed to retrieve page',
+				'Failed to navigate',
+			]
+
+			if (knownPrefix.some(prefix => error.message.startsWith(prefix))) {
+				throw error
+			}
 		}
 
 		const msg = error instanceof Error ? error.message : String(error)
@@ -448,7 +627,12 @@ export async function evaluateHtml(
 		const axeResults = await new AxeBuilder({ page })
 			.withTags(axeTags)
 			.options({
-				resultTypes: ['violations', 'passes', 'incomplete', 'inapplicable'] as const,
+				resultTypes: [
+					'violations',
+					'passes',
+					'incomplete',
+					'inapplicable',
+				] as const,
 				ancestry: true,
 				preload: true,
 			} as any)
@@ -470,24 +654,40 @@ export async function evaluateHtml(
 			}))
 
 		// ---- Build result ----
-		const violations: RawAxeViolation[] = axeResults.violations.map(v => ({
-			id: v.id,
-			impact: v.impact ?? 'minor',
-			description: v.description,
-			help: v.help,
-			helpUrl: v.helpUrl,
-			tags: v.tags,
-			nodes: v.nodes.map(n => ({
-				html: n.html,
-				target: n.target.map(String),
-				ancestry: Array.isArray((n as any).ancestry) ? (n as any).ancestry.map(String) : [],
-				impact: (n as any).impact ?? null,
-				failureSummary: n.failureSummary ?? '',
-				any: mapChecks((n as any).any),
-				all: mapChecks((n as any).all),
-				none: mapChecks((n as any).none),
-			})),
-		}))
+		const violations: RawAxeViolation[] = await Promise.all(
+			axeResults.violations.map(async v => ({
+				id: v.id,
+				impact: v.impact ?? 'minor',
+				description: v.description,
+				help: v.help,
+				helpUrl: v.helpUrl,
+				tags: v.tags,
+				nodes: await Promise.all(
+					v.nodes.map(async n => {
+						const nodeHtml = await resolveNodeHtmlFromPage(page, n)
+						const sourceContext = await resolveAncestorHtmlContext(
+							page,
+							n,
+							nodeHtml
+						)
+
+						return {
+							html: nodeHtml,
+							target: n.target.map(String),
+							ancestry: Array.isArray((n as any).ancestry)
+								? (n as any).ancestry.map(String)
+								: [],
+							sourceContext,
+							impact: (n as any).impact ?? null,
+							failureSummary: n.failureSummary ?? '',
+							any: mapChecks((n as any).any),
+							all: mapChecks((n as any).all),
+							none: mapChecks((n as any).none),
+						}
+					})
+				),
+			}))
+		)
 
 		const passes: RawAxePass[] = axeResults.passes.map(p => ({
 			id: p.id,
@@ -498,30 +698,48 @@ export async function evaluateHtml(
 			nodes: p.nodes.map(n => ({
 				html: n.html,
 				target: n.target.map(String),
-				ancestry: Array.isArray((n as any).ancestry) ? (n as any).ancestry.map(String) : [],
+				ancestry: Array.isArray((n as any).ancestry)
+					? (n as any).ancestry.map(String)
+					: [],
 			})),
 		}))
 
-		const incomplete: RawAxeIncomplete[] = (
-			axeResults.incomplete ?? []
-		).map((i: any) => ({
-			id: i.id,
-			impact: i.impact ?? 'moderate',
-			description: i.description,
-			help: i.help,
-			helpUrl: i.helpUrl,
-			tags: i.tags,
-			nodes: (i.nodes ?? []).map((n: any) => ({
-				html: n.html ?? '',
-				target: Array.isArray(n.target) ? n.target.map(String) : [],
-				ancestry: Array.isArray(n.ancestry) ? n.ancestry.map(String) : [],
-				impact: n.impact ?? null,
-				failureSummary: n.failureSummary ?? '',
-				any: mapChecks(n.any),
-				all: mapChecks(n.all),
-				none: mapChecks(n.none),
-			})),
-		}))
+		const incomplete: RawAxeIncomplete[] = await Promise.all(
+			(axeResults.incomplete ?? []).map(async (i: any) => ({
+				id: i.id,
+				impact: i.impact ?? 'moderate',
+				description: i.description,
+				help: i.help,
+				helpUrl: i.helpUrl,
+				tags: i.tags,
+				nodes: await Promise.all(
+					(i.nodes ?? []).map(async (n: any) => {
+						const nodeHtml = await resolveNodeHtmlFromPage(page, n)
+						const sourceContext = await resolveAncestorHtmlContext(
+							page,
+							n,
+							nodeHtml
+						)
+
+						return {
+							html: nodeHtml,
+							target: Array.isArray(n.target)
+								? n.target.map(String)
+								: [],
+							ancestry: Array.isArray(n.ancestry)
+								? n.ancestry.map(String)
+								: [],
+							sourceContext,
+							impact: n.impact ?? null,
+							failureSummary: n.failureSummary ?? '',
+							any: mapChecks(n.any),
+							all: mapChecks(n.all),
+							none: mapChecks(n.none),
+						}
+					})
+				),
+			}))
+		)
 
 		const inapplicable: RawAxeInapplicable[] = (
 			axeResults.inapplicable ?? []
@@ -541,11 +759,14 @@ export async function evaluateHtml(
 			orientationType: axeResults.testEnvironment?.orientationType ?? '',
 		}
 
+		const fullSourceHtml = await page.content()
+
 		return {
 			url: fileName ? `file://${fileName}` : 'file://uploaded.html',
 			timestamp: new Date().toISOString(),
 			axeCoreVersion: axeResults.testEngine.version,
 			testEnvironment: testEnv,
+			fullSourceHtml,
 			violations,
 			passes,
 			incomplete,

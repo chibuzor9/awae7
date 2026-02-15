@@ -4,6 +4,7 @@ import {
 	ShieldCheck,
 	Layers,
 	ArrowRight,
+	ChevronDown,
 	Code2,
 	FileText,
 	User,
@@ -67,24 +68,24 @@ const reportTypes = [
 		role: 'Developer',
 		description:
 			'Detailed CSS selectors, HTML snippets, and remediation code examples to fix accessibility issues quickly.',
-		accent: 'bg-blue-50 text-blue-700 border-blue-200',
-		iconAccent: 'text-blue-600',
+		accent: 'border-violet-200 bg-violet-50 text-slate-900',
+		iconAccent: 'text-violet-700',
 	},
 	{
 		icon: FileText,
 		role: 'Auditor',
 		description:
 			'Compliance matrices, principle breakdowns, and formal violation descriptions for thorough auditing.',
-		accent: 'bg-purple-50 text-purple-700 border-purple-200',
-		iconAccent: 'text-purple-600',
+		accent: 'border-fuchsia-200 bg-fuchsia-50 text-slate-900',
+		iconAccent: 'text-fuchsia-700',
 	},
 	{
 		icon: User,
 		role: 'End-User',
 		description:
 			'Plain-language summaries, accessibility scores, and priority recommendations anyone can understand.',
-		accent: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-		iconAccent: 'text-emerald-600',
+		accent: 'border-indigo-200 bg-indigo-50 text-slate-900',
+		iconAccent: 'text-indigo-700',
 	},
 ]
 
@@ -100,41 +101,32 @@ const footerLinks = [
 
 export default function Home() {
 	return (
-		<div className="flex flex-col min-h-screen">
+		<div className="flex flex-col">
 			{/* ─── Hero Section ─── */}
-			<section className="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-blue-50">
-				{/* Decorative blobs */}
-				<div
-					aria-hidden="true"
-					className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-indigo-200 opacity-30 blur-3xl"
-				/>
-				<div
-					aria-hidden="true"
-					className="pointer-events-none absolute -bottom-32 -right-32 h-[28rem] w-[28rem] rounded-full bg-blue-200 opacity-30 blur-3xl"
-				/>
-
-				<div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8 lg:py-40">
-					<div className="mx-auto max-w-3xl text-center">
-						<h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
+			<section className="relative flex min-h-[calc(100vh-4rem)] items-center bg-white">
+				<div className="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-12 lg:px-8 lg:py-14">
+					<div className="text-center lg:col-span-7 lg:text-left">
+						<p className="inline-flex items-center rounded-full border border-(--border) bg-white px-3 py-1 text-xs font-semibold text-(--accent)">
+							WCAG 2.2 Multi-Audience Reports
+						</p>
+						<h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
 							Automated Web{' '}
-							<span className="text-indigo-600">
-								Accessibility
-							</span>{' '}
+							<span className="text-blue-700">Accessibility</span>{' '}
 							Evaluator
 						</h1>
 
-						<p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600 sm:text-xl">
+						<p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-700 sm:text-lg lg:mx-0">
 							Evaluate any website against WCAG 2.2 standards and
 							get tailored reports for developers, auditors, and
 							end-users.
 						</p>
 
-						<div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+						<div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
 							<Link
 								href="/evaluate"
 								className={cn(
-									'inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow-sm',
-									'hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors'
+									'inline-flex items-center gap-2 rounded-lg bg-(--accent) px-5 py-2.5 text-sm font-semibold text-white shadow-sm',
+									'transition-all hover:-translate-y-0.5 hover:bg-(--accent-strong) focus:outline-none focus:ring-2 focus:ring-(--accent) focus:ring-offset-2'
 								)}
 							>
 								Start Evaluating
@@ -146,46 +138,106 @@ export default function Home() {
 							<Link
 								href="/wcag-cards"
 								className={cn(
-									'inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 text-base font-semibold text-gray-700 shadow-sm',
-									'hover:bg-gray-50 hover:border-indigo-300 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors'
+									'inline-flex items-center gap-2 rounded-lg border border-(--border) bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm',
+									'transition-all hover:-translate-y-0.5 hover:bg-(--accent-soft) focus:outline-none focus:ring-2 focus:ring-(--accent) focus:ring-offset-2'
 								)}
 							>
 								Browse WCAG Cards
 							</Link>
 						</div>
+
+						<div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600 lg:justify-start">
+							<span className="rounded-md bg-white px-2.5 py-1">
+								Developer View
+							</span>
+							<span className="rounded-md bg-white px-2.5 py-1">
+								Auditor View
+							</span>
+							<span className="rounded-md bg-white px-2.5 py-1">
+								End-User View
+							</span>
+						</div>
+					</div>
+
+					<div className="hidden lg:col-span-5 lg:block">
+						<div className="rounded-2xl border border-(--border) bg-white p-5 shadow-lg shadow-blue-100/60">
+							<div className="mb-4 flex items-center justify-between">
+								<p className="text-sm font-semibold text-slate-800">
+									Live Preview
+								</p>
+								<span className="text-xs font-medium text-(--accent)">
+									WCAG 2.2
+								</span>
+							</div>
+
+							<div className="space-y-3">
+								<div className="rounded-xl border border-blue-100 bg-blue-50/70 p-3">
+									<p className="text-xs font-semibold text-blue-700">
+										Developer
+									</p>
+									<p className="mt-1 text-sm text-slate-700">
+										12 issues with code-level fixes
+									</p>
+								</div>
+								<div className="rounded-xl border border-violet-100 bg-violet-50/70 p-3 animate-[pulse-soft_2.8s_ease-in-out_infinite]">
+									<p className="text-xs font-semibold text-violet-700">
+										Auditor
+									</p>
+									<p className="mt-1 text-sm text-slate-700">
+										Compliance matrix + pass/fail summary
+									</p>
+								</div>
+								<div className="rounded-xl border border-indigo-100 bg-indigo-50/70 p-3">
+									<p className="text-xs font-semibold text-indigo-700">
+										End User
+									</p>
+									<p className="mt-1 text-sm text-slate-700">
+										Score + plain-language priorities
+									</p>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
+
+				<Link
+					href="#features"
+					aria-label="Scroll to features"
+					className="absolute bottom-8 right-8 hidden h-8 w-8 items-center justify-center rounded-full border border-(--border) bg-white text-(--accent) shadow-sm transition-colors hover:bg-(--accent-soft) motion-safe:animate-[scroll-nudge_2.2s_ease-in-out_infinite] md:inline-flex lg:bottom-10 lg:right-10"
+				>
+					<ChevronDown className="h-4 w-4" aria-hidden="true" />
+				</Link>
 			</section>
 
 			{/* ─── Features Section ─── */}
-			<section className="bg-white py-20 sm:py-28">
+			<section id="features" className="bg-white py-16 sm:py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="mx-auto max-w-2xl text-center">
-						<h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+						<h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
 							Everything you need for accessibility evaluation
 						</h2>
-						<p className="mt-4 text-lg text-gray-600">
+						<p className="mt-3 text-base text-slate-700 sm:text-lg">
 							A complete toolkit to audit, understand, and improve
 							web accessibility.
 						</p>
 					</div>
 
-					<div className="mx-auto mt-16 grid max-w-5xl gap-8 sm:grid-cols-2 lg:grid-cols-3">
+					<div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
 						{features.map(feature => (
 							<div
 								key={feature.title}
-								className="group rounded-2xl border border-gray-200 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+								className="group rounded-xl border border-blue-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
 							>
-								<div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-colors group-hover:bg-indigo-100">
+								<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 transition-colors group-hover:bg-blue-100">
 									<feature.icon
-										className="h-6 w-6"
+										className="h-5 w-5"
 										aria-hidden="true"
 									/>
 								</div>
-								<h3 className="mt-6 text-lg font-semibold text-gray-900">
+								<h3 className="mt-4 text-lg font-semibold text-slate-900">
 									{feature.title}
 								</h3>
-								<p className="mt-2 text-base leading-7 text-gray-600">
+								<p className="mt-1.5 text-sm leading-6 text-slate-600">
 									{feature.description}
 								</p>
 							</div>
@@ -195,39 +247,39 @@ export default function Home() {
 			</section>
 
 			{/* ─── How It Works Section ─── */}
-			<section className="bg-gray-50 py-20 sm:py-28">
+			<section className="bg-linear-to-b from-white to-blue-50/40 py-16 sm:py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="mx-auto max-w-2xl text-center">
-						<h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+						<h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
 							How it works
 						</h2>
-						<p className="mt-4 text-lg text-gray-600">
+						<p className="mt-3 text-base text-slate-700 sm:text-lg">
 							Three simple steps to a more accessible website.
 						</p>
 					</div>
 
-					<div className="mx-auto mt-16 grid max-w-5xl gap-8 sm:grid-cols-2 lg:grid-cols-3">
+					<div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
 						{steps.map(step => (
 							<div
 								key={step.number}
-								className="relative text-center"
+								className="rounded-xl border border-violet-100 bg-white p-6 text-center shadow-sm"
 							>
 								{/* Step icon circle */}
-								<div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg">
+								<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-violet-600 text-white shadow-sm">
 									<step.icon
-										className="h-6 w-6"
+										className="h-5 w-5"
 										aria-hidden="true"
 									/>
 								</div>
 
-								<span className="mt-4 inline-block rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
+								<span className="mt-3 inline-block rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700">
 									Step {step.number}
 								</span>
 
-								<h3 className="mt-3 text-lg font-semibold text-gray-900">
+								<h3 className="mt-3 text-lg font-semibold text-slate-900">
 									{step.title}
 								</h3>
-								<p className="mt-2 text-base leading-7 text-gray-600">
+								<p className="mt-1.5 text-sm leading-6 text-slate-600">
 									{step.description}
 								</p>
 							</div>
@@ -237,35 +289,35 @@ export default function Home() {
 			</section>
 
 			{/* ─── Report Types Section ─── */}
-			<section className="bg-white py-20 sm:py-28">
+			<section className="bg-white py-16 sm:py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="mx-auto max-w-2xl text-center">
-						<h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+						<h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
 							Reports tailored to your role
 						</h2>
-						<p className="mt-4 text-lg text-gray-600">
+						<p className="mt-3 text-base text-slate-700 sm:text-lg">
 							Every stakeholder gets the information they need, in
 							the format that works for them.
 						</p>
 					</div>
 
-					<div className="mx-auto mt-16 grid max-w-5xl gap-8 sm:grid-cols-2 lg:grid-cols-3">
+					<div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
 						{reportTypes.map(report => (
 							<div
 								key={report.role}
 								className={cn(
-									'rounded-2xl border p-8 transition-shadow hover:shadow-md',
+									'rounded-xl border p-6 transition-all hover:-translate-y-0.5 hover:shadow-md',
 									report.accent
 								)}
 							>
 								<report.icon
-									className={cn('h-8 w-8', report.iconAccent)}
+									className={cn('h-7 w-7', report.iconAccent)}
 									aria-hidden="true"
 								/>
-								<h3 className="mt-4 text-xl font-bold">
+								<h3 className="mt-3 text-lg font-semibold">
 									{report.role}
 								</h3>
-								<p className="mt-2 text-base leading-7 opacity-90">
+								<p className="mt-1.5 text-sm leading-6 text-slate-700">
 									{report.description}
 								</p>
 							</div>
@@ -275,21 +327,21 @@ export default function Home() {
 			</section>
 
 			{/* ─── Footer CTA ─── */}
-			<section className="bg-gradient-to-br from-indigo-600 to-blue-700 py-16 sm:py-20">
+			<section className="bg-linear-to-r from-slate-800 via-blue-800 to-blue-700 py-14 sm:py-16">
 				<div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-					<h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+					<h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
 						Ready to evaluate your website?
 					</h2>
-					<p className="mx-auto mt-4 max-w-xl text-lg text-indigo-100">
+					<p className="mx-auto mt-3 max-w-xl text-base text-blue-100/95 sm:text-lg">
 						Start a free accessibility evaluation now and get
 						actionable reports in seconds.
 					</p>
-					<div className="mt-8">
+					<div className="mt-6">
 						<Link
 							href="/evaluate"
 							className={cn(
-								'inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-base font-semibold text-indigo-600 shadow-sm',
-								'hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 transition-colors'
+								'inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-blue-700 shadow-sm',
+								'transition-colors hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-800'
 							)}
 						>
 							Start Evaluating
@@ -303,15 +355,15 @@ export default function Home() {
 			</section>
 
 			{/* ─── Footer ─── */}
-			<footer className="border-t border-gray-200 bg-gray-50">
+			<footer className="border-t border-blue-100 bg-white">
 				<div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
 					<div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between">
 						{/* Brand */}
 						<div className="flex flex-col items-center gap-1 sm:items-start">
-							<span className="text-lg font-bold text-indigo-600 tracking-tight">
+							<span className="text-lg font-semibold tracking-tight text-blue-700">
 								AWAE
 							</span>
-							<span className="text-sm text-gray-500">
+							<span className="text-sm text-slate-600">
 								Automated Web Accessibility Evaluator
 							</span>
 						</div>
@@ -323,7 +375,7 @@ export default function Home() {
 									<li key={link.href}>
 										<Link
 											href={link.href}
-											className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors"
+											className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-700"
 										>
 											{link.label}
 										</Link>
@@ -333,8 +385,8 @@ export default function Home() {
 						</nav>
 					</div>
 
-					<div className="mt-8 border-t border-gray-200 pt-6 text-center">
-						<p className="text-sm text-gray-500">
+					<div className="mt-8 border-t border-blue-100 pt-6 text-center">
+						<p className="text-sm text-slate-500">
 							Built for BSc Software Engineering Thesis at Babcock
 							University
 						</p>

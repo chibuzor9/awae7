@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 
@@ -14,6 +14,7 @@ const navLinks = [
 
 export default function Navbar() {
 	const router = useRouter()
+	const pathname = usePathname()
 	const [user, setUser] = useState<User | null>(null)
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 	const [loggingOut, setLoggingOut] = useState(false)
@@ -38,6 +39,19 @@ export default function Navbar() {
 		}
 	}, [])
 
+	useEffect(() => {
+		setMobileMenuOpen(false)
+	}, [pathname])
+
+	useEffect(() => {
+		if (!mobileMenuOpen) return
+		const previousOverflow = document.body.style.overflow
+		document.body.style.overflow = 'hidden'
+		return () => {
+			document.body.style.overflow = previousOverflow
+		}
+	}, [mobileMenuOpen])
+
 	async function handleLogout() {
 		setLoggingOut(true)
 		try {
@@ -51,14 +65,14 @@ export default function Navbar() {
 	}
 
 	return (
-		<nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+		<nav className="sticky top-0 z-50 border-b border-(--border)/90 bg-white/90 backdrop-blur-xl">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="flex items-center justify-between h-16">
 					{/* Left: Brand */}
 					<div className="flex items-center gap-8">
 						<Link
 							href="/"
-							className="text-xl font-bold text-indigo-600 tracking-tight"
+							className="text-xl font-semibold tracking-tight text-slate-900"
 						>
 							AWAE
 						</Link>
@@ -69,7 +83,7 @@ export default function Navbar() {
 								<Link
 									key={link.href}
 									href={link.href}
-									className="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+									className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-(--accent-soft) hover:text-(--accent)"
 								>
 									{link.label}
 								</Link>
@@ -81,13 +95,13 @@ export default function Navbar() {
 					<div className="hidden md:flex items-center gap-3">
 						{user ? (
 							<>
-								<span className="text-sm text-gray-600 truncate max-w-48">
+								<span className="max-w-48 truncate text-sm text-slate-600">
 									{user.email}
 								</span>
 								<button
 									onClick={handleLogout}
 									disabled={loggingOut}
-									className="rounded-lg border border-gray-300 px-3.5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-colors cursor-pointer"
+									className="cursor-pointer rounded-lg border border-(--border) bg-white px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-(--accent-soft) focus:outline-none focus:ring-2 focus:ring-(--accent) focus:ring-offset-2 disabled:opacity-50"
 								>
 									{loggingOut ? 'Logging out...' : 'Logout'}
 								</button>
@@ -96,13 +110,13 @@ export default function Navbar() {
 							<>
 								<Link
 									href="/login"
-									className="rounded-lg px-3.5 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+									className="rounded-lg px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-(--accent-soft) hover:text-(--accent)"
 								>
 									Login
 								</Link>
 								<Link
 									href="/signup"
-									className="rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
+									className="rounded-lg bg-(--accent) px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-(--accent-strong)"
 								>
 									Sign Up
 								</Link>
@@ -113,8 +127,7 @@ export default function Navbar() {
 					{/* Mobile Menu Button */}
 					<button
 						onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-						className="md:hidden inline-flex items-center justify-center rounded-lg p-2 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors cursor-pointer"
-						aria-expanded={mobileMenuOpen}
+						className="cursor-pointer inline-flex items-center justify-center rounded-lg p-2 text-slate-700 transition-colors hover:bg-(--accent-soft) focus:outline-none focus:ring-2 focus:ring-(--accent) md:hidden"
 						aria-label="Toggle navigation menu"
 					>
 						{mobileMenuOpen ? (
@@ -152,57 +165,67 @@ export default function Navbar() {
 
 			{/* Mobile Menu */}
 			{mobileMenuOpen && (
-				<div className="md:hidden border-t border-gray-200 bg-white">
-					<div className="px-4 py-3 space-y-1">
-						{navLinks.map(link => (
-							<Link
-								key={link.href}
-								href={link.href}
-								onClick={() => setMobileMenuOpen(false)}
-								className="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-							>
-								{link.label}
-							</Link>
-						))}
-					</div>
+				<>
+					<button
+						type="button"
+						aria-label="Close mobile menu"
+						onClick={() => setMobileMenuOpen(false)}
+						className="fixed inset-0 top-16 z-40 bg-slate-900/15 backdrop-blur-[1px] md:hidden"
+					/>
+					<div className="absolute left-0 right-0 top-full z-50 border-t border-(--border) bg-white shadow-lg md:hidden">
+						<div className="space-y-1 px-4 py-3">
+							{navLinks.map(link => (
+								<Link
+									key={link.href}
+									href={link.href}
+									onClick={() => setMobileMenuOpen(false)}
+									className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-(--accent-soft) hover:text-(--accent)"
+								>
+									{link.label}
+								</Link>
+							))}
+						</div>
 
-					<div className="border-t border-gray-200 px-4 py-3">
-						{user ? (
-							<div className="space-y-3">
-								<p className="px-3 text-sm text-gray-600 truncate">
-									{user.email}
-								</p>
-								<button
-									onClick={() => {
-										setMobileMenuOpen(false)
-										handleLogout()
-									}}
-									disabled={loggingOut}
-									className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors cursor-pointer"
-								>
-									{loggingOut ? 'Logging out...' : 'Logout'}
-								</button>
-							</div>
-						) : (
-							<div className="space-y-2">
-								<Link
-									href="/login"
-									onClick={() => setMobileMenuOpen(false)}
-									className="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-								>
-									Login
-								</Link>
-								<Link
-									href="/signup"
-									onClick={() => setMobileMenuOpen(false)}
-									className="block px-3 py-2.5 rounded-lg bg-indigo-600 text-sm font-semibold text-white text-center hover:bg-indigo-500 transition-colors"
-								>
-									Sign Up
-								</Link>
-							</div>
-						)}
+						<div className="border-t border-(--border) px-4 py-3">
+							{user ? (
+								<div className="space-y-3">
+									<p className="truncate px-3 text-sm text-slate-600">
+										{user.email}
+									</p>
+									<button
+										onClick={() => {
+											setMobileMenuOpen(false)
+											handleLogout()
+										}}
+										disabled={loggingOut}
+										className="w-full cursor-pointer rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-(--accent-soft) disabled:opacity-50"
+									>
+										{loggingOut
+											? 'Logging out...'
+											: 'Logout'}
+									</button>
+								</div>
+							) : (
+								<div className="space-y-2">
+									<Link
+										href="/login"
+										onClick={() => setMobileMenuOpen(false)}
+										className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-(--accent-soft)"
+									>
+										Login
+									</Link>
+									<Link
+										href="/signup"
+										onClick={() => setMobileMenuOpen(false)}
+										className="block rounded-lg bg-(--accent) px-3 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-(--accent-strong)"
+									>
+										Sign Up
+									</Link>
+								</div>
+							)}
+						</div>
 					</div>
-				</div>
+				</>
 			)}
 		</nav>
 	)

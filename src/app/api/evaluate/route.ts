@@ -16,6 +16,60 @@ import { createClient } from '@/lib/supabase/server'
 /** Max HTML file size: 10 MB */
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 
+function mapEvaluationFailure(message: string): {
+	status: number
+	error: string
+} {
+	if (message.startsWith('Invalid URL')) {
+		return { status: 400, error: message }
+	}
+
+	if (message.startsWith('Resource not found')) {
+		return { status: 404, error: message }
+	}
+
+	if (message.startsWith('Access denied')) {
+		return { status: 403, error: message }
+	}
+
+	if (
+		message.startsWith('DNS lookup failed') ||
+		message.startsWith('Connection refused') ||
+		message.startsWith('Connection timed out') ||
+		message.startsWith('Network is offline') ||
+		message.startsWith('Secure connection failed')
+	) {
+		return { status: 502, error: message }
+	}
+
+	if (message.startsWith('Navigation timed out')) {
+		return { status: 504, error: message }
+	}
+
+	if (message.startsWith('Server returned')) {
+		return { status: 502, error: message }
+	}
+
+	if (
+		message.startsWith('Failed to retrieve page') ||
+		message.startsWith('Failed to navigate')
+	) {
+		return { status: 502, error: message }
+	}
+
+	if (message.startsWith('HTML evaluation failed')) {
+		return {
+			status: 422,
+			error: 'HTML could not be evaluated. The file may be malformed or contain unsupported content.',
+		}
+	}
+
+	return {
+		status: 500,
+		error: 'Accessibility evaluation failed. Please try again later.',
+	}
+}
+
 export async function POST(request: NextRequest) {
 	const contentType = request.headers.get('content-type') ?? ''
 
@@ -73,11 +127,10 @@ export async function POST(request: NextRequest) {
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : String(err)
 			console.error('[/api/evaluate] HTML evaluation failed:', message)
+			const mapped = mapEvaluationFailure(message)
 			return NextResponse.json(
-				{
-					error: 'Accessibility evaluation of the HTML file failed. Please try again.',
-				},
-				{ status: 500 }
+				{ error: mapped.error },
+				{ status: mapped.status }
 			)
 		}
 	}
@@ -131,21 +184,11 @@ export async function POST(request: NextRequest) {
 			rawResults = await evaluateUrl(trimmedUrl)
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : String(err)
-
-			if (
-				message.includes('Invalid URL') ||
-				message.includes('Unable to reach') ||
-				message.includes('timed out')
-			) {
-				return NextResponse.json({ error: message }, { status: 400 })
-			}
-
+			const mapped = mapEvaluationFailure(message)
 			console.error('[/api/evaluate] Evaluation failed:', message)
 			return NextResponse.json(
-				{
-					error: 'Accessibility evaluation failed. Please try again later.',
-				},
-				{ status: 500 }
+				{ error: mapped.error },
+				{ status: mapped.status }
 			)
 		}
 	}

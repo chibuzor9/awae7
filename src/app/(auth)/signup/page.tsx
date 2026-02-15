@@ -45,20 +45,20 @@ export default function SignupPage() {
 	}
 
 	return (
-		<div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50">
+		<div className="flex min-h-[70vh] items-center justify-center bg-transparent px-4 py-12">
 			<div className="w-full max-w-md">
 				{/* Header */}
 				<div className="text-center mb-8">
-					<h1 className="text-3xl font-bold text-gray-900">
+					<h1 className="text-3xl font-semibold text-slate-900">
 						Create an account
 					</h1>
-					<p className="mt-2 text-sm text-gray-600">
+					<p className="mt-2 text-sm text-slate-600">
 						Get started with AWAE today
 					</p>
 				</div>
 
 				{/* Form Card */}
-				<div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+				<div className="rounded-xl border border-(--border) bg-white p-7 shadow-lg shadow-blue-100/60">
 					{success ? (
 						<div className="text-center py-4">
 							<div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
@@ -89,7 +89,7 @@ export default function SignupPage() {
 							</p>
 							<Link
 								href="/login"
-								className="inline-block rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
+								className="inline-block rounded-lg bg-(--accent) px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-(--accent-strong)"
 							>
 								Go to Login
 							</Link>
@@ -135,7 +135,7 @@ export default function SignupPage() {
 										required
 										autoComplete="username"
 										placeholder="Choose a username"
-										className="block w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-colors text-sm"
+										className="block w-full rounded-lg border border-(--border) bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-500 shadow-sm transition-colors focus:border-(--accent) focus:outline-none focus:ring-2 focus:ring-(--accent)/20"
 									/>
 								</div>
 
@@ -155,7 +155,7 @@ export default function SignupPage() {
 										required
 										autoComplete="email"
 										placeholder="you@example.com"
-										className="block w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-colors text-sm"
+										className="block w-full rounded-lg border border-(--border) bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-500 shadow-sm transition-colors focus:border-(--accent) focus:outline-none focus:ring-2 focus:ring-(--accent)/20"
 									/>
 								</div>
 
@@ -178,7 +178,7 @@ export default function SignupPage() {
 										autoComplete="new-password"
 										minLength={6}
 										placeholder="At least 6 characters"
-										className="block w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-colors text-sm"
+										className="block w-full rounded-lg border border-(--border) bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-500 shadow-sm transition-colors focus:border-(--accent) focus:outline-none focus:ring-2 focus:ring-(--accent)/20"
 									/>
 								</div>
 
@@ -186,7 +186,7 @@ export default function SignupPage() {
 								<button
 									type="submit"
 									disabled={loading}
-									className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+									className="w-full cursor-pointer rounded-lg bg-(--accent) px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-(--accent-strong) focus:outline-none focus:ring-2 focus:ring-(--accent) focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 								>
 									{loading
 										? 'Creating account...'
@@ -199,11 +199,11 @@ export default function SignupPage() {
 
 				{/* Footer Link */}
 				{!success && (
-					<p className="mt-6 text-center text-sm text-gray-600">
+					<p className="mt-6 text-center text-sm text-slate-600">
 						Already have an account?{' '}
 						<Link
 							href="/login"
-							className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors"
+							className="font-semibold text-(--accent) transition-colors hover:text-(--accent-strong)"
 						>
 							Sign in
 						</Link>

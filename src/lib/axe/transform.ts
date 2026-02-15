@@ -180,6 +180,11 @@ export function transformRawResults(rawResults: any): EvaluationResult {
 						target: Array.isArray(n.target)
 							? n.target.map(String)
 							: [],
+						sourceContext: Array.isArray(n.sourceContext)
+							? n.sourceContext
+									.map((entry: unknown) => String(entry))
+									.filter(Boolean)
+							: [],
 						failureSummary: n.failureSummary ?? '',
 						impact: n.impact ?? null,
 						any: mapChecks(n.any),
@@ -231,6 +236,11 @@ export function transformRawResults(rawResults: any): EvaluationResult {
 						html: n.html ?? '',
 						target: Array.isArray(n.target)
 							? n.target.map(String)
+							: [],
+						sourceContext: Array.isArray(n.sourceContext)
+							? n.sourceContext
+									.map((entry: unknown) => String(entry))
+									.filter(Boolean)
 							: [],
 						impact: n.impact ?? null,
 						any: mapChecks(n.any),
@@ -297,6 +307,10 @@ export function transformRawResults(rawResults: any): EvaluationResult {
 		timestamp: rawResults.timestamp ?? new Date().toISOString(),
 		axeCoreVersion: rawResults.axeCoreVersion ?? 'unknown',
 		testEnvironment,
+		fullSourceHtml:
+			typeof rawResults.fullSourceHtml === 'string'
+				? rawResults.fullSourceHtml
+				: undefined,
 		overallScore: score,
 		totalViolations: violations.length,
 		totalIncomplete: incomplete.length,
@@ -405,6 +419,7 @@ export function generateDeveloperReport(
 			elements: v.nodes.map(n => ({
 				selector: n.target.join(', '),
 				htmlSnippet: n.html,
+				sourceContext: n.sourceContext ?? [],
 				failureSummary: n.failureSummary,
 				checkData: extractCheckData(n),
 			})),
@@ -431,6 +446,7 @@ export function generateDeveloperReport(
 
 	return {
 		summary: buildSummary(result),
+		fullSourceHtml: result.fullSourceHtml,
 		violations,
 		incompleteItems,
 		filters: {
