@@ -8,7 +8,8 @@
 		"postinstall": "node scripts/postinstall.mjs",
 		"build": "next build",
 		"start": "next start",
-		"lint": "eslint"
+		"lint": "eslint",
+		"playwright:install": "npx playwright install --with-deps chromium"
 	},
 	"dependencies": {
 		"@axe-core/playwright": "^4.11.1",
