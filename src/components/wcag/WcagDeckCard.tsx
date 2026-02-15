@@ -137,17 +137,21 @@ export default function WcagDeckCard({ card }: WcagDeckCardProps) {
 				{/* ======== BACK SIDE — Comprehensive Description ======== */}
 				<div
 					className={cn(
-						'absolute inset-0 rounded-[5.2%] border-2 shadow-sm transition-shadow group-hover:shadow-md backface-hidden transform-[rotateY(180deg)]',
+						'absolute inset-0 overflow-hidden rounded-[5.2%] border-2 shadow-sm transition-shadow group-hover:shadow-md backface-hidden transform-[rotateY(180deg)]',
 						borderClass,
 						backBgClass
 					)}
 				>
-					<div className="flex h-full flex-col gap-3 overflow-y-auto rounded-[calc(5.2%-2px)] p-5 pr-4 [scrollbar-gutter:stable] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+					<div
+						tabIndex={0}
+						aria-label={`Details for WCAG ${card.criterionNumber} ${card.title}`}
+						className="flex h-full flex-col gap-3 overflow-y-auto rounded-[calc(5.2%-2px)] p-5 pr-4 [scrollbar-gutter:stable] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar]:h-0"
+					>
 						{/* Header */}
 						<div className="flex items-start justify-between gap-2">
-							<h3 className={cn('text-sm font-bold', textClass)}>
+							<p className={cn('text-sm font-bold', textClass)}>
 								{card.criterionNumber} &mdash; {card.title}
-							</h3>
+							</p>
 							<span className="shrink-0 rounded-full bg-gray-900 px-2 py-0.5 text-[10px] font-bold text-white">
 								{card.level}
 							</span>

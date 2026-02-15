@@ -615,7 +615,7 @@ export default function DeveloperReport({
 	}, [report.fullSourceHtml, sourceEditorText])
 
 	const sourceHighlight = useMemo(() => {
-		if (!displaySourceText || filteredViolations.length === 0) {
+		if (!displaySourceText) {
 			return {
 				lines: [] as string[],
 				primaryLine: -1,
@@ -625,6 +625,16 @@ export default function DeveloperReport({
 		}
 
 		const lines = displaySourceText.split('\n')
+
+		if (filteredViolations.length === 0) {
+			return {
+				lines,
+				primaryLine: -1,
+				relatedLines: new Set<number>(),
+				lineTooltips: new Map<number, string>(),
+			}
+		}
+
 		const lineTooltips = new Map<number, string>()
 		const allMatchedLines = new Set<number>()
 
@@ -1162,9 +1172,10 @@ export default function DeveloperReport({
 					<div className="p-4">
 						{filteredViolations.length > 0 ? (
 							<div className="space-y-3">
-								{filteredViolations.map(violation => (
+								{filteredViolations.map((violation, index) => (
 									<ViolationCard
-										key={violation.ruleId}
+										key={`${violation.ruleId}-${violation.elements[0]?.pageUrl ?? 'no-page'}-${index}`}
+										uniqueId={`${violation.ruleId}-${violation.elements[0]?.pageUrl ?? 'no-page'}-${index}`}
 										ruleId={violation.ruleId}
 										severity={violation.severity}
 										description={violation.description}

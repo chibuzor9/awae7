@@ -40,6 +40,47 @@ export type WcagCategory =
 
 export interface EvaluationRequest {
 	url: string
+    crawlWholeSite?: boolean
+    maxPages?: number
+}
+
+export interface CrawlPageSummary {
+    url: string
+    status: 'ok' | 'error'
+    score?: number
+    violations: number
+    incomplete: number
+    passes: number
+    inapplicable: number
+    criticalCount?: number
+    seriousCount?: number
+    moderateCount?: number
+    minorCount?: number
+    error?: string
+}
+
+export interface CrawlSummary {
+    enabled: boolean
+    startUrl: string
+    maxPages: number
+    pagesDiscovered: number
+    pagesCrawled: number
+    pagesSucceeded: number
+    pagesFailed: number
+    pageSummaries: CrawlPageSummary[]
+}
+
+export interface PageEvaluationSummary {
+    url: string
+    score: number
+    totalViolations: number
+    totalIncomplete: number
+    totalPasses: number
+    totalInapplicable: number
+    criticalCount: number
+    seriousCount: number
+    moderateCount: number
+    minorCount: number
 }
 
 // ---------- axe-core check-level data ----------
@@ -79,6 +120,8 @@ export interface EvaluationResult {
 	axeCoreVersion: string
 	testEnvironment: TestEnvironment
 	fullSourceHtml?: string
+    crawlSummary?: CrawlSummary
+    pageSummaries?: PageEvaluationSummary[]
 	overallScore: number
 	totalViolations: number
 	totalIncomplete: number
@@ -96,6 +139,7 @@ export interface EvaluationResult {
 
 export interface ViolationItem {
 	id?: string
+    pageUrl?: string
 	ruleId: string
 	description: string
 	helpUrl: string
@@ -119,6 +163,7 @@ export interface ViolationNode {
 }
 
 export interface PassItem {
+    pageUrl?: string
 	ruleId: string
 	description: string
 	wcagCriterion: string
@@ -130,6 +175,7 @@ export interface PassItem {
 // ---------- Incomplete / Inapplicable ----------
 
 export interface IncompleteItem {
+    pageUrl?: string
 	ruleId: string
 	description: string
 	helpUrl: string
@@ -152,6 +198,7 @@ export interface IncompleteNode {
 }
 
 export interface InapplicableItem {
+    pageUrl?: string
 	ruleId: string
 	description: string
 	helpUrl: string
@@ -164,6 +211,7 @@ export interface InapplicableItem {
 // ---------- Report Types ----------
 export interface DeveloperReport {
 	summary: ReportSummary
+    pageSummaries?: PageEvaluationSummary[]
 	fullSourceHtml?: string
 	violations: DeveloperViolation[]
 	incompleteItems: DeveloperIncompleteItem[]
@@ -180,6 +228,7 @@ export interface DeveloperViolation {
 	category: WcagCategory
 	helpUrl: string
 	elements: {
+        pageUrl?: string
 		selector: string
 		htmlSnippet: string
 		sourceContext?: string[]
@@ -204,6 +253,7 @@ export interface DeveloperIncompleteItem {
 
 export interface AuditorReport {
 	summary: ReportSummary
+    pageSummaries?: PageEvaluationSummary[]
 	complianceMatrix: ComplianceEntry[]
 	principleBreakdown: PrincipleBreakdown[]
 	categoryBreakdown: CategoryBreakdown[]
@@ -267,6 +317,7 @@ export interface AuditorIncompleteItem {
 
 export interface EndUserReport {
 	summary: ReportSummary
+    pageSummaries?: PageEvaluationSummary[]
 	score: number
 	scoreLabel: string
 	scoreColor: string

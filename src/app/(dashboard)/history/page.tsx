@@ -22,6 +22,7 @@ import EvaluationResults from '@/components/evaluation/EvaluationResults'
 import { cn, formatDate, getScoreLabel } from '@/lib/utils'
 import type {
 	EvaluationHistoryItem,
+	EvaluationResult,
 	DeveloperReport,
 	AuditorReport,
 	EndUserReport,
@@ -41,6 +42,7 @@ interface PaginationInfo {
 }
 
 interface EvaluationDetail {
+	evaluation: EvaluationResult
 	developerReport: DeveloperReport
 	auditorReport: AuditorReport
 	endUserReport: EndUserReport
@@ -226,6 +228,7 @@ export default function HistoryPage() {
 			}
 
 			const detail: EvaluationDetail = {
+				evaluation: data.evaluation,
 				developerReport: data.developerReport,
 				auditorReport: data.auditorReport,
 				endUserReport: data.endUserReport,
@@ -501,6 +504,9 @@ export default function HistoryPage() {
 														</div>
 													</div>
 													<EvaluationResults
+														evaluation={
+															cachedDetail.evaluation
+														}
 														developerReport={
 															cachedDetail.developerReport
 														}

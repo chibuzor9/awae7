@@ -8,8 +8,14 @@ import { cn, isValidUrl } from '@/lib/utils'
 
 type InputMode = 'url' | 'file'
 
+export interface UrlEvaluationOptions {
+	url: string
+	crawlWholeSite: boolean
+	maxPages: number
+}
+
 export interface EvaluationFormProps {
-	onSubmitUrl: (url: string) => void
+	onSubmitUrl: (options: UrlEvaluationOptions) => void
 	onSubmitFile: (file: File) => void
 	loading: boolean
 }
@@ -26,6 +32,8 @@ export default function EvaluationForm({
 	const [url, setUrl] = useState('')
 	const [error, setError] = useState<string | null>(null)
 	const [selectedFile, setSelectedFile] = useState<File | null>(null)
+	const [crawlWholeSite, setCrawlWholeSite] = useState(false)
+	const [maxPages, setMaxPages] = useState('10')
 	const fileInputRef = useRef<HTMLInputElement>(null)
 
 	// ---- URL helpers ----
@@ -111,7 +119,23 @@ export default function EvaluationForm({
 				)
 				return
 			}
-			onSubmitUrl(normalized)
+
+			const parsedMaxPages = Number.parseInt(maxPages, 10)
+			if (
+				crawlWholeSite &&
+				(!Number.isFinite(parsedMaxPages) ||
+					parsedMaxPages < 1 ||
+					parsedMaxPages > 50)
+			) {
+				setError('Max pages must be a number between 1 and 50.')
+				return
+			}
+
+			onSubmitUrl({
+				url: normalized,
+				crawlWholeSite,
+				maxPages: crawlWholeSite ? parsedMaxPages : 1,
+			})
 		} else {
 			if (!selectedFile) {
 				setError('Please select an HTML file to evaluate.')
@@ -178,6 +202,54 @@ export default function EvaluationForm({
 								disabled={loading}
 								aria-label="Website URL"
 							/>
+
+							<div className="mt-3 rounded-lg border border-(--border) bg-(--surface) px-3 py-2.5">
+								<label className="flex items-center gap-2 text-sm font-medium text-(--text)">
+									<input
+										type="checkbox"
+										checked={crawlWholeSite}
+										onChange={e => {
+											setCrawlWholeSite(e.target.checked)
+											if (error) setError(null)
+										}}
+										disabled={loading}
+										className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+									/>
+									Crawl full website (same origin)
+								</label>
+								<p className="mt-1 text-xs text-(--muted-text)">
+									Automatically excludes admin paths like
+									/wp-admin, /admin, /administrator, and
+									/wp-login.php.
+								</p>
+
+								{crawlWholeSite && (
+									<div className="mt-2 flex items-center gap-2">
+										<label
+											htmlFor="maxPages"
+											className="text-xs font-medium text-(--muted-text)"
+										>
+											Max pages
+										</label>
+										<input
+											id="maxPages"
+											type="number"
+											min={1}
+											max={50}
+											value={maxPages}
+											onChange={e => {
+												setMaxPages(e.target.value)
+												if (error) setError(null)
+											}}
+											disabled={loading}
+											className="h-8 w-24 rounded-md border border-(--border) bg-white px-2 text-sm text-(--text)"
+										/>
+										<p className="text-xs text-(--muted-text)">
+											1 to 50 pages
+										</p>
+									</div>
+								)}
+							</div>
 						</div>
 						<Button
 							type="submit"

@@ -15,12 +15,14 @@ import AuditorReport from '@/components/evaluation/AuditorReport'
 import EndUserReport from '@/components/evaluation/EndUserReport'
 import { ExportButton } from '@/components/export/ExportButton'
 import type {
+	EvaluationResult,
 	DeveloperReport as DeveloperReportType,
 	AuditorReport as AuditorReportType,
 	EndUserReport as EndUserReportType,
 } from '@/types'
 
 export interface EvaluationResultsProps {
+	evaluation: EvaluationResult
 	developerReport: DeveloperReportType
 	auditorReport: AuditorReportType
 	endUserReport: EndUserReportType
@@ -29,6 +31,7 @@ export interface EvaluationResultsProps {
 }
 
 export default function EvaluationResults({
+	evaluation,
 	developerReport,
 	auditorReport,
 	endUserReport,
@@ -40,6 +43,24 @@ export default function EvaluationResults({
 	>(defaultTab)
 
 	const summary = developerReport.summary
+	const crawlSummary = evaluation.crawlSummary
+	const pageSummaries =
+		evaluation.pageSummaries && evaluation.pageSummaries.length > 0
+			? evaluation.pageSummaries
+			: crawlSummary?.pageSummaries
+					.filter(page => page.status === 'ok')
+					.map(page => ({
+						url: page.url,
+						score: page.score ?? 0,
+						totalViolations: page.violations,
+						totalIncomplete: page.incomplete,
+						totalPasses: page.passes,
+						totalInapplicable: page.inapplicable,
+						criticalCount: page.criticalCount ?? 0,
+						seriousCount: page.seriousCount ?? 0,
+						moderateCount: page.moderateCount ?? 0,
+						minorCount: page.minorCount ?? 0,
+					}))
 
 	const topPrinciple = Object.entries(
 		developerReport.violations.reduce<Record<string, number>>(
@@ -151,11 +172,130 @@ export default function EvaluationResults({
 						<span>
 							Inapplicable criteria:{' '}
 							<span className="font-semibold">
-								{auditorReport.inapplicableRules.length}
+								{summary.totalInapplicable}
 							</span>
 						</span>
 					</div>
 				</div>
+
+				{crawlSummary?.enabled && (
+					<div className="mt-4 rounded-xl border border-(--border) bg-(--surface) p-4">
+						<div className="flex flex-wrap items-center justify-between gap-2">
+							<p className="text-sm font-semibold text-(--text)">
+								Full-site crawl summary
+							</p>
+							<p className="text-xs text-(--muted-text)">
+								Start URL: {crawlSummary.startUrl}
+							</p>
+						</div>
+
+						<div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-5">
+							<div className="rounded-lg border border-(--border) bg-white px-3 py-2">
+								<p className="text-xs text-(--muted-text)">
+									Crawled
+								</p>
+								<p className="text-base font-semibold text-(--text)">
+									{crawlSummary.pagesCrawled}
+								</p>
+							</div>
+							<div className="rounded-lg border border-(--border) bg-white px-3 py-2">
+								<p className="text-xs text-(--muted-text)">
+									Discovered
+								</p>
+								<p className="text-base font-semibold text-(--text)">
+									{crawlSummary.pagesDiscovered}
+								</p>
+							</div>
+							<div className="rounded-lg border border-(--border) bg-white px-3 py-2">
+								<p className="text-xs text-(--muted-text)">
+									Succeeded
+								</p>
+								<p className="text-base font-semibold text-emerald-600">
+									{crawlSummary.pagesSucceeded}
+								</p>
+							</div>
+							<div className="rounded-lg border border-(--border) bg-white px-3 py-2">
+								<p className="text-xs text-(--muted-text)">
+									Failed
+								</p>
+								<p className="text-base font-semibold text-blue-700">
+									{crawlSummary.pagesFailed}
+								</p>
+							</div>
+							<div className="rounded-lg border border-(--border) bg-white px-3 py-2">
+								<p className="text-xs text-(--muted-text)">
+									Page cap
+								</p>
+								<p className="text-base font-semibold text-(--text)">
+									{crawlSummary.maxPages}
+								</p>
+							</div>
+						</div>
+
+						{pageSummaries && pageSummaries.length > 0 && (
+							<div className="mt-3">
+								<p className="text-xs font-semibold uppercase tracking-wide text-(--muted-text)">
+									Per-page results
+								</p>
+								<div className="mt-2 max-h-72 overflow-auto rounded-lg border border-(--border) bg-white">
+									<table className="min-w-full text-sm">
+										<thead className="bg-(--surface)">
+											<tr className="text-left text-xs text-(--muted-text)">
+												<th className="px-3 py-2">
+													Page
+												</th>
+												<th className="px-3 py-2">
+													Score
+												</th>
+												<th className="px-3 py-2">
+													Violations
+												</th>
+												<th className="px-3 py-2">
+													Needs review
+												</th>
+												<th className="px-3 py-2">
+													Passes
+												</th>
+												<th className="px-3 py-2">
+													Inapplicable
+												</th>
+											</tr>
+										</thead>
+										<tbody>
+											{pageSummaries.map(page => (
+												<tr
+													key={page.url}
+													className="border-t border-(--border)"
+												>
+													<td className="px-3 py-2 text-(--text)">
+														<div className="max-w-136 truncate">
+															{page.url}
+														</div>
+													</td>
+													<td className="px-3 py-2 font-semibold text-(--text)">
+														{page.score}
+													</td>
+													<td className="px-3 py-2 text-red-600">
+														{page.totalViolations}
+													</td>
+													<td className="px-3 py-2 text-amber-600">
+														{page.totalIncomplete}
+													</td>
+													<td className="px-3 py-2 text-emerald-600">
+														{page.totalPasses}
+													</td>
+													<td className="px-3 py-2 text-(--muted-text)">
+														{page.totalInapplicable}
+													</td>
+												</tr>
+											))}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						)}
+					</div>
+				)}
 			</div>
 
 			<div className="flex items-center justify-between gap-4">

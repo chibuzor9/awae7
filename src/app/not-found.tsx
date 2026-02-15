@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function NotFound() {
 	return (
-		<main className="min-h-[calc(100dvh-4rem)] bg-slate-950 px-4 py-16 sm:px-6 lg:px-8">
+		<section className="min-h-[calc(100dvh-4rem)] bg-slate-950 px-4 py-16 sm:px-6 lg:px-8">
 			<div className="mx-auto max-w-4xl rounded-2xl border border-blue-900/40 bg-slate-900/80 p-8 shadow-2xl backdrop-blur sm:p-10">
 				<p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-300">
 					Error 404
@@ -57,6 +57,6 @@ export default function NotFound() {
 					</Link>
 				</div>
 			</div>
-		</main>
+		</section>
 	)
 }

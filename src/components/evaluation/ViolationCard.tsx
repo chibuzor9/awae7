@@ -20,6 +20,7 @@ interface CheckData {
 }
 
 interface ViolationElement {
+	pageUrl?: string
 	selector: string
 	htmlSnippet: string
 	sourceContext?: string[]
@@ -50,6 +51,7 @@ function renderCodeBlock(snippet: string, keyPrefix: string) {
 }
 
 export interface ViolationCardProps {
+	uniqueId?: string
 	ruleId: string
 	severity: Severity
 	description: string
@@ -214,6 +216,7 @@ function renderHtmlLine(line: string, keyPrefix: string): React.ReactNode {
 /* ---- Component ---- */
 
 export function ViolationCard({
+	uniqueId,
 	ruleId,
 	severity,
 	description,
@@ -247,6 +250,7 @@ export function ViolationCard({
 	)
 
 	const ChevronIcon = isExpanded ? ChevronDown : ChevronRight
+	const detailsId = `violation-details-${uniqueId ?? ruleId}`
 
 	return (
 		<Card
@@ -259,7 +263,7 @@ export function ViolationCard({
 			<button
 				type="button"
 				onClick={toggle}
-				aria-controls={`violation-details-${ruleId}`}
+				aria-controls={detailsId}
 				className="flex w-full items-start gap-3 px-6 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-xl"
 			>
 				<ChevronIcon
@@ -307,7 +311,7 @@ export function ViolationCard({
 			{/* Expanded details */}
 			{isExpanded && (
 				<div
-					id={`violation-details-${ruleId}`}
+					id={detailsId}
 					role="region"
 					aria-label={`Details for ${ruleId}`}
 				>
@@ -364,6 +368,17 @@ export function ViolationCard({
 										key={`${el.selector}-${index}`}
 										className="rounded-lg border border-gray-200 bg-gray-50 p-3"
 									>
+										{el.pageUrl && (
+											<>
+												<p className="mb-1 text-xs font-medium text-gray-500">
+													Page
+												</p>
+												<p className="mb-3 break-all text-xs font-medium text-blue-700">
+													{el.pageUrl}
+												</p>
+											</>
+										)}
+
 										{/* Selector */}
 										<p className="mb-1 text-xs font-medium text-gray-500">
 											Selector

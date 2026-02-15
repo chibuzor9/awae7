@@ -190,10 +190,10 @@ export default async function Home() {
 									className="rounded-xl border border-blue-100 bg-blue-50/70 p-3 motion-safe:animate-[hero-card-focus_6s_ease-in-out_infinite]"
 									style={{ animationDelay: '0s' }}
 								>
-									<p className="text-xs font-semibold text-blue-700">
+									<p className="text-xs font-semibold text-blue-900">
 										End User
 									</p>
-									<p className="mt-1 text-sm text-slate-700">
+									<p className="mt-1 text-sm text-slate-800">
 										Score + plain-language priorities
 									</p>
 								</div>
@@ -201,10 +201,10 @@ export default async function Home() {
 									className="rounded-xl border border-blue-100 bg-blue-50/70 p-3 motion-safe:animate-[hero-card-focus_6s_ease-in-out_infinite]"
 									style={{ animationDelay: '2s' }}
 								>
-									<p className="text-xs font-semibold text-blue-700">
+									<p className="text-xs font-semibold text-blue-900">
 										Developer
 									</p>
-									<p className="mt-1 text-sm text-slate-700">
+									<p className="mt-1 text-sm text-slate-800">
 										12 issues with code-level fixes
 									</p>
 								</div>
@@ -212,10 +212,10 @@ export default async function Home() {
 									className="rounded-xl border border-blue-100 bg-blue-50/70 p-3 motion-safe:animate-[hero-card-focus_6s_ease-in-out_infinite]"
 									style={{ animationDelay: '4s' }}
 								>
-									<p className="text-xs font-semibold text-blue-700">
+									<p className="text-xs font-semibold text-blue-900">
 										Auditor
 									</p>
-									<p className="mt-1 text-sm text-slate-700">
+									<p className="mt-1 text-sm text-slate-800">
 										Compliance matrix + pass/fail summary
 									</p>
 								</div>

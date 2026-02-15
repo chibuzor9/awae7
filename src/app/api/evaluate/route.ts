@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { evaluateUrl, evaluateHtml } from '@/lib/axe/evaluate'
+import { evaluateUrl, evaluateHtml, evaluateSiteCrawl } from '@/lib/axe/evaluate'
 import {
 	transformRawResults,
 	generateDeveloperReport,
@@ -139,7 +139,11 @@ export async function POST(request: NextRequest) {
 	// Branch B — URL evaluation (application/json)
 	// ================================================================
 	else {
-		let body: { url?: string }
+        let body: {
+            url?: string
+            crawlWholeSite?: boolean
+            maxPages?: number
+        }
 		try {
 			body = await request.json()
 		} catch {
@@ -150,6 +154,12 @@ export async function POST(request: NextRequest) {
 		}
 
 		const { url } = body
+        const crawlWholeSite = body.crawlWholeSite === true
+        const maxPages =
+            typeof body.maxPages === 'number'
+                ? Math.min(50, Math.max(1, Math.floor(body.maxPages)))
+                : 10
+        let cookieHeaderForTarget: string | undefined
 
 		if (!url || typeof url !== 'string') {
 			return NextResponse.json(
@@ -182,7 +192,27 @@ export async function POST(request: NextRequest) {
 		}
 
 		try {
-			rawResults = await evaluateUrl(trimmedUrl)
+            const requestOrigin = request.nextUrl.origin
+            const targetOrigin = new URL(trimmedUrl).origin
+            if (requestOrigin === targetOrigin) {
+                const incomingCookieHeader = request.headers.get('cookie')
+                if (incomingCookieHeader?.trim()) {
+                    cookieHeaderForTarget = incomingCookieHeader
+                }
+            }
+        } catch {
+            cookieHeaderForTarget = undefined
+        }
+
+        try {
+            rawResults = crawlWholeSite
+                ? await evaluateSiteCrawl(trimmedUrl, {
+                    maxPages,
+                    cookieHeader: cookieHeaderForTarget,
+                })
+                : await evaluateUrl(trimmedUrl, {
+                    cookieHeader: cookieHeaderForTarget,
+                })
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : String(err)
 			const mapped = mapEvaluationFailure(message)

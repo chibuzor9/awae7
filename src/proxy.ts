@@ -28,9 +28,22 @@ export async function proxy(request: NextRequest) {
 		}
 	)
 
-	const {
-		data: { user },
-	} = await supabase.auth.getUser()
+    let user: Awaited<ReturnType<typeof supabase.auth.getUser>>['data']['user'] = null
+
+    try {
+        const {
+            data: { user: authenticatedUser },
+            error,
+        } = await supabase.auth.getUser()
+
+        if (error) {
+            throw error
+        }
+
+        user = authenticatedUser
+    } catch (error) {
+        console.error('Supabase auth check failed in proxy:', error)
+    }
 
 	const pathname = request.nextUrl.pathname
 
@@ -38,14 +51,28 @@ export async function proxy(request: NextRequest) {
 	if (!user && protectedPaths.some(path => pathname.startsWith(path))) {
 		const url = request.nextUrl.clone()
 		url.pathname = '/login'
-		url.searchParams.set('redirect', pathname)
+        url.searchParams.set('redirect', `${ pathname }${ request.nextUrl.search }`)
 		return NextResponse.redirect(url)
 	}
 
 	// Redirect authenticated users away from auth pages
 	if (user && authPaths.some(path => pathname.startsWith(path))) {
 		const url = request.nextUrl.clone()
-		url.pathname = '/evaluate'
+        const redirectTarget = request.nextUrl.searchParams.get('redirect')
+        url.search = ''
+
+        if (
+            typeof redirectTarget === 'string' &&
+            redirectTarget.startsWith('/') &&
+            !redirectTarget.startsWith('//')
+        ) {
+            const parsedRedirect = new URL(redirectTarget, request.url)
+            url.pathname = parsedRedirect.pathname
+            url.search = parsedRedirect.search
+        } else {
+            url.pathname = '/evaluate'
+        }
+
 		return NextResponse.redirect(url)
 	}
 

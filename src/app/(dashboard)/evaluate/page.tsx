@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { AlertCircle, Loader2 } from 'lucide-react'
 import EvaluationForm from '@/components/evaluation/EvaluationForm'
+import type { UrlEvaluationOptions } from '@/components/evaluation/EvaluationForm'
 import EvaluationResults from '@/components/evaluation/EvaluationResults'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
@@ -161,7 +162,11 @@ export default function EvaluatePage() {
 		}
 	}
 
-	async function handleUrlSubmit(url: string) {
+	async function handleUrlSubmit({
+		url,
+		crawlWholeSite,
+		maxPages,
+	}: UrlEvaluationOptions) {
 		const validationError = getUrlValidationError(url)
 		if (validationError) {
 			setError(validationError)
@@ -179,7 +184,11 @@ export default function EvaluatePage() {
 			const response = await fetch('/api/evaluate', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ url: normalizedUrl }),
+				body: JSON.stringify({
+					url: normalizedUrl,
+					crawlWholeSite,
+					maxPages,
+				}),
 			})
 
 			let data: unknown = null
@@ -390,6 +399,7 @@ export default function EvaluatePage() {
 					<section aria-label="Evaluation results">
 						<EvaluationResults
 							key={`${results.evaluation.id ?? results.evaluation.targetUrl}-${preferredRole}`}
+							evaluation={results.evaluation}
 							developerReport={results.developerReport}
 							auditorReport={results.auditorReport}
 							endUserReport={results.endUserReport}

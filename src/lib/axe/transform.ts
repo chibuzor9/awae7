@@ -24,6 +24,8 @@ import type {
 	WcagLevel,
 	WcagCategory,
 	TestEnvironment,
+    CrawlSummary,
+    PageEvaluationSummary,
 } from '@/types'
 
 // ===========================================================================
@@ -166,6 +168,7 @@ export function transformRawResults(rawResults: any): EvaluationResult {
 			const category = extractCategory(v.tags ?? [])
 
 			return {
+                pageUrl: typeof v.pageUrl === 'string' ? v.pageUrl : undefined,
 				ruleId: v.id,
 				description: v.description ?? v.help ?? '',
 				helpUrl: v.helpUrl ?? '',
@@ -204,6 +207,7 @@ export function transformRawResults(rawResults: any): EvaluationResult {
 		const category = extractCategory(p.tags ?? [])
 
 		return {
+            pageUrl: typeof p.pageUrl === 'string' ? p.pageUrl : undefined,
 			ruleId: p.id,
 			description: p.description ?? p.help ?? '',
 			wcagCriterion: criterion,
@@ -223,6 +227,7 @@ export function transformRawResults(rawResults: any): EvaluationResult {
 			const category = extractCategory(i.tags ?? [])
 
 			return {
+                pageUrl: typeof i.pageUrl === 'string' ? i.pageUrl : undefined,
 				ruleId: i.id,
 				description: i.description ?? i.help ?? '',
 				helpUrl: i.helpUrl ?? '',
@@ -262,6 +267,7 @@ export function transformRawResults(rawResults: any): EvaluationResult {
 		const category = extractCategory(r.tags ?? [])
 
 		return {
+            pageUrl: typeof r.pageUrl === 'string' ? r.pageUrl : undefined,
 			ruleId: r.id,
 			description: r.description ?? r.help ?? '',
 			helpUrl: r.helpUrl ?? '',
@@ -281,6 +287,25 @@ export function transformRawResults(rawResults: any): EvaluationResult {
 		orientationType: rawResults.testEnvironment?.orientationType ?? '',
 	}
 
+    const pageSummaries: PageEvaluationSummary[] = Array.isArray(
+        rawResults.pageSummaries
+    )
+        ? rawResults.pageSummaries.map((entry: any) => ({
+            url: String(entry?.url ?? ''),
+            score: Number(entry?.score ?? 0),
+            totalViolations: Number(entry?.totalViolations ?? 0),
+            totalIncomplete: Number(entry?.totalIncomplete ?? 0),
+            totalPasses: Number(entry?.totalPasses ?? 0),
+            totalInapplicable: Number(entry?.totalInapplicable ?? 0),
+            criticalCount: Number(entry?.criticalCount ?? 0),
+            seriousCount: Number(entry?.seriousCount ?? 0),
+            moderateCount: Number(entry?.moderateCount ?? 0),
+            minorCount: Number(entry?.minorCount ?? 0),
+        }))
+        : []
+
+    const hasPerPageSummaries = pageSummaries.length > 0
+
 	// -- Severity counts --
 	const criticalCount = violations.filter(
 		v => v.severity === 'critical'
@@ -293,14 +318,78 @@ export function transformRawResults(rawResults: any): EvaluationResult {
 
 	// -- Overall score --
 	let score = 100
-	for (const v of violations) {
-		score -= SEVERITY_WEIGHT[v.severity] ?? 2
-	}
-	// Incomplete items reduce score at half weight
-	for (const i of incomplete) {
-		score -= Math.ceil((SEVERITY_WEIGHT[i.severity] ?? 2) * 0.5)
-	}
-	score = Math.max(0, score)
+    if (hasPerPageSummaries) {
+        score = Math.round(
+            pageSummaries.reduce((sum, page) => sum + page.score, 0) /
+            pageSummaries.length
+        )
+    } else {
+        for (const v of violations) {
+            score -= SEVERITY_WEIGHT[v.severity] ?? 2
+        }
+        for (const i of incomplete) {
+            score -= Math.ceil((SEVERITY_WEIGHT[i.severity] ?? 2) * 0.5)
+        }
+        score = Math.max(0, score)
+    }
+
+    const averagedTotals = hasPerPageSummaries
+        ? {
+            totalViolations: Math.round(
+                pageSummaries.reduce(
+                    (sum, page) => sum + page.totalViolations,
+                    0
+                ) / pageSummaries.length
+            ),
+            totalIncomplete: Math.round(
+                pageSummaries.reduce(
+                    (sum, page) => sum + page.totalIncomplete,
+                    0
+                ) / pageSummaries.length
+            ),
+            totalPasses: Math.round(
+                pageSummaries.reduce((sum, page) => sum + page.totalPasses, 0) /
+                pageSummaries.length
+            ),
+            totalInapplicable: Math.round(
+                pageSummaries.reduce(
+                    (sum, page) => sum + page.totalInapplicable,
+                    0
+                ) / pageSummaries.length
+            ),
+            criticalCount: Math.round(
+                pageSummaries.reduce(
+                    (sum, page) => sum + page.criticalCount,
+                    0
+                ) / pageSummaries.length
+            ),
+            seriousCount: Math.round(
+                pageSummaries.reduce(
+                    (sum, page) => sum + page.seriousCount,
+                    0
+                ) / pageSummaries.length
+            ),
+            moderateCount: Math.round(
+                pageSummaries.reduce(
+                    (sum, page) => sum + page.moderateCount,
+                    0
+                ) / pageSummaries.length
+            ),
+            minorCount: Math.round(
+                pageSummaries.reduce((sum, page) => sum + page.minorCount, 0) /
+                pageSummaries.length
+            ),
+        }
+        : {
+            totalViolations: violations.length,
+            totalIncomplete: incomplete.length,
+            totalPasses: passes.length,
+            totalInapplicable: inapplicable.length,
+            criticalCount,
+            seriousCount,
+            moderateCount,
+            minorCount,
+        }
 
 	return {
 		targetUrl: rawResults.url ?? '',
@@ -311,15 +400,70 @@ export function transformRawResults(rawResults: any): EvaluationResult {
 			typeof rawResults.fullSourceHtml === 'string'
 				? rawResults.fullSourceHtml
 				: undefined,
+        pageSummaries,
+        crawlSummary:
+            rawResults.crawlSummary &&
+                typeof rawResults.crawlSummary === 'object'
+                ? ({
+                    enabled: rawResults.crawlSummary.enabled === true,
+                    startUrl: String(rawResults.crawlSummary.startUrl ?? ''),
+                    maxPages: Number(rawResults.crawlSummary.maxPages ?? 0),
+                    pagesDiscovered: Number(
+                        rawResults.crawlSummary.pagesDiscovered ?? 0
+                    ),
+                    pagesCrawled: Number(rawResults.crawlSummary.pagesCrawled ?? 0),
+                    pagesSucceeded: Number(
+                        rawResults.crawlSummary.pagesSucceeded ?? 0
+                    ),
+                    pagesFailed: Number(rawResults.crawlSummary.pagesFailed ?? 0),
+                    pageSummaries: Array.isArray(
+                        rawResults.crawlSummary.pageSummaries
+                    )
+                        ? rawResults.crawlSummary.pageSummaries.map((entry: any) => ({
+                            url: String(entry?.url ?? ''),
+                            status:
+                                entry?.status === 'error' ? 'error' : 'ok',
+                            violations: Number(entry?.violations ?? 0),
+                            incomplete: Number(entry?.incomplete ?? 0),
+                            passes: Number(entry?.passes ?? 0),
+                            inapplicable: Number(entry?.inapplicable ?? 0),
+                            score:
+                                typeof entry?.score === 'number'
+                                    ? entry.score
+                                    : undefined,
+                            criticalCount:
+                                typeof entry?.criticalCount === 'number'
+                                    ? entry.criticalCount
+                                    : undefined,
+                            seriousCount:
+                                typeof entry?.seriousCount === 'number'
+                                    ? entry.seriousCount
+                                    : undefined,
+                            moderateCount:
+                                typeof entry?.moderateCount === 'number'
+                                    ? entry.moderateCount
+                                    : undefined,
+                            minorCount:
+                                typeof entry?.minorCount === 'number'
+                                    ? entry.minorCount
+                                    : undefined,
+                            error:
+                                typeof entry?.error === 'string'
+                                    ? entry.error
+                                    : undefined,
+                        }))
+                        : [],
+                } satisfies CrawlSummary)
+                : undefined,
 		overallScore: score,
-		totalViolations: violations.length,
-		totalIncomplete: incomplete.length,
-		totalPasses: passes.length,
-		totalInapplicable: inapplicable.length,
-		criticalCount,
-		seriousCount,
-		moderateCount,
-		minorCount,
+        totalViolations: averagedTotals.totalViolations,
+        totalIncomplete: averagedTotals.totalIncomplete,
+        totalPasses: averagedTotals.totalPasses,
+        totalInapplicable: averagedTotals.totalInapplicable,
+        criticalCount: averagedTotals.criticalCount,
+        seriousCount: averagedTotals.seriousCount,
+        moderateCount: averagedTotals.moderateCount,
+        minorCount: averagedTotals.minorCount,
 		violations,
 		passes,
 		incomplete,
@@ -417,6 +561,7 @@ export function generateDeveloperReport(
 			category: v.category,
 			helpUrl: v.helpUrl,
 			elements: v.nodes.map(n => ({
+                pageUrl: v.pageUrl,
 				selector: n.target.join(', '),
 				htmlSnippet: n.html,
 				sourceContext: n.sourceContext ?? [],
@@ -446,6 +591,7 @@ export function generateDeveloperReport(
 
 	return {
 		summary: buildSummary(result),
+        pageSummaries: result.pageSummaries,
 		fullSourceHtml: result.fullSourceHtml,
 		violations,
 		incompleteItems,
@@ -609,6 +755,7 @@ export function generateAuditorReport(result: EvaluationResult): AuditorReport {
 
 	return {
 		summary: buildSummary(result),
+        pageSummaries: result.pageSummaries,
 		complianceMatrix,
 		principleBreakdown,
 		categoryBreakdown,
@@ -776,7 +923,7 @@ export function generateEndUserReport(result: EvaluationResult): EndUserReport {
 			i => i.wcagPrinciple === info.principle
 		)
 
-		const issueCount = relViolations.length
+        const issueCount = new Set(relViolations.map(v => v.ruleId)).size
 		const needsReviewCount = relIncomplete.length
 
 		// Per-category score: deduct from 100
@@ -797,9 +944,15 @@ export function generateEndUserReport(result: EvaluationResult): EndUserReport {
 				(a, b) =>
 					SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]
 			)
-			const plainParts = sorted
-				.slice(0, 3)
-				.map(v => getPlainLanguage(v.ruleId))
+            const seenMessages = new Set<string>()
+            const plainParts: string[] = []
+            for (const violation of sorted) {
+                const message = getPlainLanguage(violation.ruleId)
+                if (seenMessages.has(message)) continue
+                seenMessages.add(message)
+                plainParts.push(message)
+                if (plainParts.length >= 3) break
+            }
 
 			if (needsReviewCount > 0) {
 				plainParts.push(
@@ -825,17 +978,22 @@ export function generateEndUserReport(result: EvaluationResult): EndUserReport {
 		(a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]
 	)
 
-	const seen = new Set<string>()
+    const seenRuleIds = new Set<string>()
+    const seenMessages = new Set<string>()
 	const priorities: string[] = []
 	for (const v of allSorted) {
-		if (seen.has(v.ruleId)) continue
-		seen.add(v.ruleId)
-		priorities.push(getPlainLanguage(v.ruleId))
+        if (seenRuleIds.has(v.ruleId)) continue
+        seenRuleIds.add(v.ruleId)
+        const message = getPlainLanguage(v.ruleId)
+        if (seenMessages.has(message)) continue
+        seenMessages.add(message)
+        priorities.push(message)
 		if (priorities.length >= 5) break
 	}
 
 	return {
 		summary: buildSummary(result),
+        pageSummaries: result.pageSummaries,
 		score,
 		scoreLabel,
 		scoreColor,
@@ -1080,6 +1238,6 @@ const PLAIN_LANGUAGE_MAP: Record<string, string> = {
 export function getPlainLanguage(ruleId: string): string {
 	return (
 		PLAIN_LANGUAGE_MAP[ruleId] ??
-		'An accessibility issue was found that may affect some users of this page.'
+        `Accessibility issue detected for ${ ruleId.replace(/-/g, ' ') }. Review this item in the Developer report for exact affected elements.`
 	)
 }
