@@ -61,9 +61,9 @@ export default function SignupPage() {
 				<div className="rounded-xl border border-(--border) bg-white p-7 shadow-lg shadow-blue-100/60">
 					{success ? (
 						<div className="text-center py-4">
-							<div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+							<div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
 								<svg
-									className="h-6 w-6 text-green-600"
+									className="h-6 w-6 text-blue-600"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
@@ -112,7 +112,7 @@ export default function SignupPage() {
 							<form onSubmit={handleSubmit} className="space-y-5">
 								{/* Error Message */}
 								{error && (
-									<div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+									<div className="rounded-lg bg-blue-50 border border-blue-200 p-3 text-sm text-blue-700">
 										{error}
 									</div>
 								)}

@@ -107,10 +107,7 @@ export function TabsList({ className, children, ...props }: TabsListProps) {
 		<div
 			ref={listRef}
 			aria-label="Report tabs"
-			className={cn(
-				'flex gap-1 border-b border-violet-200/40',
-				className
-			)}
+			className={cn('flex gap-1 border-b border-gray-200', className)}
 			onKeyDown={handleKeyDown}
 			{...props}
 		>
@@ -141,10 +138,10 @@ export function TabsTrigger({
 			tabIndex={isActive ? 0 : -1}
 			data-tab={value}
 			className={cn(
-				'rounded-t-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-1',
+				'rounded-t-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1',
 				isActive
-					? 'border-b-2 border-violet-600 bg-violet-100/40 text-violet-700'
-					: 'text-gray-500 hover:bg-violet-100/30 hover:text-violet-700',
+					? 'border-b-2 border-blue-600 bg-blue-50 text-blue-700'
+					: 'text-gray-600 hover:bg-blue-50 hover:text-blue-700',
 				className
 			)}
 			onClick={() => setActiveTab(value)}

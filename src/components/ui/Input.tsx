@@ -49,9 +49,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 						id={inputId}
 						aria-describedby={errorId}
 						className={cn(
-							'w-full rounded-lg border border-violet-300/30 bg-[#f8f5ff] px-3 py-2 text-sm text-slate-900 placeholder-slate-500 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
+							'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
 							icon && 'pl-10',
-							error ? 'border-red-500 focus:ring-red-500' : '',
+							error ? 'border-blue-600 focus:ring-blue-600' : '',
 							className
 						)}
 						{...props}
@@ -61,7 +61,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 				{error && (
 					<p
 						id={errorId}
-						className="text-sm text-red-600"
+						className="text-sm text-blue-700"
 						role="alert"
 					>
 						{error}

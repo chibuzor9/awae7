@@ -100,21 +100,21 @@ export function Modal({
 				aria-label={title || 'Dialog'}
 				tabIndex={-1}
 				className={cn(
-					'relative z-10 mx-4 w-full max-w-lg rounded-xl border border-violet-300/20 bg-[#f7f4ff] shadow-[0_14px_50px_rgba(18,15,27,0.45)] focus:outline-none',
+					'relative z-10 mx-4 w-full max-w-lg rounded-xl border border-gray-200 bg-white shadow-xl focus:outline-none',
 					className
 				)}
 				{...props}
 			>
 				{/* Header */}
 				{title != null && (
-					<div className="flex items-center justify-between border-b border-violet-200/40 px-5 py-3.5">
+					<div className="flex items-center justify-between border-b border-gray-200 px-5 py-3.5">
 						<h2 className="text-lg font-semibold text-gray-900">
 							{title}
 						</h2>
 						<button
 							type="button"
 							onClick={onClose}
-							className="rounded-lg p-1 text-slate-500 transition-colors hover:bg-violet-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+							className="rounded-lg p-1 text-slate-500 transition-colors hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
 							aria-label="Close dialog"
 						>
 							<X className="h-5 w-5" aria-hidden="true" />
@@ -127,7 +127,7 @@ export function Modal({
 					<button
 						type="button"
 						onClick={onClose}
-						className="absolute right-3 top-3 rounded-lg p-1 text-slate-500 transition-colors hover:bg-violet-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+						className="absolute right-3 top-3 rounded-lg p-1 text-slate-500 transition-colors hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
 						aria-label="Close dialog"
 					>
 						<X className="h-5 w-5" aria-hidden="true" />

@@ -134,11 +134,11 @@ function severityBadge(label: string, count: number) {
 }
 
 function scoreLabelClass(score: number): string {
-	if (score >= 90) return 'text-green-600'
-	if (score >= 70) return 'text-lime-600'
-	if (score >= 50) return 'text-amber-600'
-	if (score >= 30) return 'text-orange-600'
-	return 'text-red-600'
+	if (score >= 90) return 'text-blue-800'
+	if (score >= 70) return 'text-blue-700'
+	if (score >= 50) return 'text-blue-600'
+	if (score >= 30) return 'text-blue-500'
+	return 'text-blue-400'
 }
 
 // ---------------------------------------------------------------------------
@@ -276,17 +276,17 @@ export default function HistoryPage() {
 
 				{/* ---- Error State ---- */}
 				{error && !loading && (
-					<Card className="mx-auto max-w-lg border-red-200 bg-red-50">
+					<Card className="mx-auto max-w-lg border-blue-200 bg-blue-50">
 						<CardBody className="flex flex-col items-center gap-4 py-10 text-center">
 							<AlertTriangle
-								className="h-10 w-10 text-red-500"
+								className="h-10 w-10 text-blue-600"
 								aria-hidden="true"
 							/>
 							<div>
-								<p className="text-lg font-semibold text-red-800">
+								<p className="text-lg font-semibold text-blue-800">
 									Failed to Load History
 								</p>
-								<p className="mt-1 text-sm text-red-600">
+								<p className="mt-1 text-sm text-blue-700">
 									{error}
 								</p>
 							</div>

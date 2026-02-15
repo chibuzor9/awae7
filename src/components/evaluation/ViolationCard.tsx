@@ -76,7 +76,7 @@ const severityBorderColor: Record<Severity, string> = {
 	critical: 'border-l-red-500',
 	serious: 'border-l-orange-500',
 	moderate: 'border-l-amber-500',
-	minor: 'border-l-blue-500',
+	minor: 'border-l-blue-400',
 }
 
 function renderHtmlLine(line: string, keyPrefix: string): React.ReactNode {

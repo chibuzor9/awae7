@@ -255,10 +255,9 @@ export default function EvaluatePage() {
 					<h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
 						Evaluate Website Accessibility
 					</h1>
-					<p className="mx-auto mt-3 max-w-2xl text-base text-slate-600 sm:text-lg">
+					<p className="mx-auto mt-3 max-w-3xl text-base text-slate-600 sm:text-lg">
 						Enter a URL or upload an HTML file to run an automated
-						WCAG 2.2 accessibility audit. You will receive tailored
-						reports for developers, auditors, and end users.
+						WCAG 2.2 accessibility audit.
 					</p>
 				</header>
 
@@ -361,17 +360,17 @@ export default function EvaluatePage() {
 
 				{/* ---- Error State ---- */}
 				{error && !loading && (
-					<Card className="mx-auto max-w-lg border-red-200 bg-red-50">
+					<Card className="mx-auto max-w-lg border-blue-200 bg-blue-50">
 						<CardBody className="flex flex-col items-center gap-4 py-10 text-center">
 							<AlertCircle
-								className="h-10 w-10 text-red-500"
+								className="h-10 w-10 text-blue-600"
 								aria-hidden="true"
 							/>
 							<div>
-								<p className="text-lg font-semibold text-red-800">
+								<p className="text-lg font-semibold text-blue-800">
 									Evaluation Failed
 								</p>
-								<p className="mt-1 text-sm text-red-600">
+								<p className="mt-1 text-sm text-blue-700">
 									{error}
 								</p>
 							</div>

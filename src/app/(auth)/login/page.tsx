@@ -73,7 +73,7 @@ function LoginForm() {
 					<form onSubmit={handleSubmit} className="space-y-5">
 						{error && (
 							<div
-								className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700"
+								className="rounded-lg bg-blue-50 border border-blue-200 p-3 text-sm text-blue-700"
 								role="alert"
 							>
 								{error}

@@ -69,24 +69,24 @@ const reportTypes = [
 		role: 'Developer',
 		description:
 			'Detailed CSS selectors, HTML snippets, and remediation code examples to fix accessibility issues quickly.',
-		accent: 'border-violet-200 bg-violet-50 text-slate-900',
-		iconAccent: 'text-violet-700',
+		accent: 'border-blue-200 bg-blue-50 text-slate-900',
+		iconAccent: 'text-blue-700',
 	},
 	{
 		icon: FileText,
 		role: 'Auditor',
 		description:
 			'Compliance matrices, principle breakdowns, and formal violation descriptions for thorough auditing.',
-		accent: 'border-fuchsia-200 bg-fuchsia-50 text-slate-900',
-		iconAccent: 'text-fuchsia-700',
+		accent: 'border-blue-200 bg-blue-50 text-slate-900',
+		iconAccent: 'text-blue-700',
 	},
 	{
 		icon: User,
 		role: 'End-User',
 		description:
 			'Plain-language summaries, accessibility scores, and priority recommendations anyone can understand.',
-		accent: 'border-indigo-200 bg-indigo-50 text-slate-900',
-		iconAccent: 'text-indigo-700',
+		accent: 'border-blue-200 bg-blue-50 text-slate-900',
+		iconAccent: 'text-blue-700',
 	},
 ]
 
@@ -187,10 +187,10 @@ export default async function Home() {
 
 							<div className="space-y-3">
 								<div
-									className="rounded-xl border border-indigo-100 bg-indigo-50/70 p-3 motion-safe:animate-[hero-card-focus_6s_ease-in-out_infinite]"
+									className="rounded-xl border border-blue-100 bg-blue-50/70 p-3 motion-safe:animate-[hero-card-focus_6s_ease-in-out_infinite]"
 									style={{ animationDelay: '0s' }}
 								>
-									<p className="text-xs font-semibold text-indigo-700">
+									<p className="text-xs font-semibold text-blue-700">
 										End User
 									</p>
 									<p className="mt-1 text-sm text-slate-700">
@@ -209,10 +209,10 @@ export default async function Home() {
 									</p>
 								</div>
 								<div
-									className="rounded-xl border border-violet-100 bg-violet-50/70 p-3 motion-safe:animate-[hero-card-focus_6s_ease-in-out_infinite]"
+									className="rounded-xl border border-blue-100 bg-blue-50/70 p-3 motion-safe:animate-[hero-card-focus_6s_ease-in-out_infinite]"
 									style={{ animationDelay: '4s' }}
 								>
-									<p className="text-xs font-semibold text-violet-700">
+									<p className="text-xs font-semibold text-blue-700">
 										Auditor
 									</p>
 									<p className="mt-1 text-sm text-slate-700">
@@ -286,17 +286,17 @@ export default async function Home() {
 						{steps.map(step => (
 							<div
 								key={step.number}
-								className="rounded-xl border border-violet-100 bg-white p-6 text-center shadow-sm"
+								className="rounded-xl border border-blue-100 bg-white p-6 text-center shadow-sm"
 							>
 								{/* Step icon circle */}
-								<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-violet-600 text-white shadow-sm">
+								<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
 									<step.icon
 										className="h-5 w-5"
 										aria-hidden="true"
 									/>
 								</div>
 
-								<span className="mt-3 inline-block rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700">
+								<span className="mt-3 inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
 									Step {step.number}
 								</span>
 

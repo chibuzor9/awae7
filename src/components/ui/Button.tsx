@@ -12,7 +12,7 @@ const variantClasses = {
 	outline:
 		'border border-[var(--border)] bg-white text-slate-700 hover:bg-[var(--accent-soft)] focus-visible:ring-[var(--accent)]',
 	ghost: 'bg-transparent text-slate-700 hover:bg-[var(--accent-soft)] focus-visible:ring-[var(--accent)]',
-	danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500',
+	danger: 'bg-blue-700 text-white hover:bg-blue-800 focus-visible:ring-blue-600',
 } as const
 
 const sizeClasses = {

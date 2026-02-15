@@ -34,16 +34,16 @@ const levelOrder: Record<string, number> = {
 
 const principleActiveColors: Record<WcagPrinciple, string> = {
 	Perceivable: 'bg-blue-600 text-white',
-	Operable: 'bg-green-700 text-white',
-	Understandable: 'bg-purple-600 text-white',
-	Robust: 'bg-orange-600 text-white',
+	Operable: 'bg-blue-600 text-white',
+	Understandable: 'bg-blue-600 text-white',
+	Robust: 'bg-blue-600 text-white',
 }
 
 const principleHoverColors: Record<WcagPrinciple, string> = {
 	Perceivable: 'hover:bg-blue-100 hover:text-blue-800',
-	Operable: 'hover:bg-green-100 hover:text-green-800',
-	Understandable: 'hover:bg-purple-100 hover:text-purple-800',
-	Robust: 'hover:bg-orange-100 hover:text-orange-800',
+	Operable: 'hover:bg-blue-100 hover:text-blue-800',
+	Understandable: 'hover:bg-blue-100 hover:text-blue-800',
+	Robust: 'hover:bg-blue-100 hover:text-blue-800',
 }
 
 /* ---- Sort helper ---- */
