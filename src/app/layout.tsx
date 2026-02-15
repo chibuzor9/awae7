@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Atkinson_Hyperlegible, Geist_Mono } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Toaster } from 'react-hot-toast'
 import Navbar from '@/components/layout/Navbar'
@@ -41,6 +42,7 @@ export default function RootLayout({
 				<Navbar />
 				<main className="min-h-[calc(100dvh-4rem)]">{children}</main>
 				<Toaster position="bottom-right" />
+				<Analytics />
 				<SpeedInsights />
 			</body>
 		</html>
