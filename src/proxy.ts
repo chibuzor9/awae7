@@ -37,10 +37,17 @@ export async function proxy(request: NextRequest) {
         } = await supabase.auth.getUser()
 
         if (error) {
-            throw error
+			if (
+				error.name === 'AuthSessionMissingError' ||
+				error.message?.includes('Auth session missing')
+			) {
+				user = null
+			} else {
+				throw error
+			}
+		} else {
+			user = authenticatedUser
         }
-
-        user = authenticatedUser
     } catch (error) {
         console.error('Supabase auth check failed in proxy:', error)
     }

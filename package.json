@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "next dev",
 		"postinstall": "node scripts/postinstall.mjs",
-		"build": "next build",
+		"build": "node scripts/postinstall.mjs && next build",
 		"start": "next start",
 		"lint": "eslint"
 	},
