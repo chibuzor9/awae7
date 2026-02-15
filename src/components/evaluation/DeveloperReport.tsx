@@ -607,8 +607,12 @@ export default function DeveloperReport({
 	}, [filteredViolations, report.fullSourceHtml])
 
 	const displaySourceText = useMemo(() => {
+		if (report.fullSourceHtml?.trim()) {
+			return report.fullSourceHtml.replace(/\r\n/g, '\n')
+		}
+
 		return formatHtmlForDisplay(sourceEditorText)
-	}, [sourceEditorText])
+	}, [report.fullSourceHtml, sourceEditorText])
 
 	const sourceHighlight = useMemo(() => {
 		if (!displaySourceText || filteredViolations.length === 0) {
@@ -814,7 +818,6 @@ export default function DeveloperReport({
 			<SectionDropdown
 				title="Filters"
 				description="Narrow results by severity, principle, level, and category."
-				defaultOpen
 			>
 				<CardBody className="space-y-4">
 					<div className="flex flex-wrap items-center justify-between gap-2">
@@ -953,7 +956,6 @@ export default function DeveloperReport({
 				<SectionDropdown
 					title="Technical Hotspots"
 					description="Quickly identify where the highest concentration of issues is."
-					defaultOpen
 				>
 					<CardBody className="space-y-5">
 						<div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -1033,7 +1035,6 @@ export default function DeveloperReport({
 					<SectionDropdown
 						title="Source Code"
 						description="Full formatted source in a fixed-height editor. Hover highlighted lines for issue details and remediation."
-						defaultOpen
 					>
 						<CardBody className="space-y-3">
 							<div className="flex justify-end">
@@ -1133,7 +1134,7 @@ export default function DeveloperReport({
 													>
 														{lineIndex + 1}
 													</span>
-													<span>
+													<span className="whitespace-pre">
 														{renderHtmlLine(
 															line,
 															`source-line-${lineIndex}`
@@ -1157,7 +1158,6 @@ export default function DeveloperReport({
 				<SectionDropdown
 					title={`Violations (${filteredViolations.length} of ${violations.length})`}
 					description="Expand for full rule-by-rule details."
-					defaultOpen
 				>
 					<div className="p-4">
 						{filteredViolations.length > 0 ? (
@@ -1215,7 +1215,6 @@ export default function DeveloperReport({
 					<SectionDropdown
 						title={`Needs Manual Review (${incompleteItems.length})`}
 						description="Items that require human validation."
-						defaultOpen
 					>
 						<Card>
 							<CardHeader>

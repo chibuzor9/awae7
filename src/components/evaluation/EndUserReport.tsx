@@ -8,7 +8,6 @@ import {
 	Shield,
 	Lightbulb,
 	AlertTriangle,
-	ArrowRight,
 	type LucideIcon,
 } from 'lucide-react'
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
@@ -151,7 +150,7 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 
 			{/* ============ ISSUE SNAPSHOT ============ */}
 			<section aria-labelledby="snapshot-heading">
-				<Card>
+				<Card className="transition-all duration-200 hover:shadow-md">
 					<CardHeader>
 						<h2
 							id="snapshot-heading"
@@ -165,13 +164,13 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 					</CardHeader>
 					<CardBody className="space-y-4">
 						<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-							<div className="rounded-lg border border-red-200 bg-red-50 p-3">
+							<div className="rounded-lg border border-red-200 bg-red-50 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">
 								<p className="text-xs text-red-700">Critical</p>
 								<p className="text-lg font-bold text-red-700">
 									{summary.criticalCount}
 								</p>
 							</div>
-							<div className="rounded-lg border border-orange-200 bg-orange-50 p-3">
+							<div className="rounded-lg border border-orange-200 bg-orange-50 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">
 								<p className="text-xs text-orange-700">
 									Serious
 								</p>
@@ -179,7 +178,7 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 									{summary.seriousCount}
 								</p>
 							</div>
-							<div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+							<div className="rounded-lg border border-amber-200 bg-amber-50 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">
 								<p className="text-xs text-amber-700">
 									Moderate
 								</p>
@@ -187,7 +186,7 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 									{summary.moderateCount}
 								</p>
 							</div>
-							<div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+							<div className="rounded-lg border border-blue-200 bg-blue-50 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">
 								<p className="text-xs text-blue-700">Minor</p>
 								<p className="text-lg font-bold text-blue-700">
 									{summary.minorCount}
@@ -229,7 +228,7 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 										.map(category => (
 											<li
 												key={category.name}
-												className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm"
+												className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/60 hover:shadow-sm"
 											>
 												<span className="font-medium text-gray-800">
 													{category.name}
@@ -249,7 +248,7 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 
 			{/* ============ WHAT THIS MEANS ============ */}
 			<section aria-labelledby="interpretation-heading">
-				<Card>
+				<Card className="transition-all duration-200 hover:shadow-md">
 					<CardBody>
 						<h2
 							id="interpretation-heading"
@@ -285,7 +284,7 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 					id="categories-heading"
 					className="text-lg font-semibold text-gray-900 mb-4"
 				>
-					How Your Site Performs
+					How This Site Performs
 				</h2>
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 					{categories.map(cat => (
@@ -297,17 +296,17 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 			{/* ============ PRIORITY ACTIONS ============ */}
 			{priorities.length > 0 && (
 				<section aria-labelledby="priorities-heading">
-					<Card>
+					<Card className="transition-all duration-200 hover:shadow-md">
 						<CardHeader>
 							<h2
 								id="priorities-heading"
 								className="text-lg font-semibold text-gray-900"
 							>
-								What to Fix First
+								What Users Are Likely to Experience
 							</h2>
 							<p className="text-sm text-gray-500 mt-1">
-								These are the most important steps to improve
-								accessibility on your site.
+								These are the most noticeable accessibility pain
+								points people may run into first.
 							</p>
 						</CardHeader>
 						<CardBody className="p-0">
@@ -318,7 +317,7 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 								{priorities.map((priority, index) => (
 									<li
 										key={index}
-										className="flex items-start gap-4 px-6 py-4 hover:bg-amber-50/50 transition-colors"
+										className="flex items-start gap-4 px-6 py-4 transition-all duration-200 hover:bg-blue-50/60"
 									>
 										{/* Number badge */}
 										<span
@@ -341,8 +340,8 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 											</div>
 										</div>
 
-										<ArrowRight
-											className="h-4 w-4 text-gray-300 shrink-0 mt-0.5"
+										<AlertTriangle
+											className="h-4 w-4 text-blue-300 shrink-0 mt-0.5"
 											aria-hidden="true"
 										/>
 									</li>
@@ -363,11 +362,11 @@ function CategoryCard({ category }: { category: EndUserCategory }) {
 	return (
 		<Card
 			className={cn(
-				'border-l-4 transition-shadow hover:shadow-md',
+				'border-l-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
 				getScoreBorderColor(category.score)
 			)}
 		>
-			<CardBody className="space-y-3">
+			<CardBody className="flex h-full flex-col gap-3">
 				{/* Header row: icon + name + issue badge */}
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2.5">
@@ -407,7 +406,7 @@ function CategoryCard({ category }: { category: EndUserCategory }) {
 				</p>
 
 				{/* Score bar */}
-				<div className="space-y-1">
+				<div className="mt-auto space-y-1">
 					<div className="flex items-center justify-between text-xs">
 						<span className="text-gray-500">Score</span>
 						<span

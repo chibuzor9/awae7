@@ -6,6 +6,7 @@ import {
 	generateAuditorReport,
 	generateEndUserReport,
 } from '@/lib/axe/transform'
+import { formatHtmlForReport } from '@/lib/html/format'
 import { prisma } from '@/lib/prisma'
 import { createClient } from '@/lib/supabase/server'
 
@@ -195,6 +196,11 @@ export async function POST(request: NextRequest) {
 
 	// ---- Transform ----
 	const evaluation = transformRawResults(rawResults)
+    if (evaluation.fullSourceHtml?.trim()) {
+        evaluation.fullSourceHtml = await formatHtmlForReport(
+            evaluation.fullSourceHtml
+        )
+    }
 	const developerReport = generateDeveloperReport(evaluation)
 	const auditorReport = generateAuditorReport(evaluation)
 	const endUserReport = generateEndUserReport(evaluation)

@@ -7,6 +7,7 @@ import {
 	generateAuditorReport,
 	generateEndUserReport,
 } from '@/lib/axe/transform'
+import { formatHtmlForReport } from '@/lib/html/format'
 import type { EvaluationResult, ViolationItem } from '@/types'
 
 // ---------------------------------------------------------------------------
@@ -126,6 +127,12 @@ export async function GET(
 				inapplicable: [],
 			}
 		}
+
+        if (evaluationResult.fullSourceHtml?.trim()) {
+            evaluationResult.fullSourceHtml = await formatHtmlForReport(
+                evaluationResult.fullSourceHtml
+            )
+        }
 
 		const developerReport = generateDeveloperReport(evaluationResult)
 		const auditorReport = generateAuditorReport(evaluationResult)

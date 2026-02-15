@@ -13,6 +13,7 @@ import {
 	CheckCircle2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/server'
 
 /* ================================================================
    Data
@@ -92,14 +93,24 @@ const reportTypes = [
 const footerLinks = [
 	{ href: '/evaluate', label: 'Evaluate' },
 	{ href: '/wcag-cards', label: 'WCAG Cards' },
-	{ href: '/login', label: 'Login' },
 ]
 
 /* ================================================================
    Component
    ================================================================ */
 
-export default function Home() {
+export default async function Home() {
+	const supabase = await createClient()
+	const {
+		data: { user },
+	} = await supabase.auth.getUser()
+
+	const footerAuthLink = user
+		? { href: '/dashboard', label: 'Dashboard' }
+		: { href: '/login', label: 'Login' }
+
+	const currentYear = new Date().getFullYear()
+
 	return (
 		<div className="flex flex-col">
 			{/* ─── Hero Section ─── */}
@@ -163,15 +174,33 @@ export default function Home() {
 						<div className="rounded-2xl border border-(--border) bg-white p-5 shadow-lg shadow-blue-100/60">
 							<div className="mb-4 flex items-center justify-between">
 								<p className="text-sm font-semibold text-slate-800">
-									Live Preview
+									Report Snapshot
 								</p>
 								<span className="text-xs font-medium text-(--accent)">
 									WCAG 2.2
 								</span>
 							</div>
+							<p className="mb-3 text-xs text-slate-600">
+								Static example of what each report type focuses
+								on after you run an evaluation.
+							</p>
 
 							<div className="space-y-3">
-								<div className="rounded-xl border border-blue-100 bg-blue-50/70 p-3">
+								<div
+									className="rounded-xl border border-indigo-100 bg-indigo-50/70 p-3 motion-safe:animate-[hero-card-focus_6s_ease-in-out_infinite]"
+									style={{ animationDelay: '0s' }}
+								>
+									<p className="text-xs font-semibold text-indigo-700">
+										End User
+									</p>
+									<p className="mt-1 text-sm text-slate-700">
+										Score + plain-language priorities
+									</p>
+								</div>
+								<div
+									className="rounded-xl border border-blue-100 bg-blue-50/70 p-3 motion-safe:animate-[hero-card-focus_6s_ease-in-out_infinite]"
+									style={{ animationDelay: '2s' }}
+								>
 									<p className="text-xs font-semibold text-blue-700">
 										Developer
 									</p>
@@ -179,20 +208,15 @@ export default function Home() {
 										12 issues with code-level fixes
 									</p>
 								</div>
-								<div className="rounded-xl border border-violet-100 bg-violet-50/70 p-3 animate-[pulse-soft_2.8s_ease-in-out_infinite]">
+								<div
+									className="rounded-xl border border-violet-100 bg-violet-50/70 p-3 motion-safe:animate-[hero-card-focus_6s_ease-in-out_infinite]"
+									style={{ animationDelay: '4s' }}
+								>
 									<p className="text-xs font-semibold text-violet-700">
 										Auditor
 									</p>
 									<p className="mt-1 text-sm text-slate-700">
 										Compliance matrix + pass/fail summary
-									</p>
-								</div>
-								<div className="rounded-xl border border-indigo-100 bg-indigo-50/70 p-3">
-									<p className="text-xs font-semibold text-indigo-700">
-										End User
-									</p>
-									<p className="mt-1 text-sm text-slate-700">
-										Score + plain-language priorities
 									</p>
 								</div>
 							</div>
@@ -371,7 +395,7 @@ export default function Home() {
 						{/* Links */}
 						<nav aria-label="Footer navigation">
 							<ul className="flex items-center gap-6">
-								{footerLinks.map(link => (
+								{[...footerLinks, footerAuthLink].map(link => (
 									<li key={link.href}>
 										<Link
 											href={link.href}
@@ -387,8 +411,8 @@ export default function Home() {
 
 					<div className="mt-8 border-t border-blue-100 pt-6 text-center">
 						<p className="text-sm text-slate-500">
-							Built for BSc Software Engineering Thesis at Babcock
-							University
+							Copyright © {currentYear} Group 7, Babcock
+							University 25/26 Undergraduate Finalists
 						</p>
 					</div>
 				</div>
