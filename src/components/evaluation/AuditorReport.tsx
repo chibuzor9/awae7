@@ -114,6 +114,33 @@ function complianceTextColor(percentage: number): string {
 	return 'text-red-700'
 }
 
+function SectionToggle({
+	open,
+	onToggle,
+}: {
+	open: boolean
+	onToggle: () => void
+}) {
+	return (
+		<button
+			type="button"
+			onClick={onToggle}
+			className="inline-flex items-center rounded-md p-1.5 text-gray-400 transition-colors hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+		>
+			<span className="sr-only">
+				{open ? 'Collapse section' : 'Expand section'}
+			</span>
+			<ChevronDown
+				className={cn(
+					'h-4 w-4 shrink-0 transition-transform',
+					open && 'rotate-180'
+				)}
+				aria-hidden="true"
+			/>
+		</button>
+	)
+}
+
 // ---------- Component ----------
 export default function AuditorReport({ report }: AuditorReportProps) {
 	const {
@@ -225,20 +252,10 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 									Executive Summary
 								</h2>
 							</div>
-							<button
-								type="button"
-								onClick={() => toggleSection('executive')}
-								className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600"
-							>
-								{openSections.executive ? 'Hide' : 'Show'}
-								<ChevronDown
-									className={cn(
-										'h-3.5 w-3.5 transition-transform',
-										openSections.executive && 'rotate-180'
-									)}
-									aria-hidden="true"
-								/>
-							</button>
+							<SectionToggle
+								open={openSections.executive}
+								onToggle={() => toggleSection('executive')}
+							/>
 						</div>
 					</CardHeader>
 					{openSections.executive && (
@@ -390,20 +407,10 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 					>
 						WCAG 2.2 Principle Breakdown
 					</h2>
-					<button
-						type="button"
-						onClick={() => toggleSection('principles')}
-						className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600"
-					>
-						{openSections.principles ? 'Hide' : 'Show'}
-						<ChevronDown
-							className={cn(
-								'h-3.5 w-3.5 transition-transform',
-								openSections.principles && 'rotate-180'
-							)}
-							aria-hidden="true"
-						/>
-					</button>
+					<SectionToggle
+						open={openSections.principles}
+						onToggle={() => toggleSection('principles')}
+					/>
 				</div>
 				{openSections.principles && (
 					<div
@@ -505,38 +512,18 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 								>
 									Compliance Matrix
 								</h2>
-								<button
-									type="button"
-									onClick={() => toggleSection('matrix')}
-									className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600"
-								>
-									{openSections.matrix ? 'Hide' : 'Show'}
-									<ChevronDown
-										className={cn(
-											'h-3.5 w-3.5 transition-transform',
-											openSections.matrix && 'rotate-180'
-										)}
-										aria-hidden="true"
-									/>
-								</button>
+								<SectionToggle
+									open={openSections.matrix}
+									onToggle={() => toggleSection('matrix')}
+								/>
 							</div>
 
 							{/* Filter dropdowns */}
 							<div className="flex flex-wrap items-end gap-3">
-								<Filter
-									className="h-4 w-4 text-gray-400"
-									aria-hidden="true"
+								<SectionToggle
+									open={openSections.violations}
+									onToggle={() => toggleSection('violations')}
 								/>
-
-								<div className="space-y-1">
-									<label
-										htmlFor="auditor-principle-filter"
-										className="block text-xs font-medium text-gray-600"
-									>
-										Principle
-									</label>
-									<select
-										id="auditor-principle-filter"
 										value={filterPrinciple}
 										onChange={e =>
 											setFilterPrinciple(
@@ -549,20 +536,10 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 									>
 										<option value="all">
 											All Principles
-										</option>
-										{PRINCIPLES.map(p => (
-											<option key={p} value={p}>
-												{p}
-											</option>
-										))}
-									</select>
-								</div>
-
-								<div className="space-y-1">
-									<label
-										htmlFor="auditor-level-filter"
-										className="block text-xs font-medium text-gray-600"
-									>
+										<SectionToggle
+											open={openSections.category}
+											onToggle={() => toggleSection('category')}
+										/>
 										Level
 									</label>
 									<select
@@ -581,20 +558,10 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 										{LEVELS.map(l => (
 											<option key={l} value={l}>
 												Level {l}
-											</option>
-										))}
-									</select>
-								</div>
-							</div>
-						</div>
-					</CardHeader>
-					{openSections.matrix && (
-						<CardBody id="matrix-panel" className="p-0">
-							<div className="overflow-x-auto">
-								<table className="w-full text-sm">
-									<thead>
-										<tr className="border-b border-gray-200 bg-gray-50">
-											{(
+											<SectionToggle
+												open={openSections.incomplete}
+												onToggle={() => toggleSection('incomplete')}
+											/>
 												[
 													{
 														key: 'criterion',
@@ -684,23 +651,10 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 														{entry.principle}
 													</td>
 													<td className="px-4 py-3">
-														<Badge
-															variant={statusBadgeVariant(
-																entry.status
-															)}
-														>
-															{entry.status ===
-																'pass' && (
-																<CheckCircle2
-																	className="h-3 w-3 mr-1"
-																	aria-hidden="true"
-																/>
-															)}
-															{entry.status ===
-																'fail' && (
-																<XCircle
-																	className="h-3 w-3 mr-1"
-																	aria-hidden="true"
+														<SectionToggle
+															open={openSections.inapplicable}
+															onToggle={() => toggleSection('inapplicable')}
+														/>
 																/>
 															)}
 															{entry.status ===
