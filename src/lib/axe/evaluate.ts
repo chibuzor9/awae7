@@ -150,6 +150,22 @@ const DEFAULT_CRAWL_EXCLUDED_PATH_PREFIXES = [
     '/wp-login.php',
 ]
 
+async function launchChromium() {
+	if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
+		process.env.PLAYWRIGHT_BROWSERS_PATH = '0'
+	}
+
+	return chromium.launch({
+		headless: true,
+		args: [
+			'--no-sandbox',
+			'--disable-setuid-sandbox',
+			'--disable-dev-shm-usage',
+			'--disable-gpu',
+		],
+	})
+}
+
 // ---------------------------------------------------------------------------
 // URL validation helper
 // ---------------------------------------------------------------------------
@@ -332,15 +348,7 @@ export async function evaluateUrl(
 
 	try {
 		// ---- Launch browser ----
-		browser = await chromium.launch({
-			headless: true,
-			args: [
-				'--no-sandbox',
-				'--disable-setuid-sandbox',
-				'--disable-dev-shm-usage',
-				'--disable-gpu',
-			],
-		})
+		browser = await launchChromium()
 
 		context = await browser.newContext({
 			userAgent:
@@ -736,15 +744,7 @@ export async function evaluateHtml(
 	let page: Page | null = null
 
 	try {
-		browser = await chromium.launch({
-			headless: true,
-			args: [
-				'--no-sandbox',
-				'--disable-setuid-sandbox',
-				'--disable-dev-shm-usage',
-				'--disable-gpu',
-			],
-		})
+		browser = await launchChromium()
 
 		context = await browser.newContext({
 			userAgent:
@@ -1011,15 +1011,7 @@ export async function evaluateSiteCrawl(
     let page: Page | null = null
 
     try {
-        browser = await chromium.launch({
-            headless: true,
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-            ],
-        })
+		browser = await launchChromium()
 
         context = await browser.newContext({
             userAgent:
