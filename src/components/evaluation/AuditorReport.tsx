@@ -706,21 +706,10 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 										Violations ({filteredViolations.length})
 									</h2>
 								</div>
-								<button
-									type="button"
-									onClick={() => toggleSection('violations')}
-									className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600"
-								>
-									{openSections.violations ? 'Hide' : 'Show'}
-									<ChevronDown
-										className={cn(
-											'h-3.5 w-3.5 transition-transform',
-											openSections.violations &&
-												'rotate-180'
-										)}
-										aria-hidden="true"
-									/>
-								</button>
+								<SectionToggle
+									open={openSections.violations}
+									onToggle={() => toggleSection('violations')}
+								/>
 							</div>
 
 							{/* Severity filter */}
@@ -892,21 +881,10 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 										category
 									</p>
 								</div>
-								<button
-									type="button"
-									onClick={() => toggleSection('category')}
-									className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600"
-								>
-									{openSections.category ? 'Hide' : 'Show'}
-									<ChevronDown
-										className={cn(
-											'h-3.5 w-3.5 transition-transform',
-											openSections.category &&
-												'rotate-180'
-										)}
-										aria-hidden="true"
-									/>
-								</button>
+								<SectionToggle
+									open={openSections.category}
+									onToggle={() => toggleSection('category')}
+								/>
 							</div>
 						</CardHeader>
 						{openSections.category && (
@@ -1034,21 +1012,10 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 										by automated testing
 									</p>
 								</div>
-								<button
-									type="button"
-									onClick={() => toggleSection('incomplete')}
-									className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600"
-								>
-									{openSections.incomplete ? 'Hide' : 'Show'}
-									<ChevronDown
-										className={cn(
-											'h-3.5 w-3.5 transition-transform',
-											openSections.incomplete &&
-												'rotate-180'
-										)}
-										aria-hidden="true"
-									/>
-								</button>
+								<SectionToggle
+									open={openSections.incomplete}
+									onToggle={() => toggleSection('incomplete')}
+								/>
 							</div>
 						</CardHeader>
 						{openSections.incomplete && (
