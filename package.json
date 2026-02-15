@@ -5,7 +5,7 @@
 	"license": "MIT",
 	"scripts": {
 		"dev": "next dev",
-		"postinstall": "prisma generate && playwright install chromium",
+		"postinstall": "node scripts/postinstall.mjs",
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint"
