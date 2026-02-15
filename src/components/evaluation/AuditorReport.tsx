@@ -520,10 +520,20 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 
 							{/* Filter dropdowns */}
 							<div className="flex flex-wrap items-end gap-3">
-								<SectionToggle
-									open={openSections.violations}
-									onToggle={() => toggleSection('violations')}
+								<Filter
+									className="h-4 w-4 text-gray-400"
+									aria-hidden="true"
 								/>
+
+								<div className="space-y-1">
+									<label
+										htmlFor="auditor-principle-filter"
+										className="block text-xs font-medium text-gray-600"
+									>
+										Principle
+									</label>
+									<select
+										id="auditor-principle-filter"
 										value={filterPrinciple}
 										onChange={e =>
 											setFilterPrinciple(
@@ -536,10 +546,20 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 									>
 										<option value="all">
 											All Principles
-										<SectionToggle
-											open={openSections.category}
-											onToggle={() => toggleSection('category')}
-										/>
+										</option>
+										{PRINCIPLES.map(p => (
+											<option key={p} value={p}>
+												{p}
+											</option>
+										))}
+									</select>
+								</div>
+
+								<div className="space-y-1">
+									<label
+										htmlFor="auditor-level-filter"
+										className="block text-xs font-medium text-gray-600"
+									>
 										Level
 									</label>
 									<select
@@ -558,10 +578,20 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 										{LEVELS.map(l => (
 											<option key={l} value={l}>
 												Level {l}
-											<SectionToggle
-												open={openSections.incomplete}
-												onToggle={() => toggleSection('incomplete')}
-											/>
+											</option>
+										))}
+									</select>
+								</div>
+							</div>
+						</div>
+					</CardHeader>
+					{openSections.matrix && (
+						<CardBody id="matrix-panel" className="p-0">
+							<div className="overflow-x-auto">
+								<table className="w-full text-sm">
+									<thead>
+										<tr className="border-b border-gray-200 bg-gray-50">
+											{(
 												[
 													{
 														key: 'criterion',
@@ -651,10 +681,23 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 														{entry.principle}
 													</td>
 													<td className="px-4 py-3">
-														<SectionToggle
-															open={openSections.inapplicable}
-															onToggle={() => toggleSection('inapplicable')}
-														/>
+														<Badge
+															variant={statusBadgeVariant(
+																entry.status
+															)}
+														>
+															{entry.status ===
+																'pass' && (
+																<CheckCircle2
+																	className="h-3 w-3 mr-1"
+																	aria-hidden="true"
+																/>
+															)}
+															{entry.status ===
+																'fail' && (
+																<XCircle
+																	className="h-3 w-3 mr-1"
+																	aria-hidden="true"
 																/>
 															)}
 															{entry.status ===
@@ -678,7 +721,6 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 									</tbody>
 								</table>
 							</div>
-							{/* Row count */}
 							<div className="px-4 py-3 border-t border-gray-100 text-xs text-gray-500">
 								Showing {filteredMatrix.length} of{' '}
 								{complianceMatrix.length} criteria
