@@ -6,12 +6,27 @@ import {
 } from 'playwright'
 import AxeBuilder from '@axe-core/playwright'
 
-async function getChromiumExecutablePath(): Promise<string | undefined> {
+interface ChromiumLaunchConfig {
+    executablePath: string | undefined
+    args: string[]
+}
+
+const BASE_CHROMIUM_ARGS = [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+]
+
+async function getChromiumConfig(): Promise<ChromiumLaunchConfig> {
     if (process.env.VERCEL) {
         const sparticuz = await import('@sparticuz/chromium')
-        return sparticuz.default.executablePath()
+        return {
+            executablePath: await sparticuz.default.executablePath(),
+            args: [...sparticuz.default.args, ...BASE_CHROMIUM_ARGS],
+        }
     }
-    return undefined
+    return { executablePath: undefined, args: BASE_CHROMIUM_ARGS }
 }
 
 // ---------------------------------------------------------------------------
@@ -340,15 +355,11 @@ export async function evaluateUrl(
 
 	try {
 		// ---- Launch browser ----
+        const launchConfig1 = await getChromiumConfig()
 		browser = await chromium.launch({
 			headless: true,
-            executablePath: await getChromiumExecutablePath(),
-			args: [
-				'--no-sandbox',
-				'--disable-setuid-sandbox',
-				'--disable-dev-shm-usage',
-				'--disable-gpu',
-			],
+            executablePath: launchConfig1.executablePath,
+            args: launchConfig1.args,
 		})
 
 		context = await browser.newContext({
@@ -745,16 +756,11 @@ export async function evaluateHtml(
 	let page: Page | null = null
 
 	try {
+        const launchConfig2 = await getChromiumConfig()
 		browser = await chromium.launch({
 			headless: true,
-            executablePath: await getChromiumExecutablePath(),
-			args: [
-				'--no-sandbox',
-				'--disable-setuid-sandbox',
-				'--disable-dev-shm-usage',
-				'--disable-gpu',
-			],
-		})
+            executablePath: launchConfig2.executablePath,
+            args: launchConfig2.args,
 
 		context = await browser.newContext({
 			userAgent:
@@ -1021,15 +1027,11 @@ export async function evaluateSiteCrawl(
     let page: Page | null = null
 
     try {
+        const launchConfig3 = await getChromiumConfig()
         browser = await chromium.launch({
             headless: true,
-            executablePath: await getChromiumExecutablePath(),
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-            ],
+            executablePath: launchConfig3.executablePath,
+            args: launchConfig3.args,
         })
 
         context = await browser.newContext({
