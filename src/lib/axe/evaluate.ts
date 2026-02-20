@@ -6,6 +6,14 @@ import {
 } from 'playwright'
 import AxeBuilder from '@axe-core/playwright'
 
+async function getChromiumExecutablePath(): Promise<string | undefined> {
+    if (process.env.VERCEL) {
+        const sparticuz = await import('@sparticuz/chromium')
+        return sparticuz.default.executablePath()
+    }
+    return undefined
+}
+
 // ---------------------------------------------------------------------------
 // Types for raw axe-core output returned by this module
 // ---------------------------------------------------------------------------
@@ -334,6 +342,7 @@ export async function evaluateUrl(
 		// ---- Launch browser ----
 		browser = await chromium.launch({
 			headless: true,
+            executablePath: await getChromiumExecutablePath(),
 			args: [
 				'--no-sandbox',
 				'--disable-setuid-sandbox',
@@ -738,6 +747,7 @@ export async function evaluateHtml(
 	try {
 		browser = await chromium.launch({
 			headless: true,
+            executablePath: await getChromiumExecutablePath(),
 			args: [
 				'--no-sandbox',
 				'--disable-setuid-sandbox',
@@ -1013,6 +1023,7 @@ export async function evaluateSiteCrawl(
     try {
         browser = await chromium.launch({
             headless: true,
+            executablePath: await getChromiumExecutablePath(),
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
