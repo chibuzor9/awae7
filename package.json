@@ -5,7 +5,7 @@
 	"license": "MIT",
 	"scripts": {
 		"dev": "next dev",
-		"postinstall": "prisma generate && playwright install chromium",
+		"postinstall": "prisma generate && node -e \"process.env.VERCEL||require('child_process').execSync('playwright install chromium-headless-shell',{stdio:'inherit'})\"",
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint"
@@ -26,6 +26,7 @@
 		"lucide-react": "^0.563.0",
 		"next": "16.1.6",
 		"pg": "^8.18.0",
+		"@sparticuz/chromium": "^133.0.0",
 		"playwright": "^1.58.2",
 		"react": "19.2.3",
 		"react-dom": "19.2.3",
