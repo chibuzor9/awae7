@@ -761,6 +761,7 @@ export async function evaluateHtml(
 			headless: true,
             executablePath: launchConfig2.executablePath,
             args: launchConfig2.args,
+        })
 
 		context = await browser.newContext({
 			userAgent:
