@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(npx playwright install chromium)",
+      "Bash(node:*)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(git stash:*)",
+      "Bash(git checkout:*)",
+      "Bash(BASE_URL=http://localhost:3001 node scripts/capture-designs.mjs:*)",
+      "Bash(BASE_URL=http://localhost:3001 PAGES=\"05-wcag-cards,06-history\" node scripts/capture-designs.mjs:*)"
+    ]
+  }
+}

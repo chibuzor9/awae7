@@ -1,35 +1,42 @@
 @import 'tailwindcss';
 
 :root {
-	--background: #ffffff;
-	--foreground: #111111;
+	--background: #f8f8f6;
+	--foreground: #0a0a0a;
 	--surface: #ffffff;
-	--surface-elevated: #f8faff;
-	--surface-soft: #eff6ff;
-	--border: #d1d5db;
-	--accent: #2563eb;
-	--accent-strong: #1d4ed8;
-	--accent-soft: #dbeafe;
+	--surface-elevated: #f2f2ef;
+	--surface-soft: #eef2ff;
+	--border: #e0e0dc;
+	--border-strong: #c4c4be;
+	--accent: #1447e6;
+	--accent-strong: #0f3bc4;
+	--accent-soft: #eef2ff;
+	--muted: #6b6b6b;
+	--ink: #0a0a0a;
 }
 
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
-	--font-sans: var(--font-atkinson-sans);
+	--font-sans: var(--font-instrument-sans);
+	--font-display: var(--font-syne);
 	--font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
 	:root {
-		--background: #ffffff;
-		--foreground: #111111;
+		--background: #f8f8f6;
+		--foreground: #0a0a0a;
 		--surface: #ffffff;
-		--surface-elevated: #f8faff;
-		--surface-soft: #eff6ff;
-		--border: #d1d5db;
-		--accent: #2563eb;
-		--accent-strong: #1d4ed8;
-		--accent-soft: #dbeafe;
+		--surface-elevated: #f2f2ef;
+		--surface-soft: #eef2ff;
+		--border: #e0e0dc;
+		--border-strong: #c4c4be;
+		--accent: #1447e6;
+		--accent-strong: #0f3bc4;
+		--accent-soft: #eef2ff;
+		--muted: #6b6b6b;
+		--ink: #0a0a0a;
 	}
 }
 
@@ -41,7 +48,7 @@ body {
 body {
 	background: var(--background);
 	color: var(--foreground);
-	font-family: var(--font-atkinson-sans), Arial, Helvetica, sans-serif;
+	font-family: var(--font-instrument-sans), system-ui, sans-serif;
 	min-height: 100vh;
 }
 
@@ -100,4 +107,35 @@ main {
 	50% {
 		transform: translateY(4px);
 	}
+}
+
+@keyframes fade-up {
+	0% {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slide-in-right {
+	0% {
+		opacity: 0;
+		transform: translateX(24px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes line-grow {
+	0% { width: 0; }
+	100% { width: 100%; }
+}
+
+.font-display {
+	font-family: var(--font-syne), system-ui, sans-serif;
 }

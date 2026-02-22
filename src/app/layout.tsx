@@ -1,15 +1,21 @@
 import type { Metadata } from 'next'
-import { Atkinson_Hyperlegible, Geist_Mono } from 'next/font/google'
+import { Instrument_Sans, Syne, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Toaster } from 'react-hot-toast'
 import Navbar from '@/components/layout/Navbar'
 import './globals.css'
 
-const atkinsonSans = Atkinson_Hyperlegible({
-	variable: '--font-atkinson-sans',
+const instrumentSans = Instrument_Sans({
+	variable: '--font-instrument-sans',
 	subsets: ['latin'],
-	weight: ['400', '700'],
+	weight: ['400', '500', '600', '700'],
+})
+
+const syne = Syne({
+	variable: '--font-syne',
+	subsets: ['latin'],
+	weight: ['400', '600', '700', '800'],
 })
 
 const geistMono = Geist_Mono({
@@ -36,7 +42,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body
-				className={`${atkinsonSans.variable} ${geistMono.variable} antialiased bg-[radial-gradient(700px_360px_at_50%_-8%,rgba(99,102,241,0.1),transparent)]`}
+				className={`${instrumentSans.variable} ${syne.variable} ${geistMono.variable} antialiased`}
 				suppressHydrationWarning
 			>
 				<Navbar />

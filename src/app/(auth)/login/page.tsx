@@ -45,27 +45,30 @@ function LoginForm() {
 	}
 
 	return (
-		<div className="flex min-h-[70vh] items-center justify-center bg-transparent px-4 py-12">
+		<div className="flex min-h-[70vh] items-center justify-center bg-background px-4 py-12">
 			<div className="w-full max-w-md">
-				<div className="text-center mb-8">
-					<h1 className="text-3xl font-semibold text-slate-900">
+				<div className="mb-8">
+					<span className="text-xs font-semibold uppercase tracking-[0.2em] text-(--accent)">
+						Account
+					</span>
+					<h1 className="font-display mt-2 text-3xl font-extrabold tracking-tight text-(--ink)">
 						Welcome back
 					</h1>
-					<p className="mt-2 text-sm text-slate-600">
+					<p className="mt-1.5 text-sm text-(--muted)">
 						Sign in to your AWAE account
 					</p>
 				</div>
 
-				<div className="rounded-xl border border-(--border) bg-white p-7 shadow-lg shadow-blue-100/60">
+				<div className="border border-(--border) bg-white p-7">
 					<OAuthButtons />
 
 					<div className="relative my-6">
 						<div className="absolute inset-0 flex items-center">
-							<div className="w-full border-t border-gray-200" />
+							<div className="w-full border-t border-(--border)" />
 						</div>
-						<div className="relative flex justify-center text-sm">
-							<span className="bg-white px-3 text-gray-500">
-								or continue with email
+						<div className="relative flex justify-center text-xs">
+							<span className="bg-white px-3 font-medium uppercase tracking-widest text-(--muted)">
+								or email
 							</span>
 						</div>
 					</div>
@@ -73,7 +76,7 @@ function LoginForm() {
 					<form onSubmit={handleSubmit} className="space-y-5">
 						{error && (
 							<div
-								className="rounded-lg bg-blue-50 border border-blue-200 p-3 text-sm text-blue-700"
+								className="border-l-2 border-(--accent) bg-(--accent-soft) p-3 text-sm text-(--accent)"
 								role="alert"
 							>
 								{error}
@@ -83,7 +86,7 @@ function LoginForm() {
 						<div>
 							<label
 								htmlFor="email"
-								className="block text-sm font-medium text-gray-700 mb-1.5"
+								className="block text-xs font-semibold uppercase tracking-widest text-(--ink) mb-2"
 							>
 								Email address
 							</label>
@@ -95,14 +98,14 @@ function LoginForm() {
 								required
 								autoComplete="email"
 								placeholder="you@example.com"
-								className="block w-full rounded-lg border border-(--border) bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-500 shadow-sm transition-colors focus:border-(--accent) focus:outline-none focus:ring-2 focus:ring-(--accent)/20"
+								className="block w-full border border-(--border) bg-white px-4 py-3 text-sm text-(--ink) placeholder-(--muted) transition-colors focus:border-(--accent) focus:outline-none focus:ring-2 focus:ring-(--accent)/20"
 							/>
 						</div>
 
 						<div>
 							<label
 								htmlFor="password"
-								className="block text-sm font-medium text-gray-700 mb-1.5"
+								className="block text-xs font-semibold uppercase tracking-widest text-(--ink) mb-2"
 							>
 								Password
 							</label>
@@ -114,21 +117,21 @@ function LoginForm() {
 								required
 								autoComplete="current-password"
 								placeholder="Enter your password"
-								className="block w-full rounded-lg border border-(--border) bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-500 shadow-sm transition-colors focus:border-(--accent) focus:outline-none focus:ring-2 focus:ring-(--accent)/20"
+								className="block w-full border border-(--border) bg-white px-4 py-3 text-sm text-(--ink) placeholder-(--muted) transition-colors focus:border-(--accent) focus:outline-none focus:ring-2 focus:ring-(--accent)/20"
 							/>
 						</div>
 
 						<button
 							type="submit"
 							disabled={loading}
-							className="w-full cursor-pointer rounded-lg bg-(--accent) px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-(--accent-strong) focus:outline-none focus:ring-2 focus:ring-(--accent) focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+							className="w-full cursor-pointer bg-(--accent) px-4 py-3 text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-(--accent-strong) focus:outline-none focus:ring-2 focus:ring-(--accent) focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 						>
-							{loading ? 'Signing in...' : 'Sign In'}
+							{loading ? 'Signing in…' : 'Sign In'}
 						</button>
 					</form>
 				</div>
 
-				<p className="mt-6 text-center text-sm text-slate-600">
+				<p className="mt-6 text-sm text-(--muted)">
 					Don&apos;t have an account?{' '}
 					<Link
 						href="/signup"
@@ -155,3 +158,4 @@ export default function LoginPage() {
 		</Suspense>
 	)
 }
+
