@@ -106,7 +106,7 @@ export default async function Home() {
 	} = await supabase.auth.getUser()
 
 	const footerAuthLink = user
-		? { href: '/dashboard', label: 'Dashboard' }
+		? { href: '/history', label: 'History' }
 		: { href: '/login', label: 'Login' }
 
 	const currentYear = new Date().getFullYear()
@@ -115,24 +115,24 @@ export default async function Home() {
 		<div className="flex flex-col">
 			{/* ─── Hero Section ─── */}
 			<section className="relative flex min-h-[calc(100vh-4rem)] items-center bg-white">
-				<div className="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-12 lg:px-8 lg:py-14">
-					<div className="text-center lg:col-span-7 lg:text-left">
+				<div className="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
+					<div className="mx-auto max-w-6xl text-center">
 						<p className="inline-flex items-center rounded-full border border-(--border) bg-white px-3 py-1 text-xs font-semibold text-(--accent)">
 							WCAG 2.2 Multi-Audience Reports
 						</p>
-						<h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+						<h1 className="mx-auto mt-4 max-w-5xl text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
 							Automated Web{' '}
 							<span className="text-blue-700">Accessibility</span>{' '}
 							Evaluator
 						</h1>
 
-						<p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-700 sm:text-lg lg:mx-0">
+						<p className="mx-auto mt-5 max-w-4xl text-base leading-7 text-slate-700 sm:text-lg">
 							Evaluate any website against WCAG 2.2 standards and
 							get tailored reports for developers, auditors, and
 							end-users.
 						</p>
 
-						<div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
+						<div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
 							<Link
 								href="/evaluate"
 								className={cn(
@@ -157,7 +157,7 @@ export default async function Home() {
 							</Link>
 						</div>
 
-						<div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600 lg:justify-start">
+						<div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600">
 							<span className="rounded-md bg-white px-2.5 py-1">
 								Developer View
 							</span>
@@ -167,59 +167,6 @@ export default async function Home() {
 							<span className="rounded-md bg-white px-2.5 py-1">
 								End-User View
 							</span>
-						</div>
-					</div>
-
-					<div className="hidden lg:col-span-5 lg:block">
-						<div className="rounded-2xl border border-(--border) bg-white p-5 shadow-lg shadow-blue-100/60">
-							<div className="mb-4 flex items-center justify-between">
-								<p className="text-sm font-semibold text-slate-800">
-									Report Snapshot
-								</p>
-								<span className="text-xs font-medium text-(--accent)">
-									WCAG 2.2
-								</span>
-							</div>
-							<p className="mb-3 text-xs text-slate-600">
-								Static example of what each report type focuses
-								on after you run an evaluation.
-							</p>
-
-							<div className="space-y-3">
-								<div
-									className="rounded-xl border border-blue-100 bg-blue-50/70 p-3 motion-safe:animate-[hero-card-focus_6s_ease-in-out_infinite]"
-									style={{ animationDelay: '0s' }}
-								>
-									<p className="text-xs font-semibold text-blue-900">
-										End User
-									</p>
-									<p className="mt-1 text-sm text-slate-800">
-										Score + plain-language priorities
-									</p>
-								</div>
-								<div
-									className="rounded-xl border border-blue-100 bg-blue-50/70 p-3 motion-safe:animate-[hero-card-focus_6s_ease-in-out_infinite]"
-									style={{ animationDelay: '2s' }}
-								>
-									<p className="text-xs font-semibold text-blue-900">
-										Developer
-									</p>
-									<p className="mt-1 text-sm text-slate-800">
-										12 issues with code-level fixes
-									</p>
-								</div>
-								<div
-									className="rounded-xl border border-blue-100 bg-blue-50/70 p-3 motion-safe:animate-[hero-card-focus_6s_ease-in-out_infinite]"
-									style={{ animationDelay: '4s' }}
-								>
-									<p className="text-xs font-semibold text-blue-900">
-										Auditor
-									</p>
-									<p className="mt-1 text-sm text-slate-800">
-										Compliance matrix + pass/fail summary
-									</p>
-								</div>
-							</div>
 						</div>
 					</div>
 				</div>
