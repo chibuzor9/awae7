@@ -1,6 +1,6 @@
-import type { DeveloperReport, AuditorReport, EndUserReport } from '@/types'
+import type { DeveloperReport, AuditorReport, EndUserReport, DesignerReport } from '@/types'
 
-type ReportType = 'developer' | 'auditor' | 'end-user'
+type ReportType = 'developer' | 'auditor' | 'end-user' | 'designer'
 
 function getDateString(): string {
 	return new Date().toISOString().split('T')[0]
@@ -18,7 +18,7 @@ function triggerDownload(blob: Blob, filename: string): void {
 }
 
 export function exportToJson(
-	report: DeveloperReport | AuditorReport | EndUserReport,
+	report: DeveloperReport | AuditorReport | EndUserReport | DesignerReport,
 	reportType: ReportType
 ): void {
 	const jsonString = JSON.stringify(report, null, 2)
