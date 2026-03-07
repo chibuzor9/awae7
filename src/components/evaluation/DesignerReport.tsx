@@ -8,6 +8,8 @@ import type { DesignerReport as DesignerReportType } from '@/types'
 
 interface DesignerReportProps {
 	report: DesignerReportType
+	targetUrl?: string
+	fullSourceHtml?: string
 }
 
 const severityConfig = {
@@ -29,9 +31,82 @@ function severityBadgeVariant(severity: string) {
 	}
 }
 
-export default function DesignerReport({ report }: DesignerReportProps) {
+function buildHighlightCss(report: DesignerReportType): string {
+	const rules: string[] = []
+
+	for (const issue of report.contrastIssues) {
+		if (issue.selector) {
+			rules.push(`${issue.selector} { outline: 3px dashed #ef4444 !important; outline-offset: 2px; }`)
+		}
+	}
+
+	for (const issue of report.targetIssues) {
+		if (issue.selector) {
+			rules.push(`${issue.selector} { outline: 3px solid #f97316 !important; outline-offset: 2px; }`)
+		}
+	}
+
+	// hierarchyIssues don't have selectors — they describe structural issues
+	// (heading order, focus order) that can't be targeted by CSS selector
+
+	return rules.join('\n')
+}
+
+function buildPreviewSrcdoc(html: string, highlightCss: string): string {
+	const styleTag = `<style data-awae-highlights>${highlightCss}</style>`
+	if (html.includes('</head>')) {
+		return html.replace('</head>', `${styleTag}</head>`)
+	}
+	return `${styleTag}${html}`
+}
+
+export default function DesignerReport({ report, targetUrl, fullSourceHtml }: DesignerReportProps) {
 	return (
 		<div className="space-y-6">
+			{/* 1. Live Preview */}
+			{(fullSourceHtml || targetUrl) && (
+				<Card>
+					<CardHeader>
+						<div>
+							<h3 className="text-base font-semibold text-(--text)">
+								Live Preview
+							</h3>
+							<p className="mt-0.5 text-sm text-(--muted-text)">
+								{fullSourceHtml
+									? 'Page source rendered with accessibility issues highlighted'
+									: 'Live page preview (highlights unavailable for cross-origin content)'}
+							</p>
+						</div>
+						{fullSourceHtml && (
+							<div className="flex gap-3">
+								<span className="inline-flex items-center gap-1.5 text-xs text-(--muted-text)">
+									<span className="inline-block h-2.5 w-2.5 rounded-sm border-2 border-dashed border-red-500" />
+									Contrast
+								</span>
+								<span className="inline-flex items-center gap-1.5 text-xs text-(--muted-text)">
+									<span className="inline-block h-2.5 w-2.5 rounded-sm border-2 border-orange-500" />
+									Touch Targets
+								</span>
+								<span className="inline-flex items-center gap-1.5 text-xs text-(--muted-text)">
+									<span className="inline-block h-2.5 w-2.5 rounded-sm border-2 border-yellow-500" />
+									Hierarchy / Focus
+								</span>
+							</div>
+						)}
+					</CardHeader>
+					<CardBody className="p-0">
+						<iframe
+							title="Evaluated page preview"
+							sandbox="allow-same-origin"
+							className="h-[600px] w-full border-0"
+							{...(fullSourceHtml
+								? { srcDoc: buildPreviewSrcdoc(fullSourceHtml, buildHighlightCss(report)) }
+								: { src: targetUrl })}
+						/>
+					</CardBody>
+				</Card>
+			)}
+
 			{/* 2. Color & Contrast */}
 			<Card>
 				<CardHeader>

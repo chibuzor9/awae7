@@ -9,7 +9,6 @@ import {
 	Calendar,
 	Globe,
 	Layers,
-	Filter,
 	SearchX,
 	ChevronDown,
 } from 'lucide-react'
@@ -756,181 +755,122 @@ export default function DeveloperReport({
 				</CardBody>
 			</Card>
 
-			{/* ==================== Filters Section ==================== */}
-			<SectionDropdown
-				title="Filters"
-				description="Narrow results by severity, principle, level, and category."
-			>
-				<CardBody className="space-y-4">
-					<div className="flex flex-wrap items-center justify-between gap-2">
-						<h3 className="flex items-center gap-1.5 text-sm font-semibold text-gray-900">
-							<Filter
-								className="h-4 w-4 text-gray-500"
-								aria-hidden="true"
-							/>
-							Filters
-							{hasActiveFilters && (
-								<Badge variant="info">
-									{activeFilterCount} active
-								</Badge>
-							)}
-						</h3>
-
-						{hasActiveFilters && (
-							<button
-								type="button"
-								onClick={clearAllFilters}
-								className="text-xs font-medium text-blue-600 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 rounded-sm"
-							>
-								Clear all filters
-							</button>
-						)}
-					</div>
-
-					<div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-						<div className="space-y-1.5">
-							<label
-								htmlFor="developer-filter-severity"
-								className="text-xs font-medium uppercase tracking-wide text-gray-500"
-							>
-								Severity
-							</label>
-							<select
-								id="developer-filter-severity"
-								value={selectedSeverity}
-								onChange={e =>
-									handleSeverityChange(e.target.value)
-								}
-								className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-							>
-								<option value="all">All severities</option>
-								{ALL_SEVERITIES.map(severity => (
-									<option key={severity} value={severity}>
-										{severity.charAt(0).toUpperCase() +
-											severity.slice(1)}
-									</option>
-								))}
-							</select>
-						</div>
-
-						<div className="space-y-1.5">
-							<label
-								htmlFor="developer-filter-principle"
-								className="text-xs font-medium uppercase tracking-wide text-gray-500"
-							>
-								WCAG Principle
-							</label>
-							<select
-								id="developer-filter-principle"
-								value={selectedPrinciple}
-								onChange={e =>
-									handlePrincipleChange(e.target.value)
-								}
-								className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-							>
-								<option value="all">All principles</option>
-								{ALL_PRINCIPLES.map(principle => (
-									<option key={principle} value={principle}>
-										{principle}
-									</option>
-								))}
-							</select>
-						</div>
-
-						<div className="space-y-1.5">
-							<label
-								htmlFor="developer-filter-level"
-								className="text-xs font-medium uppercase tracking-wide text-gray-500"
-							>
-								Conformance Level
-							</label>
-							<select
-								id="developer-filter-level"
-								value={selectedLevel}
-								onChange={e =>
-									handleLevelChange(e.target.value)
-								}
-								className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-							>
-								<option value="all">All levels</option>
-								{ALL_LEVELS.map(level => (
-									<option key={level} value={level}>
-										{level === 'best-practice'
-											? 'Best Practice'
-											: `Level ${level}`}
-									</option>
-								))}
-							</select>
-						</div>
-
-						{allCategories.length > 0 && (
-							<div className="space-y-1.5">
-								<label
-									htmlFor="developer-filter-category"
-									className="text-xs font-medium uppercase tracking-wide text-gray-500"
-								>
-									Category
-								</label>
-								<select
-									id="developer-filter-category"
-									value={selectedCategory}
-									onChange={e =>
-										handleCategoryChange(e.target.value)
-									}
-									className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-								>
-									<option value="all">All categories</option>
-									{allCategories.map(category => (
-										<option key={category} value={category}>
-											{CATEGORY_LABELS[category] ??
-												category}
-										</option>
-									))}
-								</select>
-							</div>
-						)}
-					</div>
-				</CardBody>
-			</SectionDropdown>
-
 			{/* ==================== Source Code ==================== */}
 			{sourceEditorText && (
+				<>
+				{/* ==================== Filter Toolbar ==================== */}
+				<div className="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
+					{/* Severity */}
+					<div className="space-y-1 min-w-[120px]">
+						<label htmlFor="developer-filter-severity" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+							Severity
+						</label>
+						<select
+							id="developer-filter-severity"
+							value={selectedSeverity}
+							onChange={e => handleSeverityChange(e.target.value)}
+							className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+						>
+							<option value="all">All</option>
+							{ALL_SEVERITIES.map(s => (
+								<option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+							))}
+						</select>
+					</div>
+
+					{/* Principle */}
+					<div className="space-y-1 min-w-[120px]">
+						<label htmlFor="developer-filter-principle" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+							Principle
+						</label>
+						<select
+							id="developer-filter-principle"
+							value={selectedPrinciple}
+							onChange={e => handlePrincipleChange(e.target.value)}
+							className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+						>
+							<option value="all">All</option>
+							{ALL_PRINCIPLES.map(p => (
+								<option key={p} value={p}>{p}</option>
+							))}
+						</select>
+					</div>
+
+					{/* Level */}
+					<div className="space-y-1 min-w-[100px]">
+						<label htmlFor="developer-filter-level" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+							Level
+						</label>
+						<select
+							id="developer-filter-level"
+							value={selectedLevel}
+							onChange={e => handleLevelChange(e.target.value)}
+							className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+						>
+							<option value="all">All</option>
+							{ALL_LEVELS.map(l => (
+								<option key={l} value={l}>{l === 'best-practice' ? 'Best Practice' : `Level ${l}`}</option>
+							))}
+						</select>
+					</div>
+
+					{/* Category */}
+					{allCategories.length > 0 && (
+						<div className="space-y-1 min-w-[120px]">
+							<label htmlFor="developer-filter-category" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+								Category
+							</label>
+							<select
+								id="developer-filter-category"
+								value={selectedCategory}
+								onChange={e => handleCategoryChange(e.target.value)}
+								className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+							>
+								<option value="all">All</option>
+								{allCategories.map(c => (
+									<option key={c} value={c}>{CATEGORY_LABELS[c] ?? c}</option>
+								))}
+							</select>
+						</div>
+					)}
+
+					{/* Divider */}
+					<div className="hidden sm:block h-8 w-px bg-gray-200" />
+
+					{/* Theme */}
+					<div className="space-y-1 min-w-[130px]">
+						<label htmlFor="source-focus-theme" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+							Theme
+						</label>
+						<select
+							id="source-focus-theme"
+							value={sourceTheme}
+							onChange={e => setSourceTheme(e.target.value as SourceThemeKey)}
+							className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+						>
+							{Object.entries(SOURCE_THEMES).map(([key, value]) => (
+								<option key={key} value={key}>{value.label}</option>
+							))}
+						</select>
+					</div>
+
+					{/* Clear filters button */}
+					{hasActiveFilters && (
+						<button
+							type="button"
+							onClick={clearAllFilters}
+							className="ml-auto text-xs font-medium text-blue-600 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 rounded-sm"
+						>
+							Clear filters
+						</button>
+					)}
+				</div>
+
 				<SectionDropdown
 					title="Source Code"
 					description="Full formatted source in a fixed-height editor. Hover highlighted lines for issue details and remediation."
 				>
 					<CardBody className="space-y-3">
-						<div className="flex justify-end">
-							<div className="w-full max-w-xs space-y-1">
-								<label
-									htmlFor="source-focus-theme"
-									className="text-xs font-medium uppercase tracking-wide text-gray-500"
-								>
-									Theme
-								</label>
-								<select
-									id="source-focus-theme"
-									title="Select code theme"
-									value={sourceTheme}
-									onChange={event =>
-										setSourceTheme(
-											event.target
-												.value as SourceThemeKey
-										)
-									}
-									className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-								>
-									{Object.entries(SOURCE_THEMES).map(
-										([key, value]) => (
-											<option key={key} value={key}>
-												{value.label}
-											</option>
-										)
-									)}
-								</select>
-							</div>
-						</div>
-
 						<div
 							className={cn(
 								'h-136 overflow-auto rounded-xl p-2 font-mono text-xs leading-relaxed',
@@ -1016,6 +956,7 @@ export default function DeveloperReport({
 						</p>
 					</CardBody>
 				</SectionDropdown>
+				</>
 			)}
 
 			{/* ==================== Technical Hotspots ==================== */}

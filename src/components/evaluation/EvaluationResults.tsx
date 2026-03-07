@@ -109,7 +109,11 @@ export default function EvaluationResults({
 			</TabsContent>
 
 			<TabsContent value="designer">
-				<DesignerReport report={designerReport} />
+				<DesignerReport
+					report={designerReport}
+					targetUrl={evaluation.targetUrl}
+					fullSourceHtml={developerReport.fullSourceHtml}
+				/>
 			</TabsContent>
 
 			<TabsContent value="auditor">
