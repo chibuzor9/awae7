@@ -14,6 +14,7 @@ import { Card, CardHeader, CardBody } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { ScoreGauge } from '@/components/ui/ScoreGauge'
 import { cn } from '@/lib/utils'
+import PourGrid from '@/components/evaluation/PourGrid'
 import type {
 	EndUserReport as EndUserReportType,
 	EndUserCategory,
@@ -124,6 +125,8 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 
 	return (
 		<div className="space-y-8">
+			<PourGrid principleScores={report.principleScores} useFriendlyNames={true} />
+
 			{/* ============ LARGE SCORE DISPLAY ============ */}
 			<section
 				aria-labelledby="score-heading"
@@ -390,7 +393,7 @@ function CategoryCard({ category }: { category: EndUserCategory }) {
 					</div>
 					<Badge variant={getIssueBadgeVariant(category.issueCount)}>
 						{category.issueCount === 0
-							? 'No issues'
+							? 'No Issues Detected'
 							: `${category.issueCount} ${category.issueCount === 1 ? 'issue' : 'issues'}`}
 					</Badge>{' '}
 					{(category.needsReviewCount ?? 0) > 0 && (
