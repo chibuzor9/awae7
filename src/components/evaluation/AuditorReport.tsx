@@ -16,7 +16,7 @@ import {
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { ScoreGauge } from '@/components/ui/ScoreGauge'
-import { cn, formatDate, getSeverityColor } from '@/lib/utils'
+import { cn, formatDate } from '@/lib/utils'
 import PourGrid from '@/components/evaluation/PourGrid'
 import type {
 	AuditorReport as AuditorReportType,
@@ -52,7 +52,6 @@ type SortKey = keyof Pick<
 type SortDirection = 'asc' | 'desc'
 type SectionKey =
 	| 'executive'
-	| 'principles'
 	| 'matrix'
 	| 'violations'
 	| 'category'
@@ -161,7 +160,6 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 		Record<SectionKey, boolean>
 	>({
 		executive: true,
-		principles: true,
 		matrix: true,
 		violations: true,
 		category: true,
@@ -248,163 +246,43 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 					</CardHeader>
 					{openSections.executive && (
 						<CardBody id="exec-summary-panel">
-							<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-								{/* Left: Score gauge */}
-								<div className="flex flex-col items-center justify-center">
-									<ScoreGauge
-										score={summary.overallScore}
-										size={140}
-									/>
-									<p className="mt-2 text-sm text-gray-500">
-										Overall Compliance Score
-									</p>
-								</div>
+							<div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-8">
+								{/* Left column: Score + meta */}
+								<div className="flex flex-col items-center gap-4">
+									<ScoreGauge score={summary.overallScore} size={140} />
+									<p className="text-sm text-gray-500">Overall Compliance Score</p>
 
-								{/* Middle: Meta info */}
-								<div className="space-y-4">
-									<div className="flex items-start gap-3">
-										<Globe
-											className="h-4 w-4 mt-0.5 text-gray-400 shrink-0"
-											aria-hidden="true"
-										/>
-										<div>
-											<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-												Target URL
-											</p>
-											<p className="text-sm text-gray-900 break-all">
-												{summary.targetUrl}
-											</p>
-										</div>
-									</div>
-									<div className="flex items-start gap-3">
-										<Calendar
-											className="h-4 w-4 mt-0.5 text-gray-400 shrink-0"
-											aria-hidden="true"
-										/>
-										<div>
-											<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-												Evaluation Date
-											</p>
-											<p className="text-sm text-gray-900">
-												{formatDate(
-													summary.evaluationDate
-												)}
-											</p>
-										</div>
-									</div>
-									<div className="flex items-start gap-3">
-										<Shield
-											className="h-4 w-4 mt-0.5 text-gray-400 shrink-0"
-											aria-hidden="true"
-										/>
-										<div>
-											<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-												Engine
-											</p>
-											<p className="text-sm text-gray-900">
-												axe-core v
-												{summary.axeCoreVersion}
-											</p>
-										</div>
-									</div>
-								</div>
-
-								{/* Right: Severity breakdown */}
-								<div>
-									<p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
-										Violations by Severity (
-										{summary.totalViolations} total)
-									</p>
-									<div className="space-y-2">
-										{[
-											{
-												label: 'Critical',
-												count: summary.criticalCount,
-												severity:
-													'critical' as Severity,
-											},
-											{
-												label: 'Serious',
-												count: summary.seriousCount,
-												severity: 'serious' as Severity,
-											},
-											{
-												label: 'Moderate',
-												count: summary.moderateCount,
-												severity:
-													'moderate' as Severity,
-											},
-											{
-												label: 'Minor',
-												count: summary.minorCount,
-												severity: 'minor' as Severity,
-											},
-										].map(({ label, count, severity }) => (
-											<div
-												key={severity}
-												className="flex items-center gap-3"
-											>
-												<span
-													className="h-2.5 w-2.5 rounded-full shrink-0"
-													style={{
-														backgroundColor:
-															getSeverityColor(
-																severity
-															),
-													}}
-													aria-hidden="true"
-												/>
-												<span className="text-sm text-gray-700 w-20">
-													{label}
-												</span>
-												<div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-													<div
-														className="h-full rounded-full transition-all duration-500"
-														style={{
-															width:
-																summary.totalViolations >
-																0
-																	? `${(count / summary.totalViolations) * 100}%`
-																	: '0%',
-															backgroundColor:
-																getSeverityColor(
-																	severity
-																),
-														}}
-													/>
-												</div>
-												<span className="text-sm font-semibold text-gray-900 w-8 text-right tabular-nums">
-													{count}
-												</span>
+									<div className="w-full space-y-4">
+										<div className="flex items-start gap-3">
+											<Globe className="h-4 w-4 mt-0.5 text-gray-400 shrink-0" aria-hidden="true" />
+											<div>
+												<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Target URL</p>
+												<p className="text-sm text-gray-900 break-all">{summary.targetUrl}</p>
 											</div>
-										))}
+										</div>
+										<div className="flex items-start gap-3">
+											<Calendar className="h-4 w-4 mt-0.5 text-gray-400 shrink-0" aria-hidden="true" />
+											<div>
+												<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Evaluation Date</p>
+												<p className="text-sm text-gray-900">{formatDate(summary.evaluationDate)}</p>
+											</div>
+										</div>
+										<div className="flex items-start gap-3">
+											<Shield className="h-4 w-4 mt-0.5 text-gray-400 shrink-0" aria-hidden="true" />
+											<div>
+												<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Engine</p>
+												<p className="text-sm text-gray-900">axe-core v{summary.axeCoreVersion}</p>
+											</div>
+										</div>
 									</div>
 								</div>
+
+								{/* Right column: POUR grid */}
+								<PourGrid principleScores={report.principleScores} />
 							</div>
 						</CardBody>
 					)}
 				</Card>
-			</section>
-
-			{/* ============ PRINCIPLE BREAKDOWN ============ */}
-			<section aria-labelledby="principle-heading">
-				<div className="mb-4 flex items-center justify-between gap-3">
-					<h2
-						id="principle-heading"
-						className="text-lg font-semibold text-gray-900"
-					>
-						WCAG 2.2 Principle Breakdown
-					</h2>
-					<SectionToggle
-						open={openSections.principles}
-						onToggle={() => toggleSection('principles')}
-					/>
-				</div>
-				{openSections.principles && (
-					<div id="principle-panel">
-						<PourGrid principleScores={report.principleScores} />
-					</div>
-				)}
 			</section>
 
 			{/* ============ COMPLIANCE MATRIX ============ */}

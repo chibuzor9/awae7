@@ -700,14 +700,11 @@ export default function DeveloperReport({
 
 	return (
 		<div className="space-y-4">
-			{/* ==================== POUR Principle Scores ==================== */}
-			<PourGrid principleScores={report.principleScores} />
-
-			{/* ==================== Summary Section ==================== */}
+			{/* ==================== Executive Summary ==================== */}
 			<Card>
 				<CardHeader>
 					<h2 className="text-lg font-semibold text-gray-900">
-						Developer Report
+						Executive Summary
 					</h2>
 					<p className="mt-0.5 text-sm text-gray-500">
 						Technical accessibility evaluation for developers
@@ -715,114 +712,45 @@ export default function DeveloperReport({
 				</CardHeader>
 
 				<CardBody className="space-y-6">
-					{/* Score + meta info */}
-					<div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-						{/* Score gauge */}
-						<div className="shrink-0">
-							<ScoreGauge
-								score={summary.overallScore}
-								size={140}
-							/>
+					{/* Two-column: Score+meta left, POUR grid right */}
+					<div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-6">
+						{/* Left column: Score + meta */}
+						<div className="flex flex-col items-center gap-4">
+							<ScoreGauge score={summary.overallScore} size={140} />
+
+							<div className="w-full space-y-3">
+								<div className="flex items-center gap-2 text-sm">
+									<Globe className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
+									<span className="font-medium text-gray-900">Target:</span>
+									<span className="truncate text-gray-600">{summary.targetUrl}</span>
+								</div>
+								<div className="flex items-center gap-2 text-sm">
+									<Calendar className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
+									<span className="font-medium text-gray-900">Evaluated:</span>
+									<span className="text-gray-600">{formatDate(summary.evaluationDate)}</span>
+								</div>
+								<div className="flex items-center gap-2 text-sm">
+									<Layers className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
+									<span className="font-medium text-gray-900">Engine:</span>
+									<Badge variant="default">axe-core v{summary.axeCoreVersion}</Badge>
+								</div>
+							</div>
 						</div>
 
-						{/* Meta info grid */}
-						<div className="flex-1 space-y-4">
-							{/* URL */}
-							<div className="flex items-center gap-2 text-sm">
-								<Globe
-									className="h-4 w-4 shrink-0 text-gray-400"
-									aria-hidden="true"
-								/>
-								<span className="font-medium text-gray-900">
-									Target:
-								</span>
-								<span className="truncate text-gray-600">
-									{summary.targetUrl}
-								</span>
-							</div>
-
-							{/* Date */}
-							<div className="flex items-center gap-2 text-sm">
-								<Calendar
-									className="h-4 w-4 shrink-0 text-gray-400"
-									aria-hidden="true"
-								/>
-								<span className="font-medium text-gray-900">
-									Evaluated:
-								</span>
-								<span className="text-gray-600">
-									{formatDate(summary.evaluationDate)}
-								</span>
-							</div>
-
-							{/* axe-core version */}
-							<div className="flex items-center gap-2 text-sm">
-								<Layers
-									className="h-4 w-4 shrink-0 text-gray-400"
-									aria-hidden="true"
-								/>
-								<span className="font-medium text-gray-900">
-									Engine:
-								</span>
-								<Badge variant="default">
-									axe-core v{summary.axeCoreVersion}
-								</Badge>
-							</div>
-
-							{/* Total violations */}
-							<p className="text-sm text-gray-700">
-								<span className="font-semibold">
-									{summary.totalViolations}
-								</span>{' '}
-								accessibility{' '}
-								{summary.totalViolations === 1
-									? 'violation'
-									: 'violations'}{' '}
-								found
-								{(summary.totalIncomplete ?? 0) > 0 && (
-									<>
-										{' · '}
-										<span className="font-semibold text-amber-600">
-											{summary.totalIncomplete}
-										</span>{' '}
-										needs review
-									</>
-								)}
-								{(summary.totalPasses ?? 0) > 0 && (
-									<>
-										{' · '}
-										<span className="font-semibold text-green-600">
-											{summary.totalPasses}
-										</span>{' '}
-										passed
-									</>
-								)}
-							</p>
-						</div>
+						{/* Right column: POUR grid */}
+						<PourGrid principleScores={report.principleScores} />
 					</div>
 
-					{/* Severity breakdown */}
+					{/* Severity breakdown (below the two-column area) */}
 					<div>
 						<h3 className="mb-3 text-sm font-semibold text-gray-900">
 							Severity Breakdown
 						</h3>
 						<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-							<SeverityCount
-								severity="critical"
-								count={summary.criticalCount}
-							/>
-							<SeverityCount
-								severity="serious"
-								count={summary.seriousCount}
-							/>
-							<SeverityCount
-								severity="moderate"
-								count={summary.moderateCount}
-							/>
-							<SeverityCount
-								severity="minor"
-								count={summary.minorCount}
-							/>
+							<SeverityCount severity="critical" count={summary.criticalCount} />
+							<SeverityCount severity="serious" count={summary.seriousCount} />
+							<SeverityCount severity="moderate" count={summary.moderateCount} />
+							<SeverityCount severity="minor" count={summary.minorCount} />
 						</div>
 					</div>
 				</CardBody>
