@@ -19,6 +19,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
 	title: 'AWAE - Web Accessibility Evaluator',
+	applicationName: 'AWAE',
 	description:
 		'Evaluate your website against WCAG accessibility guidelines. Identify issues, get actionable recommendations, and improve web accessibility.',
 	icons: {
@@ -28,6 +29,13 @@ export const metadata: Metadata = {
 	},
 	verification: {
 		google: '1waib8UJ6JfFZLEZ9sGwTU1sq55daSMHmxjha3H56ic',
+	},
+	openGraph: {
+		title: 'AWAE - Automated Web Accessibility Evaluator',
+		description:
+			'Evaluate your website against WCAG accessibility guidelines. Identify issues, get actionable recommendations, and improve web accessibility.',
+		siteName: 'AWAE',
+		type: 'website',
 	},
 }
 

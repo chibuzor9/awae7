@@ -93,6 +93,7 @@ const reportTypes = [
 const footerLinks = [
 	{ href: '/evaluate', label: 'Evaluate' },
 	{ href: '/wcag-cards', label: 'WCAG Cards' },
+	{ href: '/privacy-policy', label: 'Privacy Policy' },
 ]
 
 /* ================================================================
