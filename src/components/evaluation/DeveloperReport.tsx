@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/Badge'
 import { ScoreGauge } from '@/components/ui/ScoreGauge'
 import { cn, formatDate } from '@/lib/utils'
 import { ViolationCard } from '@/components/evaluation/ViolationCard'
+import PourGrid from '@/components/evaluation/PourGrid'
 import type {
 	DeveloperReport as DeveloperReportType,
 	Severity,
@@ -699,6 +700,9 @@ export default function DeveloperReport({
 
 	return (
 		<div className="space-y-4">
+			{/* ==================== POUR Principle Scores ==================== */}
+			<PourGrid principleScores={report.principleScores} />
+
 			{/* ==================== Summary Section ==================== */}
 			<Card>
 				<CardHeader>
@@ -961,7 +965,132 @@ export default function DeveloperReport({
 				</CardBody>
 			</SectionDropdown>
 
-			{/* ==================== Violations List ==================== */}
+			{/* ==================== Source Code ==================== */}
+			{sourceEditorText && (
+				<SectionDropdown
+					title="Source Code"
+					description="Full formatted source in a fixed-height editor. Hover highlighted lines for issue details and remediation."
+				>
+					<CardBody className="space-y-3">
+						<div className="flex justify-end">
+							<div className="w-full max-w-xs space-y-1">
+								<label
+									htmlFor="source-focus-theme"
+									className="text-xs font-medium uppercase tracking-wide text-gray-500"
+								>
+									Theme
+								</label>
+								<select
+									id="source-focus-theme"
+									title="Select code theme"
+									value={sourceTheme}
+									onChange={event =>
+										setSourceTheme(
+											event.target
+												.value as SourceThemeKey
+										)
+									}
+									className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+								>
+									{Object.entries(SOURCE_THEMES).map(
+										([key, value]) => (
+											<option key={key} value={key}>
+												{value.label}
+											</option>
+										)
+									)}
+								</select>
+							</div>
+						</div>
+
+						<div
+							className={cn(
+								'h-136 overflow-auto rounded-xl p-2 font-mono text-xs leading-relaxed',
+								SOURCE_THEMES[sourceTheme].container
+							)}
+						>
+							<div className="mb-2 flex items-center justify-between border-b border-white/10 px-2 pb-2">
+								<div className="flex items-center gap-1.5">
+									<span className="h-2.5 w-2.5 rounded-full bg-red-400" />
+									<span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+									<span className="h-2.5 w-2.5 rounded-full bg-green-400" />
+								</div>
+								<span className="truncate text-[10px] text-gray-400">
+									source.html
+								</span>
+							</div>
+							<div className="min-w-2xl">
+								{sourceHighlight.lines.map(
+									(line, lineIndex) => {
+										const isPrimary =
+											lineIndex ===
+											sourceHighlight.primaryLine
+										const isRelated =
+											sourceHighlight.relatedLines.has(
+												lineIndex
+											)
+
+										const hoverDetails =
+											sourceHighlight.lineTooltips.get(
+												lineIndex
+											)
+
+										return (
+											<div
+												key={`source-focus-${lineIndex}`}
+												title={
+													isPrimary || isRelated
+														? hoverDetails
+														: undefined
+												}
+												className={cn(
+													'grid grid-cols-[2.75rem_1fr] gap-2 px-2 py-0.5',
+													SOURCE_THEMES[
+														sourceTheme
+													].lineDefault,
+													isPrimary &&
+														SOURCE_THEMES[
+															sourceTheme
+														].linePrimary,
+													!isPrimary &&
+														isRelated &&
+														SOURCE_THEMES[
+															sourceTheme
+														].lineSecondary
+												)}
+											>
+												<span
+													className={cn(
+														'select-none text-right text-[10px] tabular-nums',
+														SOURCE_THEMES[
+															sourceTheme
+														].lineNumber
+													)}
+												>
+													{lineIndex + 1}
+												</span>
+												<span className="whitespace-pre">
+													{renderHtmlLine(
+														line,
+														`source-line-${lineIndex}`
+													)}
+												</span>
+											</div>
+										)
+									}
+								)}
+							</div>
+						</div>
+
+						<p className="text-xs text-gray-500">
+							Highlighted lines indicate where filtered
+							violations appear in the page source.
+						</p>
+					</CardBody>
+				</SectionDropdown>
+			)}
+
+			{/* ==================== Technical Hotspots ==================== */}
 			<section aria-label="Hotspots and insights">
 				<SectionDropdown
 					title="Technical Hotspots"
@@ -1040,131 +1169,8 @@ export default function DeveloperReport({
 				</SectionDropdown>
 			</section>
 
+			{/* ==================== Violations List ==================== */}
 			<section aria-label="Violation results" className="space-y-4">
-				{sourceEditorText && (
-					<SectionDropdown
-						title="Source Code"
-						description="Full formatted source in a fixed-height editor. Hover highlighted lines for issue details and remediation."
-					>
-						<CardBody className="space-y-3">
-							<div className="flex justify-end">
-								<div className="w-full max-w-xs space-y-1">
-									<label
-										htmlFor="source-focus-theme"
-										className="text-xs font-medium uppercase tracking-wide text-gray-500"
-									>
-										Theme
-									</label>
-									<select
-										id="source-focus-theme"
-										title="Select code theme"
-										value={sourceTheme}
-										onChange={event =>
-											setSourceTheme(
-												event.target
-													.value as SourceThemeKey
-											)
-										}
-										className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-									>
-										{Object.entries(SOURCE_THEMES).map(
-											([key, value]) => (
-												<option key={key} value={key}>
-													{value.label}
-												</option>
-											)
-										)}
-									</select>
-								</div>
-							</div>
-
-							<div
-								className={cn(
-									'h-136 overflow-auto rounded-xl p-2 font-mono text-xs leading-relaxed',
-									SOURCE_THEMES[sourceTheme].container
-								)}
-							>
-								<div className="mb-2 flex items-center justify-between border-b border-white/10 px-2 pb-2">
-									<div className="flex items-center gap-1.5">
-										<span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-										<span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-										<span className="h-2.5 w-2.5 rounded-full bg-green-400" />
-									</div>
-									<span className="truncate text-[10px] text-gray-400">
-										source.html
-									</span>
-								</div>
-								<div className="min-w-2xl">
-									{sourceHighlight.lines.map(
-										(line, lineIndex) => {
-											const isPrimary =
-												lineIndex ===
-												sourceHighlight.primaryLine
-											const isRelated =
-												sourceHighlight.relatedLines.has(
-													lineIndex
-												)
-
-											const hoverDetails =
-												sourceHighlight.lineTooltips.get(
-													lineIndex
-												)
-
-											return (
-												<div
-													key={`source-focus-${lineIndex}`}
-													title={
-														isPrimary || isRelated
-															? hoverDetails
-															: undefined
-													}
-													className={cn(
-														'grid grid-cols-[2.75rem_1fr] gap-2 px-2 py-0.5',
-														SOURCE_THEMES[
-															sourceTheme
-														].lineDefault,
-														isPrimary &&
-															SOURCE_THEMES[
-																sourceTheme
-															].linePrimary,
-														!isPrimary &&
-															isRelated &&
-															SOURCE_THEMES[
-																sourceTheme
-															].lineSecondary
-													)}
-												>
-													<span
-														className={cn(
-															'select-none text-right text-[10px] tabular-nums',
-															SOURCE_THEMES[
-																sourceTheme
-															].lineNumber
-														)}
-													>
-														{lineIndex + 1}
-													</span>
-													<span className="whitespace-pre">
-														{renderHtmlLine(
-															line,
-															`source-line-${lineIndex}`
-														)}
-													</span>
-												</div>
-											)
-										}
-									)}
-								</div>
-							</div>
-
-							<p className="text-xs text-gray-500">
-								Highlighted lines indicate where filtered
-								violations appear in the page source.
-							</p>
-						</CardBody>
-					</SectionDropdown>
-				)}
-
 				<SectionDropdown
 					title={`Violations (${filteredViolations.length} of ${violations.length})`}
 					description="Expand for full rule-by-rule details."
@@ -1198,12 +1204,14 @@ export default function DeveloperReport({
 										aria-hidden="true"
 									/>
 									<p className="mt-3 text-sm font-medium text-gray-700">
-										No violations match the current filters
+										No Issues Detected
 									</p>
-									<p className="mt-1 text-xs text-gray-500">
-										Try adjusting or clearing the filters to
-										see results.
-									</p>
+									{hasActiveFilters && (
+										<p className="mt-1 text-xs text-gray-500">
+											Try adjusting or clearing the filters to
+											see results.
+										</p>
+									)}
 									{hasActiveFilters && (
 										<button
 											type="button"
