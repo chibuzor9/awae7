@@ -26,6 +26,12 @@ import type {
 	TestEnvironment,
     CrawlSummary,
     PageEvaluationSummary,
+	PrincipleScore,
+	DesignerReport,
+	DesignerContrastIssue,
+	DesignerTargetIssue,
+	DesignerHierarchyIssue,
+	DesignerComponentSummary,
 } from '@/types'
 
 // ===========================================================================
@@ -550,6 +556,7 @@ function getActiveCategories(result: EvaluationResult): WcagCategory[] {
 export function generateDeveloperReport(
 	result: EvaluationResult
 ): DeveloperReport {
+	const principleScores = computePrincipleScores(result)
 	const violations: DeveloperViolation[] = result.violations
 		.map(v => ({
 			ruleId: v.ruleId,
@@ -601,6 +608,7 @@ export function generateDeveloperReport(
 			level: ['A', 'AA'],
 			category: activeCategories,
 		},
+		principleScores,
 	}
 }
 
@@ -609,6 +617,8 @@ export function generateDeveloperReport(
 // ===========================================================================
 
 export function generateAuditorReport(result: EvaluationResult): AuditorReport {
+	const principleScores = computePrincipleScores(result)
+
 	// ---- Compliance matrix ----
 	const criteriaMap = new Map<
 		string,
@@ -768,6 +778,7 @@ export function generateAuditorReport(result: EvaluationResult): AuditorReport {
 			level: ['A', 'AA'],
 			category: activeCategories,
 		},
+		principleScores,
 	}
 }
 
@@ -856,6 +867,7 @@ function buildFormalDescription(v: ViolationItem): string {
 // ===========================================================================
 
 export function generateEndUserReport(result: EvaluationResult): EndUserReport {
+	const principleScores = computePrincipleScores(result)
 	const score = result.overallScore
 
 	// Score label and colour
@@ -1000,6 +1012,7 @@ export function generateEndUserReport(result: EvaluationResult): EndUserReport {
 		categories,
 		priorities,
 		needsReviewCount: result.totalIncomplete,
+		principleScores,
 	}
 }
 
@@ -1232,6 +1245,24 @@ const PLAIN_LANGUAGE_MAP: Record<string, string> = {
 		'This page automatically refreshes or redirects, which can be confusing and disorienting.',
 }
 
+const DESIGNER_LANGUAGE_MAP: Record<string, string> = {
+	'color-contrast': 'Text does not meet minimum contrast ratio against its background',
+	'color-contrast-enhanced': 'Text does not meet enhanced contrast ratio (AAA)',
+	'link-in-text-block': 'Link is not visually distinguishable from surrounding text without colour alone',
+	'target-size': 'Interactive element touch target is smaller than 24×24 CSS pixels',
+	'heading-order': 'Heading levels skip (e.g. h1 → h3), breaking visual hierarchy',
+	'page-has-heading-one': 'Page is missing a primary heading (h1)',
+	'bypass': 'Page lacks a skip-to-content link for keyboard and screen reader users',
+	'focus-order-semantics': 'Focus order does not follow the visual layout',
+	'focusable-content': 'Container has focusable content that is not keyboard accessible',
+	'tabindex': 'Element has a positive tabindex, overriding natural focus order',
+	'image-alt': 'Image is missing an alternative text description',
+	'input-image-alt': 'Image button is missing an alt attribute',
+	'label': 'Form input does not have an associated visible label',
+	'select-name': 'Select element does not have an accessible name',
+	'frame-title': 'iframe is missing a descriptive title',
+}
+
 /**
  * Return end-user-friendly, plain-language description for a given axe-core rule ID.
  */
@@ -1240,4 +1271,144 @@ export function getPlainLanguage(ruleId: string): string {
 		PLAIN_LANGUAGE_MAP[ruleId] ??
         `Accessibility issue detected for ${ ruleId.replace(/-/g, ' ') }. Review this item in the Developer report for exact affected elements.`
 	)
+}
+
+// ===========================================================================
+// 5.  computePrincipleScores
+// ===========================================================================
+
+export function computePrincipleScores(result: EvaluationResult): PrincipleScore[] {
+	const principles: WcagPrinciple[] = ['Perceivable', 'Operable', 'Understandable', 'Robust']
+
+	return principles.map(principle => {
+		const violations = result.violations.filter(v => v.wcagPrinciple === principle)
+		const incomplete = result.incomplete.filter(i => i.wcagPrinciple === principle)
+
+		let deduction = 0
+		for (const v of violations) {
+			deduction += SEVERITY_WEIGHT[v.severity] * v.nodes.length
+		}
+		for (const i of incomplete) {
+			deduction += SEVERITY_WEIGHT[i.severity] * i.nodes.length * 0.5
+		}
+
+		const issueCount = violations.reduce((sum, v) => sum + v.nodes.length, 0)
+		const needsReviewCount = incomplete.reduce((sum, i) => sum + i.nodes.length, 0)
+
+		return {
+			principle,
+			score: Math.max(0, Math.min(100, Math.round(100 - deduction))),
+			issueCount,
+			needsReviewCount,
+		}
+	})
+}
+
+// ===========================================================================
+// 6.  generateDesignerReport
+// ===========================================================================
+
+export function generateDesignerReport(result: EvaluationResult): DesignerReport {
+	const summary = buildSummary(result)
+	const principleScores = computePrincipleScores(result)
+
+	// Contrast issues
+	const contrastRules = new Set(['color-contrast', 'color-contrast-enhanced', 'link-in-text-block'])
+	const contrastIssues: DesignerContrastIssue[] = []
+	for (const v of result.violations) {
+		if (!contrastRules.has(v.ruleId)) continue
+		for (const node of v.nodes) {
+			const checkData = extractCheckData(node)
+			contrastIssues.push({
+				selector: node.target.join(' > '),
+				description: v.description,
+				foreground: (checkData?.fgColor as string) ?? 'unknown',
+				background: (checkData?.bgColor as string) ?? 'unknown',
+				ratio: (checkData?.contrastRatio as string) ?? 'unknown',
+				requiredRatio: (checkData?.expectedContrastRatio as string) ?? (v.ruleId === 'color-contrast-enhanced' ? '7:1' : '4.5:1'),
+				wcagCriterion: v.wcagCriterion,
+				severity: v.severity,
+			})
+		}
+	}
+
+	// Touch target issues
+	const targetRules = new Set(['target-size'])
+	const targetIssues: DesignerTargetIssue[] = []
+	for (const v of result.violations) {
+		if (!targetRules.has(v.ruleId)) continue
+		for (const node of v.nodes) {
+			const checkData = extractCheckData(node)
+			targetIssues.push({
+				selector: node.target.join(' > '),
+				description: v.description,
+				currentSize: ((checkData?.messageValues as Record<string, unknown>)?.actualWidth as string) ?? (checkData?.size as string) ?? 'unknown',
+				requiredSize: '24x24 CSS px (WCAG 2.5.8)',
+				severity: v.severity,
+			})
+		}
+	}
+
+	// Visual hierarchy & focus issues
+	const hierarchyRules = new Set(['heading-order', 'page-has-heading-one', 'bypass', 'focus-order-semantics', 'focusable-content', 'tabindex'])
+	const hierarchyIssues: DesignerHierarchyIssue[] = []
+	for (const v of result.violations) {
+		if (!hierarchyRules.has(v.ruleId)) continue
+		hierarchyIssues.push({
+			ruleId: v.ruleId,
+			description: v.description,
+			designerDescription: DESIGNER_LANGUAGE_MAP[v.ruleId] ?? v.description,
+			elementCount: v.nodes.length,
+			severity: v.severity,
+		})
+	}
+
+	// Component checklist
+	const categoryToComponent: Record<string, string> = {
+		color: 'Colors & Contrast',
+		forms: 'Form Fields',
+		keyboard: 'Keyboard Interaction',
+		'name-role-value': 'Interactive Components',
+		'text-alternatives': 'Images & Media',
+		tables: 'Data Tables',
+		structure: 'Page Structure',
+		language: 'Language & Text',
+		semantics: 'Semantic Markup',
+		'sensory-and-visual-cues': 'Visual Cues',
+		aria: 'ARIA Patterns',
+		'time-and-media': 'Timed Content',
+		parsing: 'Code Quality',
+		other: 'Other',
+	}
+
+	const categoryIssueCounts: Record<string, number> = {}
+	for (const v of result.violations) {
+		categoryIssueCounts[v.category] = (categoryIssueCounts[v.category] ?? 0) + v.nodes.length
+	}
+
+	const activeCategories = getActiveCategories(result)
+	const componentChecklist: DesignerComponentSummary[] = activeCategories.map(cat => {
+		const count = categoryIssueCounts[cat] ?? 0
+		return {
+			component: categoryToComponent[cat] ?? cat,
+			status: count === 0 ? 'pass' : count <= 2 ? 'warning' : 'fail',
+			issueCount: count,
+		}
+	})
+
+	const statusOrder = { fail: 0, warning: 1, pass: 2 }
+	componentChecklist.sort((a, b) => statusOrder[a.status] - statusOrder[b.status])
+
+	const totalDesignIssues = contrastIssues.length + targetIssues.length + hierarchyIssues.reduce((sum, h) => sum + h.elementCount, 0)
+
+	return {
+		summary,
+		pageSummaries: result.pageSummaries,
+		principleScores,
+		contrastIssues,
+		targetIssues,
+		hierarchyIssues,
+		componentChecklist,
+		totalDesignIssues,
+	}
 }
