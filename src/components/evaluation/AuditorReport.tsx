@@ -17,6 +17,7 @@ import { Card, CardHeader, CardBody } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { ScoreGauge } from '@/components/ui/ScoreGauge'
 import { cn, formatDate, getSeverityColor } from '@/lib/utils'
+import PourGrid from '@/components/evaluation/PourGrid'
 import type {
 	AuditorReport as AuditorReportType,
 	ComplianceEntry,
@@ -102,18 +103,6 @@ function statusLabel(status: ComplianceEntry['status']): string {
 	}
 }
 
-function complianceBarColor(percentage: number): string {
-	if (percentage >= 80) return 'bg-green-500'
-	if (percentage >= 50) return 'bg-amber-500'
-	return 'bg-red-500'
-}
-
-function complianceTextColor(percentage: number): string {
-	if (percentage >= 80) return 'text-green-700'
-	if (percentage >= 50) return 'text-amber-700'
-	return 'text-red-700'
-}
-
 function SectionToggle({
 	open,
 	onToggle,
@@ -145,7 +134,6 @@ function SectionToggle({
 export default function AuditorReport({ report }: AuditorReportProps) {
 	const {
 		summary,
-		principleBreakdown,
 		complianceMatrix,
 		violations,
 		filters,
@@ -413,89 +401,8 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 					/>
 				</div>
 				{openSections.principles && (
-					<div
-						id="principle-panel"
-						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-					>
-						{principleBreakdown.map(pb => (
-							<Card key={pb.principle}>
-								<CardBody className="space-y-3">
-									<h3 className="text-sm font-semibold text-gray-900">
-										{pb.principle}
-									</h3>
-
-									{/* Compliance percentage */}
-									<div className="flex items-baseline justify-between">
-										<span
-											className={cn(
-												'text-2xl font-bold tabular-nums',
-												complianceTextColor(
-													pb.compliancePercentage
-												)
-											)}
-										>
-											{pb.compliancePercentage}%
-										</span>
-										<span className="text-xs text-gray-500">
-											compliance
-										</span>
-									</div>
-
-									{/* Progress bar */}
-									<div
-										className="h-2 w-full bg-gray-100 rounded-full overflow-hidden"
-										role="progressbar"
-										aria-valuenow={pb.compliancePercentage}
-										aria-valuemin={0}
-										aria-valuemax={100}
-										aria-label={`${pb.principle} compliance: ${pb.compliancePercentage}%`}
-									>
-										<div
-											className={cn(
-												'h-full rounded-full transition-all duration-500',
-												complianceBarColor(
-													pb.compliancePercentage
-												)
-											)}
-											style={{
-												width: `${pb.compliancePercentage}%`,
-											}}
-										/>
-									</div>
-
-									{/* Passed / Failed / Needs Review counts */}
-									<div className="flex items-center justify-between text-xs text-gray-600">
-										<span className="flex items-center gap-1">
-											<CheckCircle2
-												className="h-3.5 w-3.5 text-green-500"
-												aria-hidden="true"
-											/>
-											{pb.passedCriteria} passed
-										</span>
-										<span className="flex items-center gap-1">
-											<XCircle
-												className="h-3.5 w-3.5 text-red-500"
-												aria-hidden="true"
-											/>
-											{pb.failedCriteria} failed
-										</span>
-										{(pb.needsReviewCriteria ?? 0) > 0 && (
-											<span className="flex items-center gap-1">
-												<AlertTriangle
-													className="h-3.5 w-3.5 text-amber-500"
-													aria-hidden="true"
-												/>
-												{pb.needsReviewCriteria} review
-											</span>
-										)}
-									</div>
-									<p className="text-xs text-gray-500">
-										{pb.passedCriteria}/{pb.totalCriteria}{' '}
-										criteria passed
-									</p>
-								</CardBody>
-							</Card>
-						))}
+					<div id="principle-panel">
+						<PourGrid principleScores={report.principleScores} />
 					</div>
 				)}
 			</section>
@@ -656,8 +563,7 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 													colSpan={6}
 													className="px-4 py-8 text-center text-sm text-gray-500"
 												>
-													No criteria match the
-													selected filters.
+													No Issues Detected
 												</td>
 											</tr>
 										) : (
@@ -794,8 +700,7 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 						<CardBody id="violations-panel" className="p-0">
 							{filteredViolations.length === 0 ? (
 								<div className="px-6 py-8 text-center text-sm text-gray-500">
-									No violations match the selected severity
-									filter.
+									No Issues Detected
 								</div>
 							) : (
 								<ul
