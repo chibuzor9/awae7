@@ -26,6 +26,9 @@ export const metadata: Metadata = {
 		shortcut: '/vercel.svg',
 		apple: '/vercel.svg',
 	},
+	verification: {
+		google: '1waib8UJ6JfFZLEZ9sGwTU1sq55daSMHmxjha3H56ic',
+	},
 }
 
 export default function RootLayout({
