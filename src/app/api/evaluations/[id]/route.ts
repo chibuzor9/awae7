@@ -6,6 +6,7 @@ import {
 	generateDeveloperReport,
 	generateAuditorReport,
 	generateEndUserReport,
+	generateDesignerReport,
 } from '@/lib/axe/transform'
 import { formatHtmlForReport } from '@/lib/html/format'
 import type { EvaluationResult, ViolationItem } from '@/types'
@@ -137,6 +138,7 @@ export async function GET(
 		const developerReport = generateDeveloperReport(evaluationResult)
 		const auditorReport = generateAuditorReport(evaluationResult)
 		const endUserReport = generateEndUserReport(evaluationResult)
+		const designerReport = generateDesignerReport(evaluationResult)
 
 		return NextResponse.json(
 			{
@@ -144,6 +146,7 @@ export async function GET(
 				developerReport,
 				auditorReport,
 				endUserReport,
+				designerReport,
 			},
 			{ status: 200 }
 		)
