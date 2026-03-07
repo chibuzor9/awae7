@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react'
 import { RotateCcw } from 'lucide-react'
-import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import type { WcagCard, WcagPrinciple } from '@/types'
 
@@ -74,14 +73,24 @@ export default function WcagDeckCard({ card }: WcagDeckCardProps) {
 		setIsFlipped(prev => !prev)
 	}, [])
 
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent<HTMLDivElement>) => {
-			if (e.key === 'Enter' || e.key === ' ') {
-				e.preventDefault()
-				toggleFlip()
-			}
+	const handleReferenceClick = useCallback(
+		(
+			e:
+				| React.MouseEvent<HTMLAnchorElement>
+				| React.KeyboardEvent<HTMLAnchorElement>
+		) => {
+			e.preventDefault()
+			e.stopPropagation()
+
+			const shouldRedirect = window.confirm(
+				`You are about to leave AWAE and open the WCAG reference for ${card.criterionNumber}. Continue?`
+			)
+
+			if (!shouldRedirect) return
+
+			window.open(card.url, '_blank', 'noopener,noreferrer')
 		},
-		[toggleFlip]
+		[card.criterionNumber, card.url]
 	)
 
 	return (
@@ -89,15 +98,6 @@ export default function WcagDeckCard({ card }: WcagDeckCardProps) {
 			className={cn(
 				'group aspect-2/3 w-full cursor-pointer perspective-[1000px]'
 			)}
-			onClick={toggleFlip}
-			onKeyDown={handleKeyDown}
-			role="button"
-			tabIndex={0}
-			aria-label={`WCAG ${card.criterionNumber} ${card.title}. ${
-				isFlipped
-					? 'Showing description. Press Enter to flip back.'
-					: 'Press Enter to see description.'
-			}`}
 		>
 			{/* Card wrapper for 3D flip transform */}
 			<div
@@ -112,26 +112,34 @@ export default function WcagDeckCard({ card }: WcagDeckCardProps) {
 						'absolute inset-0 overflow-hidden rounded-[5.2%] border-2 bg-white shadow-sm transition-colors group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-blue-500 group-focus-visible:ring-offset-2 backface-hidden',
 						imageLoaded ? 'border-transparent' : borderClass
 					)}
+					onClick={toggleFlip}
 				>
-					<Image
-						src={getSvgPath(
+					<object
+						data={getSvgPath(
 							card.criterionNumber,
 							card.principle,
 							card.level
 						)}
-						alt={`WCAG ${card.criterionNumber} — ${card.title}`}
-						fill
-						className="object-contain"
-						sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+						type="image/svg+xml"
+						aria-hidden="true"
+						tabIndex={-1}
+						className="pointer-events-none h-full w-full"
 						onLoad={() => setImageLoaded(true)}
-						onError={() => setImageLoaded(false)}
 					/>
 
 					{/* Flip hint overlay */}
-					<span className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-white/80 px-2 py-1 text-xs text-gray-500 backdrop-blur-sm">
+					<button
+						type="button"
+						onClick={e => {
+							e.stopPropagation()
+							toggleFlip()
+						}}
+						className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-white/55 px-2 py-1 text-xs text-gray-600 backdrop-blur-[1px] transition-colors hover:bg-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+						aria-label={`Flip WCAG ${card.criterionNumber} card to details`}
+					>
 						<RotateCcw className="h-3 w-3" aria-hidden="true" />
 						Flip
-					</span>
+					</button>
 				</div>
 
 				{/* ======== BACK SIDE — Comprehensive Description ======== */}
@@ -144,14 +152,30 @@ export default function WcagDeckCard({ card }: WcagDeckCardProps) {
 				>
 					<div
 						tabIndex={0}
+						onClick={toggleFlip}
 						aria-label={`Details for WCAG ${card.criterionNumber} ${card.title}`}
 						className="flex h-full flex-col gap-3 overflow-y-auto rounded-[calc(5.2%-2px)] p-5 pr-4 [scrollbar-gutter:stable] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar]:h-0"
 					>
 						{/* Header */}
 						<div className="flex items-start justify-between gap-2">
-							<p className={cn('text-sm font-bold', textClass)}>
+							<a
+								href={card.url}
+								target="_blank"
+								rel="noopener noreferrer"
+								onClick={handleReferenceClick}
+								onKeyDown={e => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										handleReferenceClick(e)
+									}
+								}}
+								className={cn(
+									'cursor-pointer text-left text-sm font-bold underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+									textClass
+								)}
+								aria-label={`Open external reference for WCAG ${card.criterionNumber} ${card.title}`}
+							>
 								{card.criterionNumber} &mdash; {card.title}
-							</p>
+							</a>
 							<span className="shrink-0 rounded-full bg-gray-900 px-2 py-0.5 text-[10px] font-bold text-white">
 								{card.level}
 							</span>
@@ -181,10 +205,18 @@ export default function WcagDeckCard({ card }: WcagDeckCardProps) {
 						)}
 
 						{/* Flip-back hint */}
-						<span className="mt-auto flex items-center gap-1 self-end text-xs text-gray-600">
+						<button
+							type="button"
+							onClick={e => {
+								e.stopPropagation()
+								toggleFlip()
+							}}
+							className="mt-auto flex items-center gap-1 self-end text-xs text-gray-600 transition-colors hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+							aria-label={`Flip WCAG ${card.criterionNumber} card back to artwork`}
+						>
 							<RotateCcw className="h-3 w-3" aria-hidden="true" />
 							Click to flip back
-						</span>
+						</button>
 					</div>
 				</div>
 			</div>
