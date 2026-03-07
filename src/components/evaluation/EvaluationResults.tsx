@@ -97,8 +97,6 @@ export default function EvaluationResults({
 				/>
 			</div>
 
-			<div className="mb-4 border-b border-(--border)" />
-
 			<TabsContent value="end-user">
 				<EndUserReport report={endUserReport} />
 			</TabsContent>

@@ -3,7 +3,6 @@
 import { AlertTriangle, AlertCircle, Info, ShieldAlert, CheckCircle2 } from 'lucide-react'
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
-import PourGrid from '@/components/evaluation/PourGrid'
 import { cn } from '@/lib/utils'
 import type { DesignerReport as DesignerReportType } from '@/types'
 
@@ -33,9 +32,6 @@ function severityBadgeVariant(severity: string) {
 export default function DesignerReport({ report }: DesignerReportProps) {
 	return (
 		<div className="space-y-6">
-			{/* 1. POUR 2x2 Grid */}
-			<PourGrid principleScores={report.principleScores} />
-
 			{/* 2. Color & Contrast */}
 			<Card>
 				<CardHeader>
