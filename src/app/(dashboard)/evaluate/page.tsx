@@ -14,6 +14,7 @@ import type {
 	DeveloperReport,
 	AuditorReport,
 	EndUserReport,
+	DesignerReport,
 } from '@/types'
 
 interface EvaluationData {
@@ -21,9 +22,10 @@ interface EvaluationData {
 	developerReport: DeveloperReport
 	auditorReport: AuditorReport
 	endUserReport: EndUserReport
+	designerReport: DesignerReport
 }
 
-type PreferredRole = 'end-user' | 'developer' | 'auditor'
+type PreferredRole = 'end-user' | 'developer' | 'designer' | 'auditor'
 
 const PREFERRED_ROLE_STORAGE_KEY = 'awae_preferred_role'
 
@@ -87,6 +89,7 @@ export default function EvaluatePage() {
 				if (
 					storedRole === 'end-user' ||
 					storedRole === 'developer' ||
+					storedRole === 'designer' ||
 					storedRole === 'auditor'
 				) {
 					localFallback = storedRole
@@ -111,6 +114,7 @@ export default function EvaluatePage() {
 				if (
 					data.preferredRole === 'end-user' ||
 					data.preferredRole === 'developer' ||
+					data.preferredRole === 'designer' ||
 					data.preferredRole === 'auditor'
 				) {
 					if (mounted) setPreferredRole(data.preferredRole)
@@ -294,6 +298,7 @@ export default function EvaluatePage() {
 											value: 'developer',
 											label: 'Developer',
 										},
+										{ value: 'designer', label: 'Designer' },
 										{ value: 'auditor', label: 'Auditor' },
 									] as const
 								).map(option => {
@@ -403,6 +408,7 @@ export default function EvaluatePage() {
 							developerReport={results.developerReport}
 							auditorReport={results.auditorReport}
 							endUserReport={results.endUserReport}
+							designerReport={results.designerReport}
 							defaultTab={preferredRole}
 						/>
 					</section>

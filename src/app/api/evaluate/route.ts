@@ -5,6 +5,7 @@ import {
 	generateDeveloperReport,
 	generateAuditorReport,
 	generateEndUserReport,
+	generateDesignerReport,
 } from '@/lib/axe/transform'
 import { formatHtmlForReport } from '@/lib/html/format'
 import { prisma } from '@/lib/prisma'
@@ -234,6 +235,7 @@ export async function POST(request: NextRequest) {
 	const developerReport = generateDeveloperReport(evaluation)
 	const auditorReport = generateAuditorReport(evaluation)
 	const endUserReport = generateEndUserReport(evaluation)
+	const designerReport = generateDesignerReport(evaluation)
 
 	// ---- Optionally persist to database if authenticated ----
 	let savedEvaluationId: string | null = null
@@ -307,6 +309,7 @@ export async function POST(request: NextRequest) {
 			developerReport,
 			auditorReport,
 			endUserReport,
+			designerReport,
 		},
 		{ status: 200 }
 	)
