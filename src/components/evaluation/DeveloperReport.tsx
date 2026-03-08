@@ -6,17 +6,12 @@ import {
 	AlertCircle,
 	Info,
 	ShieldAlert,
-	Calendar,
-	Globe,
-	Layers,
-	Filter,
 	SearchX,
 	ChevronDown,
 } from 'lucide-react'
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
-import { ScoreGauge } from '@/components/ui/ScoreGauge'
-import { cn, formatDate } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { ViolationCard } from '@/components/evaluation/ViolationCard'
 import type {
 	DeveloperReport as DeveloperReportType,
@@ -404,38 +399,6 @@ function SectionDropdown({
 	)
 }
 
-/* ---- Severity Count Card ---- */
-
-interface SeverityCountProps {
-	severity: Severity
-	count: number
-}
-
-function SeverityCount({ severity, count }: SeverityCountProps) {
-	const config = severityConfig[severity]
-	const Icon = config.icon
-
-	return (
-		<div
-			className={cn(
-				'flex items-center gap-2 rounded-lg px-4 py-3',
-				config.bgClass
-			)}
-		>
-			<Icon
-				className={cn('h-5 w-5', config.colorClass)}
-				aria-hidden="true"
-			/>
-			<div>
-				<p className={cn('text-lg font-bold', config.colorClass)}>
-					{count}
-				</p>
-				<p className="text-xs capitalize text-gray-600">{severity}</p>
-			</div>
-		</div>
-	)
-}
-
 /* ---- Main Component ---- */
 
 export default function DeveloperReport({
@@ -587,12 +550,36 @@ export default function DeveloperReport({
 
 	const hasActiveFilters = activeFilterCount > 0
 
+	/* -- Page grouping for crawls -- */
+	const allPageUrls = useMemo(() => {
+		const urls = new Set<string>()
+		for (const v of violations) {
+			for (const el of v.elements) {
+				if (el.pageUrl) urls.add(el.pageUrl)
+			}
+		}
+		return Array.from(urls).sort()
+	}, [violations])
+
+	const isMultiPage = allPageUrls.length > 1
+	const [activePage, setActivePage] = useState<string>('all')
+
+	const pageFilteredViolations = useMemo(() => {
+		if (!isMultiPage || activePage === 'all') return filteredViolations
+		return filteredViolations
+			.map(v => ({
+				...v,
+				elements: v.elements.filter(el => el.pageUrl === activePage),
+			}))
+			.filter(v => v.elements.length > 0)
+	}, [filteredViolations, isMultiPage, activePage])
+
 	const sourceEditorText = useMemo(() => {
 		if (report.fullSourceHtml?.trim()) {
 			return report.fullSourceHtml
 		}
 
-		const fallbackCandidates = filteredViolations
+		const fallbackCandidates = pageFilteredViolations
 			.flatMap(violation =>
 				violation.elements.flatMap(element => [
 					...(element.sourceContext ?? []),
@@ -604,7 +591,7 @@ export default function DeveloperReport({
 		if (fallbackCandidates.length === 0) return ''
 
 		return [...fallbackCandidates].sort((a, b) => b.length - a.length)[0]
-	}, [filteredViolations, report.fullSourceHtml])
+	}, [pageFilteredViolations, report.fullSourceHtml])
 
 	const displaySourceText = useMemo(() => {
 		if (report.fullSourceHtml?.trim()) {
@@ -626,7 +613,7 @@ export default function DeveloperReport({
 
 		const lines = displaySourceText.split('\n')
 
-		if (filteredViolations.length === 0) {
+		if (pageFilteredViolations.length === 0) {
 			return {
 				lines,
 				primaryLine: -1,
@@ -638,7 +625,7 @@ export default function DeveloperReport({
 		const lineTooltips = new Map<number, string>()
 		const allMatchedLines = new Set<number>()
 
-		for (const violation of filteredViolations) {
+		for (const violation of pageFilteredViolations) {
 			for (const element of violation.elements) {
 				const selectorTokens = extractSelectorTokens(element.selector)
 				if (selectorTokens.length === 0) continue
@@ -686,282 +673,248 @@ export default function DeveloperReport({
 		}
 
 		return { lines, primaryLine, relatedLines, lineTooltips }
-	}, [displaySourceText, filteredViolations])
+	}, [displaySourceText, pageFilteredViolations])
 
 	const clearAllFilters = useCallback(() => {
 		setActiveSeverities(new Set(ALL_SEVERITIES))
 		setActivePrinciples(new Set(ALL_PRINCIPLES))
 		setActiveLevels(new Set(ALL_LEVELS))
 		setActiveCategories(new Set(allCategories))
+		setActivePage('all')
 	}, [allCategories])
 
 	/* ---- Render ---- */
 
 	return (
 		<div className="space-y-4">
-			{/* ==================== Summary Section ==================== */}
-			<Card>
-				<CardHeader>
-					<h2 className="text-lg font-semibold text-gray-900">
-						Developer Report
-					</h2>
-					<p className="mt-0.5 text-sm text-gray-500">
-						Technical accessibility evaluation for developers
-					</p>
-				</CardHeader>
-
-				<CardBody className="space-y-6">
-					{/* Score + meta info */}
-					<div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-						{/* Score gauge */}
-						<div className="shrink-0">
-							<ScoreGauge
-								score={summary.overallScore}
-								size={140}
-							/>
-						</div>
-
-						{/* Meta info grid */}
-						<div className="flex-1 space-y-4">
-							{/* URL */}
-							<div className="flex items-center gap-2 text-sm">
-								<Globe
-									className="h-4 w-4 shrink-0 text-gray-400"
-									aria-hidden="true"
-								/>
-								<span className="font-medium text-gray-900">
-									Target:
-								</span>
-								<span className="truncate text-gray-600">
-									{summary.targetUrl}
-								</span>
-							</div>
-
-							{/* Date */}
-							<div className="flex items-center gap-2 text-sm">
-								<Calendar
-									className="h-4 w-4 shrink-0 text-gray-400"
-									aria-hidden="true"
-								/>
-								<span className="font-medium text-gray-900">
-									Evaluated:
-								</span>
-								<span className="text-gray-600">
-									{formatDate(summary.evaluationDate)}
-								</span>
-							</div>
-
-							{/* axe-core version */}
-							<div className="flex items-center gap-2 text-sm">
-								<Layers
-									className="h-4 w-4 shrink-0 text-gray-400"
-									aria-hidden="true"
-								/>
-								<span className="font-medium text-gray-900">
-									Engine:
-								</span>
-								<Badge variant="default">
-									axe-core v{summary.axeCoreVersion}
-								</Badge>
-							</div>
-
-							{/* Total violations */}
-							<p className="text-sm text-gray-700">
-								<span className="font-semibold">
-									{summary.totalViolations}
-								</span>{' '}
-								accessibility{' '}
-								{summary.totalViolations === 1
-									? 'violation'
-									: 'violations'}{' '}
-								found
-								{(summary.totalIncomplete ?? 0) > 0 && (
-									<>
-										{' · '}
-										<span className="font-semibold text-amber-600">
-											{summary.totalIncomplete}
-										</span>{' '}
-										needs review
-									</>
-								)}
-								{(summary.totalPasses ?? 0) > 0 && (
-									<>
-										{' · '}
-										<span className="font-semibold text-green-600">
-											{summary.totalPasses}
-										</span>{' '}
-										passed
-									</>
-								)}
-							</p>
-						</div>
-					</div>
-
-					{/* Severity breakdown */}
-					<div>
-						<h3 className="mb-3 text-sm font-semibold text-gray-900">
-							Severity Breakdown
-						</h3>
-						<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-							<SeverityCount
-								severity="critical"
-								count={summary.criticalCount}
-							/>
-							<SeverityCount
-								severity="serious"
-								count={summary.seriousCount}
-							/>
-							<SeverityCount
-								severity="moderate"
-								count={summary.moderateCount}
-							/>
-							<SeverityCount
-								severity="minor"
-								count={summary.minorCount}
-							/>
-						</div>
-					</div>
-				</CardBody>
-			</Card>
-
-			{/* ==================== Filters Section ==================== */}
-			<SectionDropdown
-				title="Filters"
-				description="Narrow results by severity, principle, level, and category."
-			>
-				<CardBody className="space-y-4">
-					<div className="flex flex-wrap items-center justify-between gap-2">
-						<h3 className="flex items-center gap-1.5 text-sm font-semibold text-gray-900">
-							<Filter
-								className="h-4 w-4 text-gray-500"
-								aria-hidden="true"
-							/>
-							Filters
-							{hasActiveFilters && (
-								<Badge variant="info">
-									{activeFilterCount} active
-								</Badge>
-							)}
-						</h3>
-
-						{hasActiveFilters && (
-							<button
-								type="button"
-								onClick={clearAllFilters}
-								className="text-xs font-medium text-blue-600 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 rounded-sm"
-							>
-								Clear all filters
-							</button>
-						)}
-					</div>
-
-					<div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-						<div className="space-y-1.5">
-							<label
-								htmlFor="developer-filter-severity"
-								className="text-xs font-medium uppercase tracking-wide text-gray-500"
-							>
-								Severity
-							</label>
-							<select
-								id="developer-filter-severity"
-								value={selectedSeverity}
-								onChange={e =>
-									handleSeverityChange(e.target.value)
-								}
-								className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-							>
-								<option value="all">All severities</option>
-								{ALL_SEVERITIES.map(severity => (
-									<option key={severity} value={severity}>
-										{severity.charAt(0).toUpperCase() +
-											severity.slice(1)}
-									</option>
-								))}
-							</select>
-						</div>
-
-						<div className="space-y-1.5">
-							<label
-								htmlFor="developer-filter-principle"
-								className="text-xs font-medium uppercase tracking-wide text-gray-500"
-							>
-								WCAG Principle
-							</label>
-							<select
-								id="developer-filter-principle"
-								value={selectedPrinciple}
-								onChange={e =>
-									handlePrincipleChange(e.target.value)
-								}
-								className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-							>
-								<option value="all">All principles</option>
-								{ALL_PRINCIPLES.map(principle => (
-									<option key={principle} value={principle}>
-										{principle}
-									</option>
-								))}
-							</select>
-						</div>
-
-						<div className="space-y-1.5">
-							<label
-								htmlFor="developer-filter-level"
-								className="text-xs font-medium uppercase tracking-wide text-gray-500"
-							>
-								Conformance Level
-							</label>
-							<select
-								id="developer-filter-level"
-								value={selectedLevel}
-								onChange={e =>
-									handleLevelChange(e.target.value)
-								}
-								className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-							>
-								<option value="all">All levels</option>
-								{ALL_LEVELS.map(level => (
-									<option key={level} value={level}>
-										{level === 'best-practice'
-											? 'Best Practice'
-											: `Level ${level}`}
-									</option>
-								))}
-							</select>
-						</div>
-
-						{allCategories.length > 0 && (
-							<div className="space-y-1.5">
-								<label
-									htmlFor="developer-filter-category"
-									className="text-xs font-medium uppercase tracking-wide text-gray-500"
-								>
-									Category
+			{/* ==================== Source Code ==================== */}
+			{sourceEditorText && (
+				<SectionDropdown
+					title="Source Code"
+					description="Full formatted source in a fixed-height editor. Hover highlighted lines for issue details and remediation."
+					defaultOpen
+				>
+					<CardBody className="space-y-3">
+						{/* Filter toolbar */}
+						<div className="flex flex-wrap items-end gap-3">
+							{/* Severity */}
+							<div className="space-y-1 min-w-[120px]">
+								<label htmlFor="developer-filter-severity" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+									Severity
 								</label>
 								<select
-									id="developer-filter-category"
-									value={selectedCategory}
-									onChange={e =>
-										handleCategoryChange(e.target.value)
-									}
-									className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+									id="developer-filter-severity"
+									value={selectedSeverity}
+									onChange={e => handleSeverityChange(e.target.value)}
+									className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
 								>
-									<option value="all">All categories</option>
-									{allCategories.map(category => (
-										<option key={category} value={category}>
-											{CATEGORY_LABELS[category] ??
-												category}
-										</option>
+									<option value="all">All</option>
+									{ALL_SEVERITIES.map(s => (
+										<option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
 									))}
 								</select>
 							</div>
-						)}
-					</div>
-				</CardBody>
-			</SectionDropdown>
 
-			{/* ==================== Violations List ==================== */}
+							{/* Principle */}
+							<div className="space-y-1 min-w-[120px]">
+								<label htmlFor="developer-filter-principle" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+									Principle
+								</label>
+								<select
+									id="developer-filter-principle"
+									value={selectedPrinciple}
+									onChange={e => handlePrincipleChange(e.target.value)}
+									className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+								>
+									<option value="all">All</option>
+									{ALL_PRINCIPLES.map(p => (
+										<option key={p} value={p}>{p}</option>
+									))}
+								</select>
+							</div>
+
+							{/* Level */}
+							<div className="space-y-1 min-w-[100px]">
+								<label htmlFor="developer-filter-level" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+									Level
+								</label>
+								<select
+									id="developer-filter-level"
+									value={selectedLevel}
+									onChange={e => handleLevelChange(e.target.value)}
+									className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+								>
+									<option value="all">All</option>
+									{ALL_LEVELS.map(l => (
+										<option key={l} value={l}>{l === 'best-practice' ? 'Best Practice' : `Level ${l}`}</option>
+									))}
+								</select>
+							</div>
+
+							{/* Category */}
+							{allCategories.length > 0 && (
+								<div className="space-y-1 min-w-[120px]">
+									<label htmlFor="developer-filter-category" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+										Category
+									</label>
+									<select
+										id="developer-filter-category"
+										value={selectedCategory}
+										onChange={e => handleCategoryChange(e.target.value)}
+										className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+									>
+										<option value="all">All</option>
+										{allCategories.map(c => (
+											<option key={c} value={c}>{CATEGORY_LABELS[c] ?? c}</option>
+										))}
+									</select>
+								</div>
+							)}
+
+							{/* Page (crawl only) */}
+							{isMultiPage && (
+								<div className="space-y-1 min-w-[140px]">
+									<label htmlFor="developer-filter-page" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+										Page
+									</label>
+									<select
+										id="developer-filter-page"
+										value={activePage}
+										onChange={e => setActivePage(e.target.value)}
+										className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+									>
+										<option value="all">All pages ({allPageUrls.length})</option>
+										{allPageUrls.map(url => {
+											const short = url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+											return (
+												<option key={url} value={url}>{short}</option>
+											)
+										})}
+									</select>
+								</div>
+							)}
+
+							{/* Divider */}
+							<div className="hidden sm:block h-8 w-px bg-gray-200" />
+
+							{/* Theme */}
+							<div className="space-y-1 min-w-[130px]">
+								<label htmlFor="source-focus-theme" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+									Theme
+								</label>
+								<select
+									id="source-focus-theme"
+									value={sourceTheme}
+									onChange={e => setSourceTheme(e.target.value as SourceThemeKey)}
+									className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+								>
+									{Object.entries(SOURCE_THEMES).map(([key, value]) => (
+										<option key={key} value={key}>{value.label}</option>
+									))}
+								</select>
+							</div>
+
+							{/* Clear filters button */}
+							{hasActiveFilters && (
+								<button
+									type="button"
+									onClick={clearAllFilters}
+									className="ml-auto text-xs font-medium text-blue-600 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 rounded-sm"
+								>
+									Clear filters
+								</button>
+							)}
+						</div>
+
+						{/* Code viewer */}
+						<div
+							className={cn(
+								'h-136 overflow-auto rounded-xl p-2 font-mono text-xs leading-relaxed',
+								SOURCE_THEMES[sourceTheme].container
+							)}
+						>
+							<div className="mb-2 flex items-center justify-between border-b border-white/10 px-2 pb-2">
+								<div className="flex items-center gap-1.5">
+									<span className="h-2.5 w-2.5 rounded-full bg-red-400" />
+									<span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+									<span className="h-2.5 w-2.5 rounded-full bg-green-400" />
+								</div>
+								<span className="truncate text-[10px] text-gray-400">
+									source.html
+								</span>
+							</div>
+							<div className="min-w-2xl">
+								{sourceHighlight.lines.map(
+									(line, lineIndex) => {
+										const isPrimary =
+											lineIndex ===
+											sourceHighlight.primaryLine
+										const isRelated =
+											sourceHighlight.relatedLines.has(
+												lineIndex
+											)
+
+										const hoverDetails =
+											sourceHighlight.lineTooltips.get(
+												lineIndex
+											)
+
+										return (
+											<div
+												key={`source-focus-${lineIndex}`}
+												title={
+													isPrimary || isRelated
+														? hoverDetails
+														: undefined
+												}
+												className={cn(
+													'grid grid-cols-[2.75rem_1fr] gap-2 px-2 py-0.5',
+													SOURCE_THEMES[
+														sourceTheme
+													].lineDefault,
+													isPrimary &&
+														SOURCE_THEMES[
+															sourceTheme
+														].linePrimary,
+													!isPrimary &&
+														isRelated &&
+														SOURCE_THEMES[
+															sourceTheme
+														].lineSecondary
+												)}
+											>
+												<span
+													className={cn(
+														'select-none text-right text-[10px] tabular-nums',
+														SOURCE_THEMES[
+															sourceTheme
+														].lineNumber
+													)}
+												>
+													{lineIndex + 1}
+												</span>
+												<span className="whitespace-pre">
+													{renderHtmlLine(
+														line,
+														`source-line-${lineIndex}`
+													)}
+												</span>
+											</div>
+										)
+									}
+								)}
+							</div>
+						</div>
+
+						<p className="text-xs text-gray-500">
+							Highlighted lines indicate where filtered
+							violations appear in the page source.
+						</p>
+					</CardBody>
+				</SectionDropdown>
+			)}
+
+			{/* ==================== Technical Hotspots ==================== */}
 			<section aria-label="Hotspots and insights">
 				<SectionDropdown
 					title="Technical Hotspots"
@@ -1040,139 +993,16 @@ export default function DeveloperReport({
 				</SectionDropdown>
 			</section>
 
+			{/* ==================== Violations List ==================== */}
 			<section aria-label="Violation results" className="space-y-4">
-				{sourceEditorText && (
-					<SectionDropdown
-						title="Source Code"
-						description="Full formatted source in a fixed-height editor. Hover highlighted lines for issue details and remediation."
-					>
-						<CardBody className="space-y-3">
-							<div className="flex justify-end">
-								<div className="w-full max-w-xs space-y-1">
-									<label
-										htmlFor="source-focus-theme"
-										className="text-xs font-medium uppercase tracking-wide text-gray-500"
-									>
-										Theme
-									</label>
-									<select
-										id="source-focus-theme"
-										title="Select code theme"
-										value={sourceTheme}
-										onChange={event =>
-											setSourceTheme(
-												event.target
-													.value as SourceThemeKey
-											)
-										}
-										className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-									>
-										{Object.entries(SOURCE_THEMES).map(
-											([key, value]) => (
-												<option key={key} value={key}>
-													{value.label}
-												</option>
-											)
-										)}
-									</select>
-								</div>
-							</div>
-
-							<div
-								className={cn(
-									'h-136 overflow-auto rounded-xl p-2 font-mono text-xs leading-relaxed',
-									SOURCE_THEMES[sourceTheme].container
-								)}
-							>
-								<div className="mb-2 flex items-center justify-between border-b border-white/10 px-2 pb-2">
-									<div className="flex items-center gap-1.5">
-										<span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-										<span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-										<span className="h-2.5 w-2.5 rounded-full bg-green-400" />
-									</div>
-									<span className="truncate text-[10px] text-gray-400">
-										source.html
-									</span>
-								</div>
-								<div className="min-w-2xl">
-									{sourceHighlight.lines.map(
-										(line, lineIndex) => {
-											const isPrimary =
-												lineIndex ===
-												sourceHighlight.primaryLine
-											const isRelated =
-												sourceHighlight.relatedLines.has(
-													lineIndex
-												)
-
-											const hoverDetails =
-												sourceHighlight.lineTooltips.get(
-													lineIndex
-												)
-
-											return (
-												<div
-													key={`source-focus-${lineIndex}`}
-													title={
-														isPrimary || isRelated
-															? hoverDetails
-															: undefined
-													}
-													className={cn(
-														'grid grid-cols-[2.75rem_1fr] gap-2 px-2 py-0.5',
-														SOURCE_THEMES[
-															sourceTheme
-														].lineDefault,
-														isPrimary &&
-															SOURCE_THEMES[
-																sourceTheme
-															].linePrimary,
-														!isPrimary &&
-															isRelated &&
-															SOURCE_THEMES[
-																sourceTheme
-															].lineSecondary
-													)}
-												>
-													<span
-														className={cn(
-															'select-none text-right text-[10px] tabular-nums',
-															SOURCE_THEMES[
-																sourceTheme
-															].lineNumber
-														)}
-													>
-														{lineIndex + 1}
-													</span>
-													<span className="whitespace-pre">
-														{renderHtmlLine(
-															line,
-															`source-line-${lineIndex}`
-														)}
-													</span>
-												</div>
-											)
-										}
-									)}
-								</div>
-							</div>
-
-							<p className="text-xs text-gray-500">
-								Highlighted lines indicate where filtered
-								violations appear in the page source.
-							</p>
-						</CardBody>
-					</SectionDropdown>
-				)}
-
 				<SectionDropdown
-					title={`Violations (${filteredViolations.length} of ${violations.length})`}
+					title={`Violations (${pageFilteredViolations.length} of ${violations.length})`}
 					description="Expand for full rule-by-rule details."
 				>
 					<div className="p-4">
-						{filteredViolations.length > 0 ? (
+						{pageFilteredViolations.length > 0 ? (
 							<div className="space-y-3">
-								{filteredViolations.map((violation, index) => (
+								{pageFilteredViolations.map((violation, index) => (
 									<ViolationCard
 										key={`${violation.ruleId}-${violation.elements[0]?.pageUrl ?? 'no-page'}-${index}`}
 										uniqueId={`${violation.ruleId}-${violation.elements[0]?.pageUrl ?? 'no-page'}-${index}`}
@@ -1198,12 +1028,14 @@ export default function DeveloperReport({
 										aria-hidden="true"
 									/>
 									<p className="mt-3 text-sm font-medium text-gray-700">
-										No violations match the current filters
+										No Issues Detected
 									</p>
-									<p className="mt-1 text-xs text-gray-500">
-										Try adjusting or clearing the filters to
-										see results.
-									</p>
+									{hasActiveFilters && (
+										<p className="mt-1 text-xs text-gray-500">
+											Try adjusting or clearing the filters to
+											see results.
+										</p>
+									)}
 									{hasActiveFilters && (
 										<button
 											type="button"

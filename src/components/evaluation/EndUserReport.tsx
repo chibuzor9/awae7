@@ -1,7 +1,6 @@
 'use client'
 
 import {
-	CheckCircle2,
 	Eye,
 	MousePointer,
 	BookOpen,
@@ -114,13 +113,8 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 		categories,
 		priorities,
 		needsReviewCount,
-		summary,
 	} = report
 	const interpretation = getInterpretation(score)
-
-	const attentionCategories = [...categories]
-		.filter(category => category.issueCount > 0 || category.score < 80)
-		.sort((a, b) => b.issueCount - a.issueCount)
 
 	return (
 		<div className="space-y-8">
@@ -146,104 +140,6 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 						</span>
 					)}
 				</p>
-			</section>
-
-			{/* ============ ISSUE SNAPSHOT ============ */}
-			<section aria-labelledby="snapshot-heading">
-				<Card className="transition-all duration-200 hover:shadow-md">
-					<CardHeader>
-						<h2
-							id="snapshot-heading"
-							className="text-lg font-semibold text-gray-900"
-						>
-							Issue Snapshot
-						</h2>
-						<p className="text-sm text-gray-500 mt-1">
-							Quick summary of what needs attention now.
-						</p>
-					</CardHeader>
-					<CardBody className="space-y-4">
-						<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-							<div className="rounded-lg border border-red-200 bg-red-50 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">
-								<p className="text-xs text-red-700">Critical</p>
-								<p className="text-lg font-bold text-red-700">
-									{summary.criticalCount}
-								</p>
-							</div>
-							<div className="rounded-lg border border-orange-200 bg-orange-50 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">
-								<p className="text-xs text-orange-700">
-									Serious
-								</p>
-								<p className="text-lg font-bold text-orange-700">
-									{summary.seriousCount}
-								</p>
-							</div>
-							<div className="rounded-lg border border-amber-200 bg-amber-50 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">
-								<p className="text-xs text-amber-700">
-									Moderate
-								</p>
-								<p className="text-lg font-bold text-amber-700">
-									{summary.moderateCount}
-								</p>
-							</div>
-							<div className="rounded-lg border border-blue-200 bg-blue-50 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">
-								<p className="text-xs text-blue-700">Minor</p>
-								<p className="text-lg font-bold text-blue-700">
-									{summary.minorCount}
-								</p>
-							</div>
-						</div>
-
-						<div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-							<div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-								<AlertTriangle
-									className="h-4 w-4"
-									aria-hidden="true"
-								/>
-								<span>
-									{summary.totalViolations} detected issues,{' '}
-									{needsReviewCount} require manual review
-								</span>
-							</div>
-							<div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-								<CheckCircle2
-									className="h-4 w-4"
-									aria-hidden="true"
-								/>
-								<span>
-									{summary.totalPasses} accessibility checks
-									passed
-								</span>
-							</div>
-						</div>
-
-						{attentionCategories.length > 0 && (
-							<div>
-								<p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-									Areas needing attention first
-								</p>
-								<ul className="space-y-2">
-									{attentionCategories
-										.slice(0, 4)
-										.map(category => (
-											<li
-												key={category.name}
-												className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/60 hover:shadow-sm"
-											>
-												<span className="font-medium text-gray-800">
-													{category.name}
-												</span>
-												<span className="tabular-nums text-gray-600">
-													{category.issueCount} issues
-													· {category.score}/100
-												</span>
-											</li>
-										))}
-								</ul>
-							</div>
-						)}
-					</CardBody>
-				</Card>
 			</section>
 
 			{/* ============ WHAT THIS MEANS ============ */}
@@ -390,7 +286,7 @@ function CategoryCard({ category }: { category: EndUserCategory }) {
 					</div>
 					<Badge variant={getIssueBadgeVariant(category.issueCount)}>
 						{category.issueCount === 0
-							? 'No issues'
+							? 'No Issues Detected'
 							: `${category.issueCount} ${category.issueCount === 1 ? 'issue' : 'issues'}`}
 					</Badge>{' '}
 					{(category.needsReviewCount ?? 0) > 0 && (

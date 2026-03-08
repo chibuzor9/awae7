@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { CircleUser, LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
 import type { User } from '@supabase/supabase-js'
 
 const navLinks = [
@@ -12,12 +14,24 @@ const navLinks = [
 	{ href: '/history', label: 'History' },
 ]
 
+const PREFERRED_ROLE_STORAGE_KEY = 'awae_preferred_role'
+type PreferredRole = 'end-user' | 'developer' | 'designer' | 'auditor'
+
+const ROLE_OPTIONS: { value: PreferredRole; label: string }[] = [
+	{ value: 'end-user', label: 'End User' },
+	{ value: 'developer', label: 'Developer' },
+	{ value: 'designer', label: 'Designer' },
+	{ value: 'auditor', label: 'Auditor' },
+]
+
 export default function Navbar() {
 	const router = useRouter()
 	const pathname = usePathname()
 	const [user, setUser] = useState<User | null>(null)
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 	const [loggingOut, setLoggingOut] = useState(false)
+	const [preferredRole, setPreferredRole] = useState<PreferredRole>('end-user')
+	const [profileOpen, setProfileOpen] = useState(false)
 
 	useEffect(() => {
 		const supabase = createClient()
@@ -44,6 +58,17 @@ export default function Navbar() {
 	}, [pathname])
 
 	useEffect(() => {
+		try {
+			const stored = window.localStorage.getItem(PREFERRED_ROLE_STORAGE_KEY)
+			if (stored && ['end-user', 'developer', 'designer', 'auditor'].includes(stored)) {
+				setPreferredRole(stored as PreferredRole)
+			}
+		} catch {
+			// Ignore localStorage errors
+		}
+	}, [])
+
+	useEffect(() => {
 		if (!mobileMenuOpen) return
 		const previousOverflow = document.body.style.overflow
 		document.body.style.overflow = 'hidden'
@@ -51,6 +76,18 @@ export default function Navbar() {
 			document.body.style.overflow = previousOverflow
 		}
 	}, [mobileMenuOpen])
+
+	useEffect(() => {
+		if (!profileOpen && !mobileMenuOpen) return
+		const handler = (e: globalThis.KeyboardEvent) => {
+			if (e.key === 'Escape') {
+				setProfileOpen(false)
+				setMobileMenuOpen(false)
+			}
+		}
+		document.addEventListener('keydown', handler)
+		return () => document.removeEventListener('keydown', handler)
+	}, [profileOpen, mobileMenuOpen])
 
 	async function handleLogout() {
 		setLoggingOut(true)
@@ -61,6 +98,26 @@ export default function Navbar() {
 			router.refresh()
 		} finally {
 			setLoggingOut(false)
+		}
+	}
+
+	async function handlePreferenceChange(role: PreferredRole) {
+		setPreferredRole(role)
+		setProfileOpen(false)
+		try {
+			window.localStorage.setItem(PREFERRED_ROLE_STORAGE_KEY, role)
+			window.dispatchEvent(new Event('awae-preference-changed'))
+		} catch {
+			// Ignore localStorage errors
+		}
+		try {
+			await fetch('/api/preferences', {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ preferredRole: role }),
+			})
+		} catch {
+			// Silent fail for API sync
 		}
 	}
 
@@ -94,18 +151,71 @@ export default function Navbar() {
 					{/* Right: Auth Section (Desktop) */}
 					<div className="hidden md:flex items-center gap-3">
 						{user ? (
-							<>
-								<span className="max-w-48 truncate text-sm text-slate-600">
-									{user.email}
-								</span>
+							<div className="relative">
 								<button
-									onClick={handleLogout}
-									disabled={loggingOut}
-									className="cursor-pointer rounded-lg border border-(--border) bg-white px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-(--accent-soft) focus:outline-none focus:ring-2 focus:ring-(--accent) focus:ring-offset-2 disabled:opacity-50"
+									type="button"
+									onClick={() => setProfileOpen(!profileOpen)}
+									className="flex items-center justify-center rounded-full p-1.5 text-slate-600 transition-colors hover:bg-(--accent-soft) hover:text-(--accent) focus:outline-none focus:ring-2 focus:ring-(--accent) focus:ring-offset-2"
+									aria-label="Account menu"
 								>
-									{loggingOut ? 'Logging out...' : 'Logout'}
+									<CircleUser className="h-6 w-6" aria-hidden="true" />
 								</button>
-							</>
+								{profileOpen && (
+									<>
+										<button
+											type="button"
+											tabIndex={-1}
+											className="fixed inset-0 z-40"
+											aria-label="Close account menu"
+											onClick={() => setProfileOpen(false)}
+										/>
+										<div className="absolute right-0 z-50 mt-2 w-56 rounded-xl border border-(--border) bg-white py-2 shadow-lg">
+											{/* Email */}
+											<div className="px-4 py-2 border-b border-(--border)">
+												<p className="truncate text-sm font-medium text-slate-900">{user.email}</p>
+											</div>
+
+											{/* Preferred View */}
+											<div className="px-4 py-2.5 border-b border-(--border)">
+												<p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 mb-2">Preferred View</p>
+												<div className="space-y-0.5">
+													{ROLE_OPTIONS.map(option => (
+														<button
+															key={option.value}
+															type="button"
+															onClick={() => handlePreferenceChange(option.value)}
+															className={cn(
+																'w-full rounded-md px-2.5 py-1.5 text-left text-sm transition-colors',
+																preferredRole === option.value
+																	? 'bg-(--accent-soft) font-semibold text-(--accent)'
+																	: 'text-slate-700 hover:bg-slate-50'
+															)}
+														>
+															{option.label}
+														</button>
+													))}
+												</div>
+											</div>
+
+											{/* Logout */}
+											<div className="px-2 pt-1">
+												<button
+													type="button"
+													onClick={() => {
+														setProfileOpen(false)
+														handleLogout()
+													}}
+													disabled={loggingOut}
+													className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
+												>
+													<LogOut className="h-4 w-4" aria-hidden="true" />
+													{loggingOut ? 'Logging out...' : 'Log out'}
+												</button>
+											</div>
+										</div>
+									</>
+								)}
+							</div>
 						) : (
 							<>
 								<Link
@@ -168,6 +278,7 @@ export default function Navbar() {
 				<>
 					<button
 						type="button"
+						tabIndex={-1}
 						aria-label="Close mobile menu"
 						onClick={() => setMobileMenuOpen(false)}
 						className="fixed inset-0 top-16 z-40 bg-slate-900/15 backdrop-blur-[1px] md:hidden"
@@ -192,6 +303,27 @@ export default function Navbar() {
 									<p className="truncate px-3 text-sm text-slate-600">
 										{user.email}
 									</p>
+									{/* Mobile preference selector */}
+									<div className="space-y-2 px-3">
+										<p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Preferred View</p>
+										<div className="flex flex-wrap gap-1">
+											{ROLE_OPTIONS.map(option => (
+												<button
+													key={option.value}
+													type="button"
+													onClick={() => handlePreferenceChange(option.value)}
+													className={cn(
+														'rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
+														preferredRole === option.value
+															? 'bg-(--accent) text-white'
+															: 'bg-(--accent-soft) text-slate-700'
+													)}
+												>
+													{option.label}
+												</button>
+											))}
+										</div>
+									</div>
 									<button
 										onClick={() => {
 											setMobileMenuOpen(false)

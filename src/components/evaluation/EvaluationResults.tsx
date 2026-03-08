@@ -2,23 +2,23 @@
 
 import { useEffect, useState } from 'react'
 import {
-	AlertTriangle,
-	CheckCircle2,
-	ClipboardCheck,
 	Code2,
 	FileText,
+	Palette,
 	User,
 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs'
 import DeveloperReport from '@/components/evaluation/DeveloperReport'
 import AuditorReport from '@/components/evaluation/AuditorReport'
 import EndUserReport from '@/components/evaluation/EndUserReport'
+import DesignerReport from '@/components/evaluation/DesignerReport'
 import { ExportButton } from '@/components/export/ExportButton'
 import type {
 	EvaluationResult,
 	DeveloperReport as DeveloperReportType,
 	AuditorReport as AuditorReportType,
 	EndUserReport as EndUserReportType,
+	DesignerReport as DesignerReportType,
 } from '@/types'
 
 export interface EvaluationResultsProps {
@@ -26,8 +26,9 @@ export interface EvaluationResultsProps {
 	developerReport: DeveloperReportType
 	auditorReport: AuditorReportType
 	endUserReport: EndUserReportType
+	designerReport: DesignerReportType
 	onWcagCardClick?: (criterionNumber: string) => void
-	defaultTab?: 'developer' | 'auditor' | 'end-user'
+	defaultTab?: 'developer' | 'auditor' | 'end-user' | 'designer'
 }
 
 export default function EvaluationResults({
@@ -35,43 +36,13 @@ export default function EvaluationResults({
 	developerReport,
 	auditorReport,
 	endUserReport,
+	designerReport,
 	onWcagCardClick,
 	defaultTab = 'end-user',
 }: EvaluationResultsProps) {
 	const [activeTab, setActiveTab] = useState<
-		'developer' | 'auditor' | 'end-user'
+		'developer' | 'auditor' | 'end-user' | 'designer'
 	>(defaultTab)
-
-	const summary = developerReport.summary
-	const crawlSummary = evaluation.crawlSummary
-	const pageSummaries =
-		evaluation.pageSummaries && evaluation.pageSummaries.length > 0
-			? evaluation.pageSummaries
-			: crawlSummary?.pageSummaries
-					.filter(page => page.status === 'ok')
-					.map(page => ({
-						url: page.url,
-						score: page.score ?? 0,
-						totalViolations: page.violations,
-						totalIncomplete: page.incomplete,
-						totalPasses: page.passes,
-						totalInapplicable: page.inapplicable,
-						criticalCount: page.criticalCount ?? 0,
-						seriousCount: page.seriousCount ?? 0,
-						moderateCount: page.moderateCount ?? 0,
-						minorCount: page.minorCount ?? 0,
-					}))
-
-	const topPrinciple = Object.entries(
-		developerReport.violations.reduce<Record<string, number>>(
-			(acc, item) => {
-				acc[item.wcagPrinciple] =
-					(acc[item.wcagPrinciple] ?? 0) + item.elements.length
-				return acc
-			},
-			{}
-		)
-	).sort((a, b) => b[1] - a[1])[0]
 
 	useEffect(() => {
 		setActiveTab(defaultTab)
@@ -82,222 +53,10 @@ export default function EvaluationResults({
 			defaultValue={defaultTab}
 			key={defaultTab}
 			onValueChange={v =>
-				setActiveTab(v as 'developer' | 'auditor' | 'end-user')
+				setActiveTab(v as 'developer' | 'auditor' | 'end-user' | 'designer')
 			}
 			className="w-full"
 		>
-			<div className="mb-4 rounded-2xl border border-(--border) bg-white p-5 shadow-sm">
-				<div className="flex flex-wrap items-start justify-between gap-3">
-					<div>
-						<p className="text-xs font-semibold uppercase tracking-wide text-(--muted-text)">
-							Results Overview
-						</p>
-						<h2 className="mt-1 text-lg font-semibold text-(--text)">
-							Accessibility evaluation snapshot
-						</h2>
-					</div>
-					<p className="text-sm text-(--muted-text)">
-						Target:{' '}
-						<span className="font-medium text-(--text)">
-							{summary.targetUrl}
-						</span>
-					</p>
-				</div>
-
-				<div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-					<div className="rounded-xl border border-(--border) bg-(--surface) p-3">
-						<p className="text-xs text-(--muted-text)">
-							Overall score
-						</p>
-						<p className="mt-1 text-xl font-bold text-(--text)">
-							{summary.overallScore}/100
-						</p>
-					</div>
-					<div className="rounded-xl border border-(--border) bg-(--surface) p-3">
-						<p className="text-xs text-(--muted-text)">
-							Violations
-						</p>
-						<p className="mt-1 text-xl font-bold text-red-600">
-							{summary.totalViolations}
-						</p>
-					</div>
-					<div className="rounded-xl border border-(--border) bg-(--surface) p-3">
-						<p className="text-xs text-(--muted-text)">
-							Needs review
-						</p>
-						<p className="mt-1 text-xl font-bold text-amber-600">
-							{summary.totalIncomplete}
-						</p>
-					</div>
-					<div className="rounded-xl border border-(--border) bg-(--surface) p-3">
-						<p className="text-xs text-(--muted-text)">
-							Checks passed
-						</p>
-						<p className="mt-1 text-xl font-bold text-emerald-600">
-							{summary.totalPasses}
-						</p>
-					</div>
-				</div>
-
-				<div className="mt-4 grid grid-cols-1 gap-2 text-sm md:grid-cols-3">
-					<div className="flex items-center gap-2 rounded-lg border border-(--border) bg-(--surface) px-3 py-2 text-(--text)">
-						<AlertTriangle
-							className="h-4 w-4 text-red-500"
-							aria-hidden="true"
-						/>
-						<span>
-							Most impacted principle:{' '}
-							<span className="font-semibold">
-								{topPrinciple?.[0] ?? 'N/A'}
-							</span>
-						</span>
-					</div>
-					<div className="flex items-center gap-2 rounded-lg border border-(--border) bg-(--surface) px-3 py-2 text-(--text)">
-						<ClipboardCheck
-							className="h-4 w-4 text-amber-500"
-							aria-hidden="true"
-						/>
-						<span>
-							Manual review items:{' '}
-							<span className="font-semibold">
-								{auditorReport.incompleteItems.length}
-							</span>
-						</span>
-					</div>
-					<div className="flex items-center gap-2 rounded-lg border border-(--border) bg-(--surface) px-3 py-2 text-(--text)">
-						<CheckCircle2
-							className="h-4 w-4 text-emerald-500"
-							aria-hidden="true"
-						/>
-						<span>
-							Inapplicable criteria:{' '}
-							<span className="font-semibold">
-								{summary.totalInapplicable}
-							</span>
-						</span>
-					</div>
-				</div>
-
-				{crawlSummary?.enabled && (
-					<div className="mt-4 rounded-xl border border-(--border) bg-(--surface) p-4">
-						<div className="flex flex-wrap items-center justify-between gap-2">
-							<p className="text-sm font-semibold text-(--text)">
-								Full-site crawl summary
-							</p>
-							<p className="text-xs text-(--muted-text)">
-								Start URL: {crawlSummary.startUrl}
-							</p>
-						</div>
-
-						<div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-5">
-							<div className="rounded-lg border border-(--border) bg-white px-3 py-2">
-								<p className="text-xs text-(--muted-text)">
-									Crawled
-								</p>
-								<p className="text-base font-semibold text-(--text)">
-									{crawlSummary.pagesCrawled}
-								</p>
-							</div>
-							<div className="rounded-lg border border-(--border) bg-white px-3 py-2">
-								<p className="text-xs text-(--muted-text)">
-									Discovered
-								</p>
-								<p className="text-base font-semibold text-(--text)">
-									{crawlSummary.pagesDiscovered}
-								</p>
-							</div>
-							<div className="rounded-lg border border-(--border) bg-white px-3 py-2">
-								<p className="text-xs text-(--muted-text)">
-									Succeeded
-								</p>
-								<p className="text-base font-semibold text-emerald-600">
-									{crawlSummary.pagesSucceeded}
-								</p>
-							</div>
-							<div className="rounded-lg border border-(--border) bg-white px-3 py-2">
-								<p className="text-xs text-(--muted-text)">
-									Failed
-								</p>
-								<p className="text-base font-semibold text-blue-700">
-									{crawlSummary.pagesFailed}
-								</p>
-							</div>
-							<div className="rounded-lg border border-(--border) bg-white px-3 py-2">
-								<p className="text-xs text-(--muted-text)">
-									Page cap
-								</p>
-								<p className="text-base font-semibold text-(--text)">
-									{crawlSummary.maxPages}
-								</p>
-							</div>
-						</div>
-
-						{pageSummaries && pageSummaries.length > 0 && (
-							<div className="mt-3">
-								<p className="text-xs font-semibold uppercase tracking-wide text-(--muted-text)">
-									Per-page results
-								</p>
-								<div className="mt-2 max-h-72 overflow-auto rounded-lg border border-(--border) bg-white">
-									<table className="min-w-full text-sm">
-										<thead className="bg-(--surface)">
-											<tr className="text-left text-xs text-(--muted-text)">
-												<th className="px-3 py-2">
-													Page
-												</th>
-												<th className="px-3 py-2">
-													Score
-												</th>
-												<th className="px-3 py-2">
-													Violations
-												</th>
-												<th className="px-3 py-2">
-													Needs review
-												</th>
-												<th className="px-3 py-2">
-													Passes
-												</th>
-												<th className="px-3 py-2">
-													Inapplicable
-												</th>
-											</tr>
-										</thead>
-										<tbody>
-											{pageSummaries.map(page => (
-												<tr
-													key={page.url}
-													className="border-t border-(--border)"
-												>
-													<td className="px-3 py-2 text-(--text)">
-														<div className="max-w-136 truncate">
-															{page.url}
-														</div>
-													</td>
-													<td className="px-3 py-2 font-semibold text-(--text)">
-														{page.score}
-													</td>
-													<td className="px-3 py-2 text-red-600">
-														{page.totalViolations}
-													</td>
-													<td className="px-3 py-2 text-amber-600">
-														{page.totalIncomplete}
-													</td>
-													<td className="px-3 py-2 text-emerald-600">
-														{page.totalPasses}
-													</td>
-													<td className="px-3 py-2 text-(--muted-text)">
-														{page.totalInapplicable}
-													</td>
-												</tr>
-											))}
-										</tbody>
-									</table>
-								</div>
-							</div>
-						)}
-					</div>
-				)}
-			</div>
-
 			<div className="flex items-center justify-between gap-4">
 				<TabsList className="mb-2">
 					<TabsTrigger value="end-user">
@@ -314,6 +73,13 @@ export default function EvaluationResults({
 						</span>
 					</TabsTrigger>
 
+					<TabsTrigger value="designer">
+						<span className="inline-flex items-center gap-1.5">
+							<Palette className="h-4 w-4" aria-hidden="true" />
+							Designer
+						</span>
+					</TabsTrigger>
+
 					<TabsTrigger value="auditor">
 						<span className="inline-flex items-center gap-1.5">
 							<FileText className="h-4 w-4" aria-hidden="true" />
@@ -326,6 +92,7 @@ export default function EvaluationResults({
 					developerReport={developerReport}
 					auditorReport={auditorReport}
 					endUserReport={endUserReport}
+					designerReport={designerReport}
 					activeTab={activeTab}
 				/>
 			</div>
@@ -338,6 +105,14 @@ export default function EvaluationResults({
 				<DeveloperReport
 					report={developerReport}
 					onWcagCardClick={onWcagCardClick}
+				/>
+			</TabsContent>
+
+			<TabsContent value="designer">
+				<DesignerReport
+					report={designerReport}
+					targetUrl={evaluation.targetUrl}
+					fullSourceHtml={developerReport.fullSourceHtml}
 				/>
 			</TabsContent>
 

@@ -4,15 +4,17 @@ import type {
 	DeveloperReport,
 	AuditorReport,
 	EndUserReport,
+	DesignerReport,
 	ReportSummary,
 } from '@/types'
 
-type ReportType = 'developer' | 'auditor' | 'end-user'
+type ReportType = 'developer' | 'auditor' | 'end-user' | 'designer'
 
 const REPORT_TYPE_LABELS: Record<ReportType, string> = {
 	developer: 'Developer Report',
 	auditor: 'Auditor Report',
 	'end-user': 'End-User Report',
+	designer: 'Designer Report',
 }
 
 const COLORS = {
@@ -630,11 +632,225 @@ function generateEndUserPdf(doc: jsPDF, report: EndUserReport): void {
 }
 
 // ---------------------------------------------------------------------------
+// Designer PDF
+// ---------------------------------------------------------------------------
+
+function generateDesignerPdf(doc: jsPDF, report: DesignerReport): void {
+	let y = addHeader(doc, report.summary, 'designer')
+
+	// -- Color & Contrast --
+	doc.setFontSize(14)
+	doc.setTextColor(...COLORS.darkGray)
+	doc.text('Color & Contrast', 20, y)
+	y += 6
+
+	if (report.contrastIssues.length === 0) {
+		doc.setFontSize(11)
+		doc.setTextColor(...COLORS.mediumGray)
+		doc.text('No Issues Detected', 20, y + 6)
+		y += 16
+	} else {
+		const contrastBody = report.contrastIssues.map(c => [
+			truncate(c.selector, 50),
+			c.ratio,
+			c.requiredRatio,
+			c.severity.charAt(0).toUpperCase() + c.severity.slice(1),
+			c.wcagCriterion,
+		])
+
+		autoTable(doc, {
+			startY: y,
+			head: [['Selector', 'Ratio', 'Required', 'Severity', 'WCAG']],
+			body: contrastBody,
+			headStyles: {
+				fillColor: [37, 99, 235] as [number, number, number],
+				textColor: COLORS.white,
+				fontSize: 8,
+				fontStyle: 'bold',
+			},
+			bodyStyles: {
+				fontSize: 7,
+				textColor: COLORS.darkGray,
+			},
+			alternateRowStyles: {
+				fillColor: COLORS.lightGray,
+			},
+			margin: { left: 20, right: 20 },
+			didParseCell(data) {
+				if (data.section === 'body' && data.column.index === 3) {
+					const raw = String(data.cell.raw).toLowerCase()
+					data.cell.styles.textColor = severityColor(raw)
+					data.cell.styles.fontStyle = 'bold'
+				}
+			},
+		})
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		y = (doc as any).lastAutoTable.finalY + 10
+	}
+
+	// -- Touch Targets & Spacing --
+	doc.setFontSize(14)
+	doc.setTextColor(...COLORS.darkGray)
+	doc.text('Touch Targets & Spacing', 20, y)
+	y += 6
+
+	if (report.targetIssues.length === 0) {
+		doc.setFontSize(11)
+		doc.setTextColor(...COLORS.mediumGray)
+		doc.text('No Issues Detected', 20, y + 6)
+		y += 16
+	} else {
+		const targetBody = report.targetIssues.map(t => [
+			truncate(t.selector, 50),
+			t.currentSize,
+			t.requiredSize,
+			t.severity.charAt(0).toUpperCase() + t.severity.slice(1),
+		])
+
+		autoTable(doc, {
+			startY: y,
+			head: [['Selector', 'Current Size', 'Required Size', 'Severity']],
+			body: targetBody,
+			headStyles: {
+				fillColor: [217, 119, 6] as [number, number, number],
+				textColor: COLORS.white,
+				fontSize: 8,
+				fontStyle: 'bold',
+			},
+			bodyStyles: {
+				fontSize: 7,
+				textColor: COLORS.darkGray,
+			},
+			alternateRowStyles: {
+				fillColor: COLORS.lightGray,
+			},
+			margin: { left: 20, right: 20 },
+			didParseCell(data) {
+				if (data.section === 'body' && data.column.index === 3) {
+					const raw = String(data.cell.raw).toLowerCase()
+					data.cell.styles.textColor = severityColor(raw)
+					data.cell.styles.fontStyle = 'bold'
+				}
+			},
+		})
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		y = (doc as any).lastAutoTable.finalY + 10
+	}
+
+	// -- Visual Hierarchy & Focus --
+	doc.addPage()
+	y = 20
+
+	doc.setFontSize(14)
+	doc.setTextColor(...COLORS.darkGray)
+	doc.text('Visual Hierarchy & Focus', 20, y)
+	y += 6
+
+	if (report.hierarchyIssues.length === 0) {
+		doc.setFontSize(11)
+		doc.setTextColor(...COLORS.mediumGray)
+		doc.text('No Issues Detected', 20, y + 6)
+		y += 16
+	} else {
+		const hierarchyBody = report.hierarchyIssues.map(h => [
+			truncate(h.designerDescription, 80),
+			String(h.elementCount),
+			h.severity.charAt(0).toUpperCase() + h.severity.slice(1),
+		])
+
+		autoTable(doc, {
+			startY: y,
+			head: [['Issue', 'Elements', 'Severity']],
+			body: hierarchyBody,
+			headStyles: {
+				fillColor: [13, 148, 136] as [number, number, number],
+				textColor: COLORS.white,
+				fontSize: 8,
+				fontStyle: 'bold',
+			},
+			bodyStyles: {
+				fontSize: 7,
+				textColor: COLORS.darkGray,
+			},
+			alternateRowStyles: {
+				fillColor: COLORS.lightGray,
+			},
+			margin: { left: 20, right: 20 },
+			didParseCell(data) {
+				if (data.section === 'body' && data.column.index === 2) {
+					const raw = String(data.cell.raw).toLowerCase()
+					data.cell.styles.textColor = severityColor(raw)
+					data.cell.styles.fontStyle = 'bold'
+				}
+			},
+		})
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		y = (doc as any).lastAutoTable.finalY + 10
+	}
+
+	// -- Component Checklist --
+	doc.setFontSize(14)
+	doc.setTextColor(...COLORS.darkGray)
+	doc.text('Component Checklist', 20, y)
+	y += 6
+
+	if (report.componentChecklist.length === 0) {
+		doc.setFontSize(11)
+		doc.setTextColor(...COLORS.mediumGray)
+		doc.text('No Issues Detected', 20, y + 6)
+	} else {
+		const checklistBody = report.componentChecklist.map(c => [
+			c.component,
+			c.status.charAt(0).toUpperCase() + c.status.slice(1),
+			String(c.issueCount),
+		])
+
+		autoTable(doc, {
+			startY: y,
+			head: [['Component', 'Status', 'Issues']],
+			body: checklistBody,
+			headStyles: {
+				fillColor: [79, 70, 229] as [number, number, number],
+				textColor: COLORS.white,
+				fontSize: 8,
+				fontStyle: 'bold',
+			},
+			bodyStyles: {
+				fontSize: 7,
+				textColor: COLORS.darkGray,
+			},
+			alternateRowStyles: {
+				fillColor: COLORS.lightGray,
+			},
+			margin: { left: 20, right: 20 },
+			didParseCell(data) {
+				if (data.section === 'body' && data.column.index === 1) {
+					const status = String(data.cell.raw).toLowerCase()
+					if (status === 'pass') {
+						data.cell.styles.textColor = [34, 197, 94]
+					} else if (status === 'fail') {
+						data.cell.styles.textColor = [239, 68, 68]
+					} else {
+						data.cell.styles.textColor = [245, 158, 11]
+					}
+					data.cell.styles.fontStyle = 'bold'
+				}
+			},
+		})
+	}
+
+	addFooter(doc)
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
 export function exportToPdf(
-	report: DeveloperReport | AuditorReport | EndUserReport,
+	report: DeveloperReport | AuditorReport | EndUserReport | DesignerReport,
 	reportType: ReportType
 ): void {
 	const doc = new jsPDF({
@@ -652,6 +868,9 @@ export function exportToPdf(
 			break
 		case 'end-user':
 			generateEndUserPdf(doc, report as EndUserReport)
+			break
+		case 'designer':
+			generateDesignerPdf(doc, report as DesignerReport)
 			break
 	}
 

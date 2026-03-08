@@ -3,7 +3,7 @@
 // ==========================================
 
 // ---------- User & Auth ----------
-export type UserRole = 'developer' | 'auditor' | 'end-user'
+export type UserRole = 'developer' | 'auditor' | 'end-user' | 'designer'
 
 export interface AppUser {
 	id: string
@@ -216,6 +216,7 @@ export interface DeveloperReport {
 	violations: DeveloperViolation[]
 	incompleteItems: DeveloperIncompleteItem[]
 	filters: ReportFilters
+	principleScores: PrincipleScore[]
 }
 
 export interface DeveloperViolation {
@@ -261,6 +262,7 @@ export interface AuditorReport {
 	incompleteItems: AuditorIncompleteItem[]
 	inapplicableRules: InapplicableItem[]
 	filters: ReportFilters
+	principleScores: PrincipleScore[]
 }
 
 export interface ComplianceEntry {
@@ -324,6 +326,7 @@ export interface EndUserReport {
 	categories: EndUserCategory[]
 	priorities: string[]
 	needsReviewCount: number
+	principleScores: PrincipleScore[]
 }
 
 export interface EndUserCategory {
@@ -356,6 +359,64 @@ export interface ReportFilters {
 	principle: WcagPrinciple[]
 	level: WcagLevel[]
 	category: WcagCategory[]
+}
+
+// ---------- Shared Principle Score ----------
+export interface PrincipleScore {
+	principle: WcagPrinciple
+	score: number
+	issueCount: number
+	needsReviewCount: number
+}
+
+// ---------- Designer Report ----------
+
+/** A color contrast violation with visual details for designers. */
+export interface DesignerContrastIssue {
+	selector: string
+	description: string
+	foreground: string
+	background: string
+	ratio: string
+	requiredRatio: string
+	wcagCriterion: string
+	severity: Severity
+}
+
+/** An element whose touch target is too small. */
+export interface DesignerTargetIssue {
+	selector: string
+	description: string
+	currentSize: string
+	requiredSize: string
+	severity: Severity
+}
+
+/** A visual hierarchy or focus order issue. */
+export interface DesignerHierarchyIssue {
+	ruleId: string
+	description: string
+	designerDescription: string
+	elementCount: number
+	severity: Severity
+}
+
+/** Summary of issues per UI component type. */
+export interface DesignerComponentSummary {
+	component: string
+	status: 'pass' | 'warning' | 'fail'
+	issueCount: number
+}
+
+export interface DesignerReport {
+	summary: ReportSummary
+	pageSummaries?: PageEvaluationSummary[]
+	principleScores: PrincipleScore[]
+	contrastIssues: DesignerContrastIssue[]
+	targetIssues: DesignerTargetIssue[]
+	hierarchyIssues: DesignerHierarchyIssue[]
+	componentChecklist: DesignerComponentSummary[]
+	totalDesignIssues: number
 }
 
 // ---------- WCAG Card ----------

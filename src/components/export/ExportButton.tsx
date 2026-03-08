@@ -6,19 +6,20 @@ import { Button } from '@/components/ui/Button'
 import { exportToPdf } from '@/lib/export/pdf'
 import { exportToJson } from '@/lib/export/json'
 import { exportToCsv } from '@/lib/export/csv'
-import type { DeveloperReport, AuditorReport, EndUserReport } from '@/types'
+import type { DeveloperReport, AuditorReport, EndUserReport, DesignerReport } from '@/types'
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-type ReportType = 'developer' | 'auditor' | 'end-user'
+type ReportType = 'developer' | 'auditor' | 'end-user' | 'designer'
 type ExportFormat = 'pdf' | 'json' | 'csv'
 
 interface ExportButtonProps {
 	developerReport: DeveloperReport
 	auditorReport: AuditorReport
 	endUserReport: EndUserReport
+	designerReport: DesignerReport
 	activeTab: ReportType
 }
 
@@ -44,6 +45,7 @@ export function ExportButton({
 	developerReport,
 	auditorReport,
 	endUserReport,
+	designerReport,
 	activeTab,
 }: ExportButtonProps) {
 	const [isOpen, setIsOpen] = useState(false)
@@ -56,7 +58,8 @@ export function ExportButton({
 	const getActiveReport = useCallback(():
 		| DeveloperReport
 		| AuditorReport
-		| EndUserReport => {
+		| EndUserReport
+		| DesignerReport => {
 		switch (activeTab) {
 			case 'developer':
 				return developerReport
@@ -64,8 +67,10 @@ export function ExportButton({
 				return auditorReport
 			case 'end-user':
 				return endUserReport
+			case 'designer':
+				return designerReport
 		}
-	}, [activeTab, developerReport, auditorReport, endUserReport])
+	}, [activeTab, developerReport, auditorReport, endUserReport, designerReport])
 
 	// Dispatch the export for the given format
 	const handleExport = useCallback(

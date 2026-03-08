@@ -1,6 +1,6 @@
-import type { DeveloperReport, AuditorReport, EndUserReport } from '@/types'
+import type { DeveloperReport, AuditorReport, EndUserReport, DesignerReport } from '@/types'
 
-type ReportType = 'developer' | 'auditor' | 'end-user'
+type ReportType = 'developer' | 'auditor' | 'end-user' | 'designer'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -141,11 +141,63 @@ function generateEndUserCsv(report: EndUserReport): string {
 }
 
 // ---------------------------------------------------------------------------
+// Designer CSV
+// ---------------------------------------------------------------------------
+
+function generateDesignerCsv(report: DesignerReport): string {
+	const headers = [
+		'Section',
+		'Selector',
+		'Description',
+		'Current Value',
+		'Required Value',
+		'Severity',
+	]
+
+	const rows: string[][] = []
+
+	for (const c of report.contrastIssues) {
+		rows.push([
+			'Color & Contrast',
+			c.selector,
+			c.description,
+			c.ratio,
+			c.requiredRatio,
+			c.severity,
+		])
+	}
+
+	for (const t of report.targetIssues) {
+		rows.push([
+			'Touch Targets & Spacing',
+			t.selector,
+			t.description,
+			t.currentSize,
+			t.requiredSize,
+			t.severity,
+		])
+	}
+
+	for (const h of report.hierarchyIssues) {
+		rows.push([
+			'Visual Hierarchy & Focus',
+			h.ruleId,
+			h.designerDescription,
+			`${h.elementCount} element(s)`,
+			'',
+			h.severity,
+		])
+	}
+
+	return arrayToCsv(headers, rows)
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
 export function exportToCsv(
-	report: DeveloperReport | AuditorReport | EndUserReport,
+	report: DeveloperReport | AuditorReport | EndUserReport | DesignerReport,
 	reportType: ReportType
 ): void {
 	let csvContent: string
@@ -159,6 +211,9 @@ export function exportToCsv(
 			break
 		case 'end-user':
 			csvContent = generateEndUserCsv(report as EndUserReport)
+			break
+		case 'designer':
+			csvContent = generateDesignerCsv(report as DesignerReport)
 			break
 	}
 

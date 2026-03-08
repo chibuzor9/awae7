@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { AlertCircle, Loader2 } from 'lucide-react'
 import EvaluationForm from '@/components/evaluation/EvaluationForm'
@@ -8,12 +8,12 @@ import type { UrlEvaluationOptions } from '@/components/evaluation/EvaluationFor
 import EvaluationResults from '@/components/evaluation/EvaluationResults'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
-import { cn } from '@/lib/utils'
 import type {
 	EvaluationResult,
 	DeveloperReport,
 	AuditorReport,
 	EndUserReport,
+	DesignerReport,
 } from '@/types'
 
 interface EvaluationData {
@@ -21,9 +21,10 @@ interface EvaluationData {
 	developerReport: DeveloperReport
 	auditorReport: AuditorReport
 	endUserReport: EndUserReport
+	designerReport: DesignerReport
 }
 
-type PreferredRole = 'end-user' | 'developer' | 'auditor'
+type PreferredRole = 'end-user' | 'developer' | 'designer' | 'auditor'
 
 const PREFERRED_ROLE_STORAGE_KEY = 'awae_preferred_role'
 
@@ -73,6 +74,13 @@ export default function EvaluatePage() {
 	const [results, setResults] = useState<EvaluationData | null>(null)
 	const [preferredRole, setPreferredRole] =
 		useState<PreferredRole>('end-user')
+	const resultsRef = useRef<HTMLElement>(null)
+
+	useEffect(() => {
+		if (results && !loading) {
+			resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+		}
+	}, [results, loading])
 
 	useEffect(() => {
 		let mounted = true
@@ -87,6 +95,7 @@ export default function EvaluatePage() {
 				if (
 					storedRole === 'end-user' ||
 					storedRole === 'developer' ||
+					storedRole === 'designer' ||
 					storedRole === 'auditor'
 				) {
 					localFallback = storedRole
@@ -111,6 +120,7 @@ export default function EvaluatePage() {
 				if (
 					data.preferredRole === 'end-user' ||
 					data.preferredRole === 'developer' ||
+					data.preferredRole === 'designer' ||
 					data.preferredRole === 'auditor'
 				) {
 					if (mounted) setPreferredRole(data.preferredRole)
@@ -132,35 +142,28 @@ export default function EvaluatePage() {
 
 		loadPreference()
 
+		const handlePreferenceChange = () => {
+			try {
+				const stored = window.localStorage.getItem(PREFERRED_ROLE_STORAGE_KEY)
+				if (
+					stored === 'end-user' ||
+					stored === 'developer' ||
+					stored === 'designer' ||
+					stored === 'auditor'
+				) {
+					if (mounted) setPreferredRole(stored)
+				}
+			} catch {
+				// Ignore localStorage errors
+			}
+		}
+		window.addEventListener('awae-preference-changed', handlePreferenceChange)
+
 		return () => {
 			mounted = false
+			window.removeEventListener('awae-preference-changed', handlePreferenceChange)
 		}
 	}, [])
-
-	async function handlePreferredRoleChange(role: PreferredRole) {
-		setPreferredRole(role)
-		try {
-			window.localStorage.setItem(PREFERRED_ROLE_STORAGE_KEY, role)
-		} catch {
-			// Ignore localStorage access issues silently
-		}
-
-		try {
-			const response = await fetch('/api/preferences', {
-				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ preferredRole: role }),
-			})
-
-			if (!response.ok) {
-				throw new Error('Failed to persist preference')
-			}
-		} catch {
-			toast.error(
-				'Preference saved locally, but cloud sync failed. Please try again.'
-			)
-		}
-	}
 
 	async function handleUrlSubmit({
 		url,
@@ -258,7 +261,7 @@ export default function EvaluatePage() {
 
 	return (
 		<div className="min-h-full bg-transparent">
-			<div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+			<div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
 				{/* ---- Header ---- */}
 				<header className="mb-10 text-center">
 					<h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
@@ -269,63 +272,6 @@ export default function EvaluatePage() {
 						WCAG 2.2 accessibility audit.
 					</p>
 				</header>
-
-				{/* ---- Preference ---- */}
-				<section aria-label="Report preference" className="mb-8">
-					<Card className="mx-auto max-w-2xl">
-						<CardBody className="space-y-4">
-							<div className="text-center">
-								<p className="text-sm font-semibold text-slate-900">
-									Preferred report view
-								</p>
-								<p className="mt-1 text-sm text-slate-600">
-									Choose which report tab opens first after
-									each evaluation.
-								</p>
-							</div>
-							<div className="flex flex-wrap items-center justify-center gap-2">
-								{(
-									[
-										{
-											value: 'end-user',
-											label: 'End User',
-										},
-										{
-											value: 'developer',
-											label: 'Developer',
-										},
-										{ value: 'auditor', label: 'Auditor' },
-									] as const
-								).map(option => {
-									const isActive =
-										preferredRole === option.value
-									return (
-										<button
-											key={option.value}
-											type="button"
-											onClick={() =>
-												handlePreferredRoleChange(
-													option.value
-												)
-											}
-											data-active={
-												isActive ? 'true' : 'false'
-											}
-											className={cn(
-												'rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
-												isActive
-													? 'bg-(--accent) text-white'
-													: 'bg-(--accent-soft) text-slate-700 hover:bg-[color-mix(in_oklab,var(--accent-soft)_80%,white)]'
-											)}
-										>
-											{option.label}
-										</button>
-									)
-								})}
-							</div>
-						</CardBody>
-					</Card>
-				</section>
 
 				{/* ---- Form ---- */}
 				<section aria-label="Evaluation form" className="mb-12">
@@ -396,13 +342,14 @@ export default function EvaluatePage() {
 
 				{/* ---- Results ---- */}
 				{results && !loading && (
-					<section aria-label="Evaluation results">
+					<section ref={resultsRef} aria-label="Evaluation results" className="scroll-mt-20">
 						<EvaluationResults
 							key={`${results.evaluation.id ?? results.evaluation.targetUrl}-${preferredRole}`}
 							evaluation={results.evaluation}
 							developerReport={results.developerReport}
 							auditorReport={results.auditorReport}
 							endUserReport={results.endUserReport}
+							designerReport={results.designerReport}
 							defaultTab={preferredRole}
 						/>
 					</section>

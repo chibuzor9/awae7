@@ -26,6 +26,7 @@ import type {
 	DeveloperReport,
 	AuditorReport,
 	EndUserReport,
+	DesignerReport,
 } from '@/types'
 
 // ---------------------------------------------------------------------------
@@ -46,6 +47,7 @@ interface EvaluationDetail {
 	developerReport: DeveloperReport
 	auditorReport: AuditorReport
 	endUserReport: EndUserReport
+	designerReport: DesignerReport
 }
 
 // ---------------------------------------------------------------------------
@@ -232,6 +234,7 @@ export default function HistoryPage() {
 				developerReport: data.developerReport,
 				auditorReport: data.auditorReport,
 				endUserReport: data.endUserReport,
+				designerReport: data.designerReport,
 			}
 
 			setDetailCache(prev => ({ ...prev, [id]: detail }))
@@ -253,7 +256,7 @@ export default function HistoryPage() {
 
 	return (
 		<div className="min-h-full bg-transparent">
-			<div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+			<div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
 				{/* ---- Header ---- */}
 				<header className="mb-10">
 					<div className="flex items-center gap-3 mb-3">
@@ -270,7 +273,7 @@ export default function HistoryPage() {
 					<p className="text-base text-slate-600 sm:text-lg">
 						Review your past accessibility evaluations. Click on any
 						evaluation to view the full report with developer,
-						auditor, and end-user perspectives.
+						designer, auditor, and end-user perspectives.
 					</p>
 				</header>
 
@@ -424,6 +427,7 @@ export default function HistoryPage() {
 														variant="outline"
 														size="sm"
 														className="mt-2"
+														tabIndex={-1}
 														onClick={e => {
 															e.stopPropagation()
 															handleViewDetail(
@@ -515,6 +519,9 @@ export default function HistoryPage() {
 														}
 														endUserReport={
 															cachedDetail.endUserReport
+														}
+														designerReport={
+															cachedDetail.designerReport
 														}
 													/>
 												</CardBody>
