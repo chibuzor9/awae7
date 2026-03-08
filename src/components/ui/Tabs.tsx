@@ -106,6 +106,7 @@ export function TabsList({ className, children, ...props }: TabsListProps) {
 	return (
 		<div
 			ref={listRef}
+			role="tablist"
 			aria-label="Report tabs"
 			className={cn('flex gap-1 border-b border-gray-200', className)}
 			onKeyDown={handleKeyDown}
@@ -135,6 +136,10 @@ export function TabsTrigger({
 	return (
 		<button
 			type="button"
+			role="tab"
+			id={`tab-${value}`}
+			aria-selected={isActive}
+			aria-controls={`tabpanel-${value}`}
 			tabIndex={isActive ? 0 : -1}
 			data-tab={value}
 			className={cn(
@@ -171,8 +176,10 @@ export function TabsContent({
 
 	return (
 		<div
+			id={`tabpanel-${value}`}
+			role="tabpanel"
+			aria-labelledby={`tab-${value}`}
 			data-tabpanel={value}
-			tabIndex={0}
 			className={cn('py-3 focus-visible:outline-none', className)}
 			{...props}
 		>

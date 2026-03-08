@@ -256,7 +256,7 @@ export default function HistoryPage() {
 
 	return (
 		<div className="min-h-full bg-transparent">
-			<div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+			<div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
 				{/* ---- Header ---- */}
 				<header className="mb-10">
 					<div className="flex items-center gap-3 mb-3">
@@ -427,6 +427,7 @@ export default function HistoryPage() {
 														variant="outline"
 														size="sm"
 														className="mt-2"
+														tabIndex={-1}
 														onClick={e => {
 															e.stopPropagation()
 															handleViewDetail(

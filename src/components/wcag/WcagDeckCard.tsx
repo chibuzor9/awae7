@@ -151,7 +151,6 @@ export default function WcagDeckCard({ card }: WcagDeckCardProps) {
 					)}
 				>
 					<div
-						tabIndex={0}
 						onClick={toggleFlip}
 						aria-label={`Details for WCAG ${card.criterionNumber} ${card.title}`}
 						className="flex h-full flex-col gap-3 overflow-y-auto rounded-[calc(5.2%-2px)] p-5 pr-4 [scrollbar-gutter:stable] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar]:h-0"

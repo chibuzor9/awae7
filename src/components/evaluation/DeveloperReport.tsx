@@ -6,18 +6,13 @@ import {
 	AlertCircle,
 	Info,
 	ShieldAlert,
-	Calendar,
-	Globe,
-	Layers,
 	SearchX,
 	ChevronDown,
 } from 'lucide-react'
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
-import { ScoreGauge } from '@/components/ui/ScoreGauge'
-import { cn, formatDate } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { ViolationCard } from '@/components/evaluation/ViolationCard'
-import PourGrid from '@/components/evaluation/PourGrid'
 import type {
 	DeveloperReport as DeveloperReportType,
 	Severity,
@@ -404,38 +399,6 @@ function SectionDropdown({
 	)
 }
 
-/* ---- Severity Count Card ---- */
-
-interface SeverityCountProps {
-	severity: Severity
-	count: number
-}
-
-function SeverityCount({ severity, count }: SeverityCountProps) {
-	const config = severityConfig[severity]
-	const Icon = config.icon
-
-	return (
-		<div
-			className={cn(
-				'flex items-center gap-2 rounded-lg px-4 py-3',
-				config.bgClass
-			)}
-		>
-			<Icon
-				className={cn('h-5 w-5', config.colorClass)}
-				aria-hidden="true"
-			/>
-			<div>
-				<p className={cn('text-lg font-bold', config.colorClass)}>
-					{count}
-				</p>
-				<p className="text-xs capitalize text-gray-600">{severity}</p>
-			</div>
-		</div>
-	)
-}
-
 /* ---- Main Component ---- */
 
 export default function DeveloperReport({
@@ -587,12 +550,36 @@ export default function DeveloperReport({
 
 	const hasActiveFilters = activeFilterCount > 0
 
+	/* -- Page grouping for crawls -- */
+	const allPageUrls = useMemo(() => {
+		const urls = new Set<string>()
+		for (const v of violations) {
+			for (const el of v.elements) {
+				if (el.pageUrl) urls.add(el.pageUrl)
+			}
+		}
+		return Array.from(urls).sort()
+	}, [violations])
+
+	const isMultiPage = allPageUrls.length > 1
+	const [activePage, setActivePage] = useState<string>('all')
+
+	const pageFilteredViolations = useMemo(() => {
+		if (!isMultiPage || activePage === 'all') return filteredViolations
+		return filteredViolations
+			.map(v => ({
+				...v,
+				elements: v.elements.filter(el => el.pageUrl === activePage),
+			}))
+			.filter(v => v.elements.length > 0)
+	}, [filteredViolations, isMultiPage, activePage])
+
 	const sourceEditorText = useMemo(() => {
 		if (report.fullSourceHtml?.trim()) {
 			return report.fullSourceHtml
 		}
 
-		const fallbackCandidates = filteredViolations
+		const fallbackCandidates = pageFilteredViolations
 			.flatMap(violation =>
 				violation.elements.flatMap(element => [
 					...(element.sourceContext ?? []),
@@ -604,7 +591,7 @@ export default function DeveloperReport({
 		if (fallbackCandidates.length === 0) return ''
 
 		return [...fallbackCandidates].sort((a, b) => b.length - a.length)[0]
-	}, [filteredViolations, report.fullSourceHtml])
+	}, [pageFilteredViolations, report.fullSourceHtml])
 
 	const displaySourceText = useMemo(() => {
 		if (report.fullSourceHtml?.trim()) {
@@ -626,7 +613,7 @@ export default function DeveloperReport({
 
 		const lines = displaySourceText.split('\n')
 
-		if (filteredViolations.length === 0) {
+		if (pageFilteredViolations.length === 0) {
 			return {
 				lines,
 				primaryLine: -1,
@@ -638,7 +625,7 @@ export default function DeveloperReport({
 		const lineTooltips = new Map<number, string>()
 		const allMatchedLines = new Set<number>()
 
-		for (const violation of filteredViolations) {
+		for (const violation of pageFilteredViolations) {
 			for (const element of violation.elements) {
 				const selectorTokens = extractSelectorTokens(element.selector)
 				if (selectorTokens.length === 0) continue
@@ -686,191 +673,160 @@ export default function DeveloperReport({
 		}
 
 		return { lines, primaryLine, relatedLines, lineTooltips }
-	}, [displaySourceText, filteredViolations])
+	}, [displaySourceText, pageFilteredViolations])
 
 	const clearAllFilters = useCallback(() => {
 		setActiveSeverities(new Set(ALL_SEVERITIES))
 		setActivePrinciples(new Set(ALL_PRINCIPLES))
 		setActiveLevels(new Set(ALL_LEVELS))
 		setActiveCategories(new Set(allCategories))
+		setActivePage('all')
 	}, [allCategories])
 
 	/* ---- Render ---- */
 
 	return (
 		<div className="space-y-4">
-			{/* ==================== Executive Summary ==================== */}
-			<Card>
-				<CardHeader>
-					<h2 className="text-lg font-semibold text-gray-900">
-						Executive Summary
-					</h2>
-					<p className="mt-0.5 text-sm text-gray-500">
-						Technical accessibility evaluation for developers
-					</p>
-				</CardHeader>
-
-				<CardBody className="space-y-6">
-					{/* Two-column: Score+meta left, POUR grid right */}
-					<div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-6">
-						{/* Left column: Score + meta */}
-						<div className="flex flex-col items-center gap-4">
-							<ScoreGauge score={summary.overallScore} size={140} />
-
-							<div className="w-full space-y-3">
-								<div className="flex items-center gap-2 text-sm">
-									<Globe className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
-									<span className="font-medium text-gray-900">Target:</span>
-									<span className="truncate text-gray-600">{summary.targetUrl}</span>
-								</div>
-								<div className="flex items-center gap-2 text-sm">
-									<Calendar className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
-									<span className="font-medium text-gray-900">Evaluated:</span>
-									<span className="text-gray-600">{formatDate(summary.evaluationDate)}</span>
-								</div>
-								<div className="flex items-center gap-2 text-sm">
-									<Layers className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
-									<span className="font-medium text-gray-900">Engine:</span>
-									<Badge variant="default">axe-core v{summary.axeCoreVersion}</Badge>
-								</div>
-							</div>
-						</div>
-
-						{/* Right column: POUR grid */}
-						<PourGrid principleScores={report.principleScores} />
-					</div>
-
-					{/* Severity breakdown (below the two-column area) */}
-					<div>
-						<h3 className="mb-3 text-sm font-semibold text-gray-900">
-							Severity Breakdown
-						</h3>
-						<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-							<SeverityCount severity="critical" count={summary.criticalCount} />
-							<SeverityCount severity="serious" count={summary.seriousCount} />
-							<SeverityCount severity="moderate" count={summary.moderateCount} />
-							<SeverityCount severity="minor" count={summary.minorCount} />
-						</div>
-					</div>
-				</CardBody>
-			</Card>
-
 			{/* ==================== Source Code ==================== */}
 			{sourceEditorText && (
-				<>
-				{/* ==================== Filter Toolbar ==================== */}
-				<div className="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
-					{/* Severity */}
-					<div className="space-y-1 min-w-[120px]">
-						<label htmlFor="developer-filter-severity" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
-							Severity
-						</label>
-						<select
-							id="developer-filter-severity"
-							value={selectedSeverity}
-							onChange={e => handleSeverityChange(e.target.value)}
-							className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-						>
-							<option value="all">All</option>
-							{ALL_SEVERITIES.map(s => (
-								<option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
-							))}
-						</select>
-					</div>
-
-					{/* Principle */}
-					<div className="space-y-1 min-w-[120px]">
-						<label htmlFor="developer-filter-principle" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
-							Principle
-						</label>
-						<select
-							id="developer-filter-principle"
-							value={selectedPrinciple}
-							onChange={e => handlePrincipleChange(e.target.value)}
-							className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-						>
-							<option value="all">All</option>
-							{ALL_PRINCIPLES.map(p => (
-								<option key={p} value={p}>{p}</option>
-							))}
-						</select>
-					</div>
-
-					{/* Level */}
-					<div className="space-y-1 min-w-[100px]">
-						<label htmlFor="developer-filter-level" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
-							Level
-						</label>
-						<select
-							id="developer-filter-level"
-							value={selectedLevel}
-							onChange={e => handleLevelChange(e.target.value)}
-							className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-						>
-							<option value="all">All</option>
-							{ALL_LEVELS.map(l => (
-								<option key={l} value={l}>{l === 'best-practice' ? 'Best Practice' : `Level ${l}`}</option>
-							))}
-						</select>
-					</div>
-
-					{/* Category */}
-					{allCategories.length > 0 && (
-						<div className="space-y-1 min-w-[120px]">
-							<label htmlFor="developer-filter-category" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
-								Category
-							</label>
-							<select
-								id="developer-filter-category"
-								value={selectedCategory}
-								onChange={e => handleCategoryChange(e.target.value)}
-								className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-							>
-								<option value="all">All</option>
-								{allCategories.map(c => (
-									<option key={c} value={c}>{CATEGORY_LABELS[c] ?? c}</option>
-								))}
-							</select>
-						</div>
-					)}
-
-					{/* Divider */}
-					<div className="hidden sm:block h-8 w-px bg-gray-200" />
-
-					{/* Theme */}
-					<div className="space-y-1 min-w-[130px]">
-						<label htmlFor="source-focus-theme" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
-							Theme
-						</label>
-						<select
-							id="source-focus-theme"
-							value={sourceTheme}
-							onChange={e => setSourceTheme(e.target.value as SourceThemeKey)}
-							className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-						>
-							{Object.entries(SOURCE_THEMES).map(([key, value]) => (
-								<option key={key} value={key}>{value.label}</option>
-							))}
-						</select>
-					</div>
-
-					{/* Clear filters button */}
-					{hasActiveFilters && (
-						<button
-							type="button"
-							onClick={clearAllFilters}
-							className="ml-auto text-xs font-medium text-blue-600 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 rounded-sm"
-						>
-							Clear filters
-						</button>
-					)}
-				</div>
-
 				<SectionDropdown
 					title="Source Code"
 					description="Full formatted source in a fixed-height editor. Hover highlighted lines for issue details and remediation."
+					defaultOpen
 				>
 					<CardBody className="space-y-3">
+						{/* Filter toolbar */}
+						<div className="flex flex-wrap items-end gap-3">
+							{/* Severity */}
+							<div className="space-y-1 min-w-[120px]">
+								<label htmlFor="developer-filter-severity" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+									Severity
+								</label>
+								<select
+									id="developer-filter-severity"
+									value={selectedSeverity}
+									onChange={e => handleSeverityChange(e.target.value)}
+									className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+								>
+									<option value="all">All</option>
+									{ALL_SEVERITIES.map(s => (
+										<option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+									))}
+								</select>
+							</div>
+
+							{/* Principle */}
+							<div className="space-y-1 min-w-[120px]">
+								<label htmlFor="developer-filter-principle" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+									Principle
+								</label>
+								<select
+									id="developer-filter-principle"
+									value={selectedPrinciple}
+									onChange={e => handlePrincipleChange(e.target.value)}
+									className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+								>
+									<option value="all">All</option>
+									{ALL_PRINCIPLES.map(p => (
+										<option key={p} value={p}>{p}</option>
+									))}
+								</select>
+							</div>
+
+							{/* Level */}
+							<div className="space-y-1 min-w-[100px]">
+								<label htmlFor="developer-filter-level" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+									Level
+								</label>
+								<select
+									id="developer-filter-level"
+									value={selectedLevel}
+									onChange={e => handleLevelChange(e.target.value)}
+									className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+								>
+									<option value="all">All</option>
+									{ALL_LEVELS.map(l => (
+										<option key={l} value={l}>{l === 'best-practice' ? 'Best Practice' : `Level ${l}`}</option>
+									))}
+								</select>
+							</div>
+
+							{/* Category */}
+							{allCategories.length > 0 && (
+								<div className="space-y-1 min-w-[120px]">
+									<label htmlFor="developer-filter-category" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+										Category
+									</label>
+									<select
+										id="developer-filter-category"
+										value={selectedCategory}
+										onChange={e => handleCategoryChange(e.target.value)}
+										className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+									>
+										<option value="all">All</option>
+										{allCategories.map(c => (
+											<option key={c} value={c}>{CATEGORY_LABELS[c] ?? c}</option>
+										))}
+									</select>
+								</div>
+							)}
+
+							{/* Page (crawl only) */}
+							{isMultiPage && (
+								<div className="space-y-1 min-w-[140px]">
+									<label htmlFor="developer-filter-page" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+										Page
+									</label>
+									<select
+										id="developer-filter-page"
+										value={activePage}
+										onChange={e => setActivePage(e.target.value)}
+										className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+									>
+										<option value="all">All pages ({allPageUrls.length})</option>
+										{allPageUrls.map(url => {
+											const short = url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+											return (
+												<option key={url} value={url}>{short}</option>
+											)
+										})}
+									</select>
+								</div>
+							)}
+
+							{/* Divider */}
+							<div className="hidden sm:block h-8 w-px bg-gray-200" />
+
+							{/* Theme */}
+							<div className="space-y-1 min-w-[130px]">
+								<label htmlFor="source-focus-theme" className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+									Theme
+								</label>
+								<select
+									id="source-focus-theme"
+									value={sourceTheme}
+									onChange={e => setSourceTheme(e.target.value as SourceThemeKey)}
+									className="w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+								>
+									{Object.entries(SOURCE_THEMES).map(([key, value]) => (
+										<option key={key} value={key}>{value.label}</option>
+									))}
+								</select>
+							</div>
+
+							{/* Clear filters button */}
+							{hasActiveFilters && (
+								<button
+									type="button"
+									onClick={clearAllFilters}
+									className="ml-auto text-xs font-medium text-blue-600 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 rounded-sm"
+								>
+									Clear filters
+								</button>
+							)}
+						</div>
+
+						{/* Code viewer */}
 						<div
 							className={cn(
 								'h-136 overflow-auto rounded-xl p-2 font-mono text-xs leading-relaxed',
@@ -956,7 +912,6 @@ export default function DeveloperReport({
 						</p>
 					</CardBody>
 				</SectionDropdown>
-				</>
 			)}
 
 			{/* ==================== Technical Hotspots ==================== */}
@@ -1041,13 +996,13 @@ export default function DeveloperReport({
 			{/* ==================== Violations List ==================== */}
 			<section aria-label="Violation results" className="space-y-4">
 				<SectionDropdown
-					title={`Violations (${filteredViolations.length} of ${violations.length})`}
+					title={`Violations (${pageFilteredViolations.length} of ${violations.length})`}
 					description="Expand for full rule-by-rule details."
 				>
 					<div className="p-4">
-						{filteredViolations.length > 0 ? (
+						{pageFilteredViolations.length > 0 ? (
 							<div className="space-y-3">
-								{filteredViolations.map((violation, index) => (
+								{pageFilteredViolations.map((violation, index) => (
 									<ViolationCard
 										key={`${violation.ruleId}-${violation.elements[0]?.pageUrl ?? 'no-page'}-${index}`}
 										uniqueId={`${violation.ruleId}-${violation.elements[0]?.pageUrl ?? 'no-page'}-${index}`}

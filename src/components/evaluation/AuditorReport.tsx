@@ -246,7 +246,7 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 					</CardHeader>
 					{openSections.executive && (
 						<CardBody id="exec-summary-panel">
-							<div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-8">
+							<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 								{/* Left column: Score + meta */}
 								<div className="flex flex-col items-center gap-4">
 									<ScoreGauge score={summary.overallScore} size={140} />

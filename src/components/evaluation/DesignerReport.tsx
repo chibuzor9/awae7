@@ -52,12 +52,25 @@ function buildHighlightCss(report: DesignerReportType): string {
 	return rules.join('\n')
 }
 
-function buildPreviewSrcdoc(html: string, highlightCss: string): string {
+function stripCspMeta(html: string): string {
+	return html.replace(
+		/<meta[^>]*http-equiv\s*=\s*["']?content-security-policy["']?[^>]*>/gi,
+		''
+	)
+}
+
+function buildPreviewSrcdoc(html: string, highlightCss: string, targetUrl?: string): string {
+	const clean = stripCspMeta(html)
 	const styleTag = `<style data-awae-highlights>${highlightCss}</style>`
-	if (html.includes('</head>')) {
-		return html.replace('</head>', `${styleTag}</head>`)
+	const baseTag = targetUrl ? `<base href="${targetUrl}" />` : ''
+	const injected = `${baseTag}${styleTag}`
+	if (clean.includes('</head>')) {
+		return clean.replace('</head>', `${injected}</head>`)
 	}
-	return `${styleTag}${html}`
+	if (clean.includes('<head>')) {
+		return clean.replace('<head>', `<head>${injected}`)
+	}
+	return `${injected}${clean}`
 }
 
 export default function DesignerReport({ report, targetUrl, fullSourceHtml }: DesignerReportProps) {
@@ -95,14 +108,23 @@ export default function DesignerReport({ report, targetUrl, fullSourceHtml }: De
 						)}
 					</CardHeader>
 					<CardBody className="p-0">
-						<iframe
-							title="Evaluated page preview"
-							sandbox="allow-same-origin"
-							className="h-[600px] w-full border-0"
-							{...(fullSourceHtml
-								? { srcDoc: buildPreviewSrcdoc(fullSourceHtml, buildHighlightCss(report)) }
-								: { src: targetUrl })}
-						/>
+						{fullSourceHtml ? (
+							<iframe
+								title="Evaluated page preview"
+								sandbox="allow-same-origin allow-scripts"
+								referrerPolicy="no-referrer"
+								className="h-[600px] w-full border-0"
+								srcDoc={buildPreviewSrcdoc(fullSourceHtml, buildHighlightCss(report), targetUrl)}
+							/>
+						) : (
+							<iframe
+								title="Evaluated page preview"
+								sandbox="allow-same-origin allow-scripts"
+								referrerPolicy="no-referrer"
+								className="h-[600px] w-full border-0"
+								src={targetUrl}
+							/>
+						)}
 					</CardBody>
 				</Card>
 			)}

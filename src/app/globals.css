@@ -33,6 +33,10 @@
 	}
 }
 
+html {
+	font-size: 17px;
+}
+
 html,
 body {
 	overflow-x: hidden;
@@ -43,6 +47,7 @@ body {
 	color: var(--foreground);
 	font-family: var(--font-atkinson-sans), Arial, Helvetica, sans-serif;
 	min-height: 100vh;
+	-webkit-font-smoothing: antialiased;
 }
 
 main {
