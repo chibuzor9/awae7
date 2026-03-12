@@ -135,7 +135,6 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 		summary,
 		complianceMatrix,
 		violations,
-		filters,
 		categoryBreakdown,
 		incompleteItems,
 		inapplicableRules,
@@ -249,36 +248,67 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 							<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 								{/* Left column: Score + meta */}
 								<div className="flex flex-col items-center gap-4">
-									<ScoreGauge score={summary.overallScore} size={140} />
-									<p className="text-sm text-gray-500">Overall Compliance Score</p>
+									<ScoreGauge
+										score={summary.overallScore}
+										size={140}
+									/>
+									<p className="text-sm text-gray-500">
+										Overall Compliance Score
+									</p>
 
 									<div className="w-full space-y-4">
 										<div className="flex items-start gap-3">
-											<Globe className="h-4 w-4 mt-0.5 text-gray-400 shrink-0" aria-hidden="true" />
+											<Globe
+												className="h-4 w-4 mt-0.5 text-gray-400 shrink-0"
+												aria-hidden="true"
+											/>
 											<div>
-												<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Target URL</p>
-												<p className="text-sm text-gray-900 break-all">{summary.targetUrl}</p>
+												<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+													Target URL
+												</p>
+												<p className="text-sm text-gray-900 break-all">
+													{summary.targetUrl}
+												</p>
 											</div>
 										</div>
 										<div className="flex items-start gap-3">
-											<Calendar className="h-4 w-4 mt-0.5 text-gray-400 shrink-0" aria-hidden="true" />
+											<Calendar
+												className="h-4 w-4 mt-0.5 text-gray-400 shrink-0"
+												aria-hidden="true"
+											/>
 											<div>
-												<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Evaluation Date</p>
-												<p className="text-sm text-gray-900">{formatDate(summary.evaluationDate)}</p>
+												<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+													Evaluation Date
+												</p>
+												<p className="text-sm text-gray-900">
+													{formatDate(
+														summary.evaluationDate
+													)}
+												</p>
 											</div>
 										</div>
 										<div className="flex items-start gap-3">
-											<Shield className="h-4 w-4 mt-0.5 text-gray-400 shrink-0" aria-hidden="true" />
+											<Shield
+												className="h-4 w-4 mt-0.5 text-gray-400 shrink-0"
+												aria-hidden="true"
+											/>
 											<div>
-												<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Engine</p>
-												<p className="text-sm text-gray-900">axe-core v{summary.axeCoreVersion}</p>
+												<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+													Engine
+												</p>
+												<p className="text-sm text-gray-900">
+													axe-core v
+													{summary.axeCoreVersion}
+												</p>
 											</div>
 										</div>
 									</div>
 								</div>
 
 								{/* Right column: POUR grid */}
-								<PourGrid principleScores={report.principleScores} />
+								<PourGrid
+									principleScores={report.principleScores}
+								/>
 							</div>
 						</CardBody>
 					)}
@@ -327,7 +357,7 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 													| 'all'
 											)
 										}
-										className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
+										className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
 									>
 										<option value="all">
 											All Principles
@@ -357,7 +387,7 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 													| 'all'
 											)
 										}
-										className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
+										className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
 									>
 										<option value="all">All Levels</option>
 										{LEVELS.map(l => (
@@ -413,10 +443,11 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 													className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide"
 												>
 													<button
+														type="button"
 														onClick={() =>
 															handleSort(key)
 														}
-														className="flex items-center gap-1 hover:text-gray-900 transition-colors cursor-pointer"
+														className="flex items-center gap-1 hover:text-gray-900 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1 rounded-sm"
 														aria-label={`Sort by ${label}`}
 													>
 														{label}
@@ -561,7 +592,7 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 													| 'all'
 											)
 										}
-										className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
+										className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
 									>
 										<option value="all">All</option>
 										{SEVERITIES.map(s => (
@@ -592,6 +623,7 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 										return (
 											<li key={v.ruleId}>
 												<button
+													type="button"
 													onClick={() =>
 														setExpandedViolation(
 															isExpanded
@@ -601,6 +633,7 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 													}
 													className="w-full text-left px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer"
 													aria-expanded={isExpanded}
+													aria-label={`${isExpanded ? 'Collapse' : 'Expand'} details for ${v.ruleId}: ${v.description}`}
 												>
 													<div className="flex items-start justify-between gap-4">
 														<div className="flex-1 min-w-0">
@@ -912,7 +945,7 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 									onClick={() =>
 										toggleSection('inapplicable')
 									}
-									className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600"
+									className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
 								>
 									{openSections.inapplicable
 										? 'Hide'

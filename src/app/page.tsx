@@ -8,6 +8,7 @@ import {
 	Code2,
 	FileText,
 	User,
+	Palette,
 	Globe,
 	Search,
 	CheckCircle2,
@@ -24,7 +25,7 @@ const features = [
 		icon: BarChart3,
 		title: 'Multi-Level Reports',
 		description:
-			'Get tailored accessibility reports for three distinct audiences: developers, auditors, and end-users, each with the right level of technical detail.',
+			'Get tailored accessibility reports for four distinct audiences: developers, designers, auditors, and end-users, each with the right level of technical detail.',
 	},
 	{
 		icon: ShieldCheck,
@@ -59,7 +60,7 @@ const steps = [
 		icon: CheckCircle2,
 		title: 'View Reports',
 		description:
-			'Switch between developer, auditor, and end-user views to get insights tailored to your role.',
+			'Switch between developer, designer, auditor, and end-user views to get insights tailored to your role.',
 	},
 ]
 
@@ -69,6 +70,14 @@ const reportTypes = [
 		role: 'Developer',
 		description:
 			'Detailed CSS selectors, HTML snippets, and remediation code examples to fix accessibility issues quickly.',
+		accent: 'border-blue-200 bg-blue-50 text-slate-900',
+		iconAccent: 'text-blue-700',
+	},
+	{
+		icon: Palette,
+		role: 'Designer',
+		description:
+			'Live visual previews, color-contrast analysis, and design-oriented guidance to improve accessibility at the design level.',
 		accent: 'border-blue-200 bg-blue-50 text-slate-900',
 		iconAccent: 'text-blue-700',
 	},
@@ -129,8 +138,8 @@ export default async function Home() {
 
 						<p className="mx-auto mt-5 max-w-4xl text-base leading-7 text-slate-700 sm:text-lg">
 							Evaluate any website against WCAG 2.2 standards and
-							get tailored reports for developers, auditors, and
-							end-users.
+							get tailored reports for developers, designers,
+							auditors, and end-users.
 						</p>
 
 						<div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -161,6 +170,9 @@ export default async function Home() {
 						<div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600">
 							<span className="rounded-md bg-white px-2.5 py-1">
 								Developer View
+							</span>
+							<span className="rounded-md bg-white px-2.5 py-1">
+								Designer View
 							</span>
 							<span className="rounded-md bg-white px-2.5 py-1">
 								Auditor View
@@ -273,7 +285,7 @@ export default async function Home() {
 						</p>
 					</div>
 
-					<div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
+					<div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
 						{reportTypes.map(report => (
 							<div
 								key={report.role}

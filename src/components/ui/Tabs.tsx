@@ -179,6 +179,7 @@ export function TabsContent({
 			id={`tabpanel-${value}`}
 			role="tabpanel"
 			aria-labelledby={`tab-${value}`}
+			tabIndex={0}
 			data-tabpanel={value}
 			className={cn('py-3 focus-visible:outline-none', className)}
 			{...props}
