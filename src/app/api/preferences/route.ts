@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 
-type PreferredRole = 'end-user' | 'developer' | 'auditor'
+type PreferredRole = 'end-user' | 'developer' | 'designer' | 'auditor'
 
 function isPreferredRole(value: unknown): value is PreferredRole {
-	return value === 'end-user' || value === 'developer' || value === 'auditor'
+	return value === 'end-user' || value === 'developer' || value === 'designer' || value === 'auditor'
 }
 
 function deriveUsername(email: string): string {
@@ -94,7 +94,7 @@ export async function PUT(request: NextRequest) {
 		if (!isPreferredRole(preferredRole)) {
 			return NextResponse.json(
 				{
-					error: 'Invalid preferredRole. Use end-user, developer, or auditor.',
+					error: 'Invalid preferredRole. Use end-user, developer, designer, or auditor.',
 				},
 				{ status: 400 }
 			)

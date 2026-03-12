@@ -113,15 +113,19 @@ export default function DesignerReport({ report, targetUrl, fullSourceHtml }: De
 								title="Evaluated page preview"
 								sandbox="allow-same-origin allow-scripts"
 								referrerPolicy="no-referrer"
-								className="h-[600px] w-full border-0"
-								srcDoc={buildPreviewSrcdoc(fullSourceHtml, buildHighlightCss(report), targetUrl)}
+								className="h-150 w-full border-0"
+								srcDoc={buildPreviewSrcdoc(
+									fullSourceHtml,
+									buildHighlightCss(report),
+									targetUrl
+								)}
 							/>
 						) : (
 							<iframe
 								title="Evaluated page preview"
 								sandbox="allow-same-origin allow-scripts"
 								referrerPolicy="no-referrer"
-								className="h-[600px] w-full border-0"
+								className="h-150 w-full border-0"
 								src={targetUrl}
 							/>
 						)}
@@ -137,11 +141,14 @@ export default function DesignerReport({ report, targetUrl, fullSourceHtml }: De
 							Color & Contrast
 						</h3>
 						<p className="mt-0.5 text-sm text-(--muted-text)">
-							Text and interactive elements that do not meet minimum contrast ratios
+							Text and interactive elements that do not meet
+							minimum contrast ratios
 						</p>
 					</div>
 					{report.contrastIssues.length > 0 ? (
-						<Badge variant="error">{report.contrastIssues.length} issues</Badge>
+						<Badge variant="error">
+							{report.contrastIssues.length} issues
+						</Badge>
 					) : (
 						<Badge variant="success">No Issues Detected</Badge>
 					)}
@@ -149,7 +156,8 @@ export default function DesignerReport({ report, targetUrl, fullSourceHtml }: De
 				<CardBody>
 					{report.contrastIssues.length === 0 ? (
 						<p className="text-center text-sm text-(--muted-text) py-4">
-							All text and interactive elements meet contrast requirements.
+							All text and interactive elements meet contrast
+							requirements.
 						</p>
 					) : (
 						<div className="space-y-3">
@@ -158,21 +166,36 @@ export default function DesignerReport({ report, targetUrl, fullSourceHtml }: De
 									key={`contrast-${i}`}
 									className="flex items-start gap-3 rounded-lg border border-(--border) p-3"
 								>
-									<div className="flex shrink-0 flex-col items-center gap-1">
+									<div
+										className="flex shrink-0 flex-col items-center gap-1"
+										role="img"
+										aria-label={`Color swatches: Foreground ${issue.foreground}, Background ${issue.background}`}
+									>
+										{/* Note: Inline styles required for dynamic contrast colors */}
 										<div
 											className="h-6 w-6 rounded border border-gray-300"
-											style={{ backgroundColor: issue.foreground }}
+											style={{
+												backgroundColor:
+													issue.foreground,
+											}}
 											title={`Foreground: ${issue.foreground}`}
 										/>
 										<div
 											className="h-6 w-6 rounded border border-gray-300"
-											style={{ backgroundColor: issue.background }}
+											style={{
+												backgroundColor:
+													issue.background,
+											}}
 											title={`Background: ${issue.background}`}
 										/>
 									</div>
 									<div className="min-w-0 flex-1">
 										<div className="flex items-center gap-2">
-											<Badge variant={severityBadgeVariant(issue.severity)}>
+											<Badge
+												variant={severityBadgeVariant(
+													issue.severity
+												)}
+											>
 												{issue.severity}
 											</Badge>
 											<span className="text-xs text-(--muted-text)">
@@ -180,7 +203,9 @@ export default function DesignerReport({ report, targetUrl, fullSourceHtml }: De
 											</span>
 										</div>
 										<p className="mt-1 text-sm text-(--text)">
-											Ratio: <strong>{issue.ratio}</strong> (required: {issue.requiredRatio})
+											Ratio:{' '}
+											<strong>{issue.ratio}</strong>{' '}
+											(required: {issue.requiredRatio})
 										</p>
 										<p className="mt-0.5 text-xs font-mono text-(--muted-text) truncate">
 											{issue.selector}
@@ -201,11 +226,14 @@ export default function DesignerReport({ report, targetUrl, fullSourceHtml }: De
 							Touch Targets & Spacing
 						</h3>
 						<p className="mt-0.5 text-sm text-(--muted-text)">
-							Interactive elements that are too small to tap comfortably
+							Interactive elements that are too small to tap
+							comfortably
 						</p>
 					</div>
 					{report.targetIssues.length > 0 ? (
-						<Badge variant="error">{report.targetIssues.length} issues</Badge>
+						<Badge variant="error">
+							{report.targetIssues.length} issues
+						</Badge>
 					) : (
 						<Badge variant="success">No Issues Detected</Badge>
 					)}
@@ -213,7 +241,8 @@ export default function DesignerReport({ report, targetUrl, fullSourceHtml }: De
 				<CardBody>
 					{report.targetIssues.length === 0 ? (
 						<p className="text-center text-sm text-(--muted-text) py-4">
-							All interactive elements meet minimum touch target size.
+							All interactive elements meet minimum touch target
+							size.
 						</p>
 					) : (
 						<div className="space-y-2">
@@ -222,12 +251,18 @@ export default function DesignerReport({ report, targetUrl, fullSourceHtml }: De
 									key={`target-${i}`}
 									className="flex items-center gap-3 rounded-lg border border-(--border) p-3"
 								>
-									<Badge variant={severityBadgeVariant(issue.severity)}>
+									<Badge
+										variant={severityBadgeVariant(
+											issue.severity
+										)}
+									>
 										{issue.severity}
 									</Badge>
 									<div className="min-w-0 flex-1">
 										<p className="text-sm text-(--text)">
-											Size: <strong>{issue.currentSize}</strong> (required: {issue.requiredSize})
+											Size:{' '}
+											<strong>{issue.currentSize}</strong>{' '}
+											(required: {issue.requiredSize})
 										</p>
 										<p className="mt-0.5 text-xs font-mono text-(--muted-text) truncate">
 											{issue.selector}
@@ -248,11 +283,14 @@ export default function DesignerReport({ report, targetUrl, fullSourceHtml }: De
 							Visual Hierarchy & Focus
 						</h3>
 						<p className="mt-0.5 text-sm text-(--muted-text)">
-							Heading structure, focus indicators, and reading order
+							Heading structure, focus indicators, and reading
+							order
 						</p>
 					</div>
 					{report.hierarchyIssues.length > 0 ? (
-						<Badge variant="error">{report.hierarchyIssues.length} issues</Badge>
+						<Badge variant="error">
+							{report.hierarchyIssues.length} issues
+						</Badge>
 					) : (
 						<Badge variant="success">No Issues Detected</Badge>
 					)}
@@ -270,14 +308,21 @@ export default function DesignerReport({ report, targetUrl, fullSourceHtml }: De
 									className="rounded-lg border border-(--border) p-3"
 								>
 									<div className="flex items-center gap-2">
-										<Badge variant={severityBadgeVariant(issue.severity)}>
+										<Badge
+											variant={severityBadgeVariant(
+												issue.severity
+											)}
+										>
 											{issue.severity}
 										</Badge>
 										<span className="text-xs font-mono text-(--muted-text)">
 											{issue.ruleId}
 										</span>
 										<span className="text-xs text-(--muted-text)">
-											· {issue.elementCount} element{issue.elementCount !== 1 ? 's' : ''}
+											· {issue.elementCount} element
+											{issue.elementCount !== 1
+												? 's'
+												: ''}
 										</span>
 									</div>
 									<p className="mt-1.5 text-sm text-(--text)">
@@ -303,35 +348,53 @@ export default function DesignerReport({ report, targetUrl, fullSourceHtml }: De
 							<tr className="text-left text-xs text-(--muted-text)">
 								<th className="px-4 py-2.5">Component</th>
 								<th className="px-4 py-2.5">Status</th>
-								<th className="px-4 py-2.5 text-right">Issues</th>
+								<th className="px-4 py-2.5 text-right">
+									Issues
+								</th>
 							</tr>
 						</thead>
 						<tbody>
 							{report.componentChecklist.map(item => (
-								<tr key={item.component} className="border-t border-(--border)">
-									<td className="px-4 py-2.5 text-(--text)">{item.component}</td>
+								<tr
+									key={item.component}
+									className="border-t border-(--border)"
+								>
+									<td className="px-4 py-2.5 text-(--text)">
+										{item.component}
+									</td>
 									<td className="px-4 py-2.5">
 										{item.status === 'pass' && (
 											<span className="inline-flex items-center gap-1 text-emerald-600">
-												<CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+												<CheckCircle2
+													className="h-3.5 w-3.5"
+													aria-hidden="true"
+												/>
 												Pass
 											</span>
 										)}
 										{item.status === 'warning' && (
 											<span className="inline-flex items-center gap-1 text-amber-600">
-												<AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+												<AlertCircle
+													className="h-3.5 w-3.5"
+													aria-hidden="true"
+												/>
 												Warning
 											</span>
 										)}
 										{item.status === 'fail' && (
 											<span className="inline-flex items-center gap-1 text-red-600">
-												<AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
+												<AlertTriangle
+													className="h-3.5 w-3.5"
+													aria-hidden="true"
+												/>
 												Fail
 											</span>
 										)}
 									</td>
 									<td className="px-4 py-2.5 text-right font-medium text-(--text)">
-										{item.issueCount === 0 ? 'No Issues Detected' : item.issueCount}
+										{item.issueCount === 0
+											? 'No Issues Detected'
+											: item.issueCount}
 									</td>
 								</tr>
 							))}
