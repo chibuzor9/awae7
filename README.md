@@ -1,161 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AWAE7
 
-## Getting Started
+AWAE7 is a Next.js 16 web accessibility evaluation platform that analyzes pages against WCAG 2.2 and generates audience-specific reports for:
 
-First, run the development server:
+- Developers
+- Designers
+- Auditors
+- End users
+
+The app uses `axe-core` for automated accessibility analysis, Supabase for authentication, and Prisma + PostgreSQL for persistence.
+
+## Core Features
+
+- URL and HTML file accessibility evaluation
+- Optional multi-page crawl mode for site-wide checks
+- Role-specific report views with tailored detail depth
+- WCAG card deck for accessibility learning and remediation guidance
+- Export support (CSV, JSON, PDF)
+
+## Tech Stack
+
+- Next.js (App Router) + React + TypeScript
+- Tailwind CSS
+- Supabase Auth (`@supabase/ssr`)
+- Prisma with PostgreSQL
+- axe-core + Playwright
+
+## Prerequisites
+
+- Node.js 20+
+- npm 10+
+- PostgreSQL database
+- Supabase project (URL + anon key)
+
+## Quick Start
+
+1. Install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create `.env.local` in the project root and set required values:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Environment Setup
-
-1. Copy `.env.example` to `.env.local`:
-
-```bash
-cp .env.example .env.local
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DB_NAME"
+NEXT_PUBLIC_SUPABASE_URL="https://YOUR_PROJECT_REF.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"
 ```
 
-2. Configure your environment variables:
-    - **Database**: Add your `DATABASE_URL` for PostgreSQL
-    - **Supabase**: Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-    - **Email**: Choose and configure an email service provider (see Email Configuration below)
-    - **Site URL**: Set `NEXT_PUBLIC_SITE_URL` to your application URL
-
-3. Generate Prisma client and push schema to database:
+3. Generate Prisma client and apply schema:
 
 ```bash
 npx prisma generate
 npx prisma db push
 ```
 
-## Email Configuration
-
-AWAE7 uses a **dual email system** for optimal user experience:
-
-### Supabase Auth Emails (No Setup Required)
-
-Authentication emails are handled by Supabase automatically:
-
-- ✅ Signup confirmation
-- ✅ Password reset
-- ✅ Magic link login
-- ✅ Email change verification
-- ✅ User invitations
-- ✅ Reauthentication/OTP
-
-**To customize**: Copy templates from `/supabase-email-templates/` into Supabase Dashboard → Authentication → Email Templates
-
-See `/supabase-email-templates/ARCHITECTURE.md` for full details.
-
-### Custom SMTP (Optional - For Marketing Emails)
-
-For non-auth emails (welcome messages, newsletters), configure custom SMTP:
-
-**1. Choose an Email Service Provider**
-
-**Recommended: Resend** (simplest setup)
+4. Start development server:
 
 ```bash
-npm install resend
+npm run dev
 ```
 
-Add to `.env.local`:
+5. Open `http://localhost:3000`.
 
-```
-RESEND_API_KEY="re_your_api_key"
-EMAIL_FROM="AWAE7 <hello@yourdomain.com>"
-```
+## Available Scripts
 
-**2. Implement Email Sending**
+- `npm run dev`: Start local development server
+- `npm run build`: Create production build
+- `npm run start`: Run production server
+- `npm run lint`: Run ESLint
 
-Update `src/lib/email/index.ts` to use your chosen provider. Example with Resend:
+## Project Structure
 
-```typescript
-import { Resend } from 'resend'
+- `src/app`: App Router pages and API routes
+- `src/components`: UI and report components
+- `src/lib/axe`: accessibility evaluation and report transformation
+- `src/lib/email`: email template rendering + email sending integration points
+- `src/lib/supabase`: browser/server/middleware Supabase clients
+- `prisma/schema.prisma`: database schema
 
-export async function sendEmail(options: EmailOptions): Promise<void> {
-	const resend = new Resend(process.env.RESEND_API_KEY)
+## Environment Variables
 
-	await resend.emails.send({
-		from: process.env.EMAIL_FROM!,
-		to: options.to,
-		subject: options.subject,
-		html: options.html,
-	})
-}
-```
+Required today:
 
-**3. Send Marketing Emails**
+- `DATABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-Use the welcome email after user completes signup:
+Optional (only if you implement SMTP provider integration in `src/lib/email/index.ts`):
 
-```typescript
-import { sendWelcomeEmail } from '@/lib/email'
+- `RESEND_API_KEY`
+- `EMAIL_FROM`
+- `SENDGRID_API_KEY`
 
-// After Supabase confirms user's email
-await sendWelcomeEmail({
-	username: user.name,
-	email: user.email,
-	siteUrl: 'https://awae7.com',
-})
-```
+## Email Architecture
 
-Add more templates in `/src/lib/email/templates/` for newsletters, tips, etc.
+AWAE7 uses a dual approach:
 
-## Architecture Benefits
+- Supabase handles authentication emails (confirmation, password reset, magic links, OTP).
+- Application SMTP integration handles non-auth emails such as welcome or engagement messaging.
 
-**Why separate auth from marketing emails?**
+The SMTP implementation is intentionally a placeholder in `src/lib/email/index.ts`. In development, it logs outgoing email payload details; in production, it throws until a provider is wired.
 
-- 🔒 Auth emails always work (no SMTP issues blocking signups)
-- ⚡ Faster onboarding (Supabase handles auth instantly)
-- 🎯 Better deliverability (auth through Supabase, marketing through dedicated SMTP)
-- 🛠️ Easy customization (update Supabase templates without code deployment)
+Email templates currently live in `src/lib/email/templates`.
 
-## Supabase Auth Email Customization
+## Notes
 
-To replace default Supabase emails with custom templates:
-
-1. In Supabase Dashboard, go to **Authentication → Email Templates**
-2. Disable built-in email templates
-3. Use the provided templates in this project instead
-
-The custom templates provide:
-
-- Professional branding matching AWAE7
-- Responsive design for all devices
-- Clear call-to-action buttons
-- Accessibility-friendly markup
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Accessibility crawling uses Playwright and Chromium headless shell.
+- The `postinstall` script runs Prisma generation and installs Playwright browser binaries outside Vercel environments.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See `LICENSE`.
 
-This project uses [axe-core](https://github.com/dequelabs/axe-core), which is licensed under the Mozilla Public License 2.0 (MPL-2.0).
+This project uses [axe-core](https://github.com/dequelabs/axe-core), licensed under MPL-2.0.
