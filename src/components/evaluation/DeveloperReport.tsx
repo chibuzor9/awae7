@@ -7,10 +7,10 @@ import {
 	Info,
 	ShieldAlert,
 	SearchX,
-	ChevronDown,
 } from 'lucide-react'
-import { Card, CardHeader, CardBody } from '@/components/ui/Card'
+import { Card, CardBody } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
+import { SectionDropdown } from '@/components/ui/SectionDropdown'
 import { cn } from '@/lib/utils'
 import { ViolationCard } from '@/components/evaluation/ViolationCard'
 import type {
@@ -355,50 +355,6 @@ function renderHtmlLine(line: string, keyPrefix: string): React.ReactNode {
 	return parts
 }
 
-function SectionDropdown({
-	title,
-	description,
-	children,
-	defaultOpen = false,
-	className,
-}: {
-	title: string
-	description?: string
-	children: React.ReactNode
-	defaultOpen?: boolean
-	className?: string
-}) {
-	return (
-		<details
-			open={defaultOpen}
-			className={cn(
-				'group overflow-hidden rounded-xl border border-gray-200 bg-white',
-				className
-			)}
-		>
-			<summary className="cursor-pointer list-none px-4 py-2.5">
-				<div className="flex items-center justify-between gap-2">
-					<div>
-						<p className="text-sm font-semibold text-gray-900">
-							{title}
-						</p>
-						{description && (
-							<p className="text-xs text-gray-500 mt-0.5">
-								{description}
-							</p>
-						)}
-					</div>
-					<ChevronDown
-						className="h-4 w-4 shrink-0 text-gray-400 transition-transform group-open:rotate-180"
-						aria-hidden="true"
-					/>
-				</div>
-			</summary>
-			<div className="border-t border-gray-100">{children}</div>
-		</details>
-	)
-}
-
 /* ---- Main Component ---- */
 
 export default function DeveloperReport({
@@ -574,6 +530,23 @@ export default function DeveloperReport({
 			.filter(v => v.elements.length > 0)
 	}, [filteredViolations, isMultiPage, activePage])
 
+	/** Per-page violation + element counts for the crawl summary */
+	const pageStats = useMemo(() => {
+		if (!isMultiPage) return []
+		return allPageUrls.map(url => {
+			let violationCount = 0
+			let elementCount = 0
+			for (const v of filteredViolations) {
+				const pageElements = v.elements.filter(el => el.pageUrl === url)
+				if (pageElements.length > 0) {
+					violationCount++
+					elementCount += pageElements.length
+				}
+			}
+			return { url, violationCount, elementCount }
+		}).sort((a, b) => b.elementCount - a.elementCount)
+	}, [isMultiPage, allPageUrls, filteredViolations])
+
 	const sourceEditorText = useMemo(() => {
 		if (report.fullSourceHtml?.trim()) {
 			return report.fullSourceHtml
@@ -687,6 +660,76 @@ export default function DeveloperReport({
 
 	return (
 		<div className="space-y-4">
+			{/* ==================== Crawl Page Navigator ==================== */}
+			{isMultiPage && (
+				<div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4 space-y-3">
+					<div className="flex flex-wrap items-center justify-between gap-2">
+						<div>
+							<h3 className="text-sm font-semibold text-gray-900">
+								Site Crawl Results
+							</h3>
+							<p className="text-xs text-gray-500 mt-0.5">
+								{allPageUrls.length} pages scanned &middot;{' '}
+								{activePage === 'all'
+									? `Showing all ${filteredViolations.length} rules`
+									: `Filtered to ${pageFilteredViolations.length} rules`}
+							</p>
+						</div>
+						<select
+							aria-label="Filter by page"
+							value={activePage}
+							onChange={e => setActivePage(e.target.value)}
+							className="rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-sm text-gray-800 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 max-w-xs truncate"
+						>
+							<option value="all">All pages ({allPageUrls.length})</option>
+							{pageStats.map(({ url, elementCount }) => {
+								const short = url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+								return (
+									<option key={url} value={url}>
+										{short} ({elementCount} issues)
+									</option>
+								)
+							})}
+						</select>
+					</div>
+
+					{/* Per-page breakdown chips */}
+					<div className="flex flex-wrap gap-1.5">
+						<button
+							type="button"
+							onClick={() => setActivePage('all')}
+							className={cn(
+								'rounded-full px-3 py-1 text-xs font-medium transition-colors',
+								activePage === 'all'
+									? 'bg-blue-600 text-white'
+									: 'bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+							)}
+						>
+							All pages
+						</button>
+						{pageStats.map(({ url, elementCount }) => {
+							const short = url.replace(/^https?:\/\/[^/]+/, '').replace(/\/$/, '') || '/'
+							const isActive = activePage === url
+							return (
+								<button
+									key={url}
+									type="button"
+									onClick={() => setActivePage(url)}
+									title={url}
+									className={cn(
+										'rounded-full px-3 py-1 text-xs font-medium transition-colors max-w-[200px] truncate',
+										isActive
+											? 'bg-blue-600 text-white'
+											: 'bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+									)}
+								>
+									{short} <span className="opacity-70">({elementCount})</span>
+								</button>
+							)
+						})}
+					</div>
+				</div>
+			)}
 			{/* ==================== Source Code ==================== */}
 			{sourceEditorText && (
 				<SectionDropdown
@@ -1057,64 +1100,49 @@ export default function DeveloperReport({
 				<section aria-label="Needs review items">
 					<SectionDropdown
 						title={`Needs Manual Review (${incompleteItems.length})`}
-						description="Items that require human validation."
+						description="These items could not be fully evaluated automatically and require manual verification."
 					>
-						<Card>
-							<CardHeader>
-								<h3 className="text-sm font-semibold text-gray-900">
-									Needs Manual Review
-									<span className="ml-1.5 text-gray-500 font-normal">
-										({incompleteItems.length})
-									</span>
-								</h3>
-								<p className="mt-0.5 text-xs text-gray-500">
-									These items could not be fully evaluated
-									automatically and require manual
-									verification.
-								</p>
-							</CardHeader>
-							<CardBody className="p-0">
-								<ul
-									className="divide-y divide-gray-100"
-									role="list"
-								>
-									{incompleteItems.map(item => (
-										<li
-											key={item.ruleId}
-											className="px-6 py-4"
-										>
-											<div className="flex flex-wrap items-center gap-2 mb-1">
-												<Badge variant="warning">
-													{item.severity}
-												</Badge>
-												<code className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs">
-													{item.ruleId}
-												</code>
-												<Badge variant="info">
-													{item.wcagCriterion} (
-													{item.wcagLevel})
-												</Badge>
-											</div>
-											<p className="text-sm text-gray-800">
-												{item.description}
+						<div className="p-0">
+							<ul
+								className="divide-y divide-gray-100"
+								role="list"
+							>
+								{incompleteItems.map(item => (
+									<li
+										key={item.ruleId}
+										className="px-6 py-4"
+									>
+										<div className="flex flex-wrap items-center gap-2 mb-1">
+											<Badge variant="warning">
+												{item.severity}
+											</Badge>
+											<code className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs">
+												{item.ruleId}
+											</code>
+											<Badge variant="info">
+												{item.wcagCriterion} (
+												{item.wcagLevel})
+											</Badge>
+										</div>
+										<p className="text-sm text-gray-800">
+											{item.description}
+										</p>
+										{item.reason && (
+											<p className="mt-1 text-xs text-amber-700 bg-amber-50 rounded px-2 py-1 inline-block">
+												{item.reason}
 											</p>
-											{item.reason && (
-												<p className="mt-1 text-xs text-amber-700 bg-amber-50 rounded px-2 py-1 inline-block">
-													{item.reason}
-												</p>
-											)}
-											<p className="mt-1 text-xs text-gray-500">
-												{item.elementCount}{' '}
-												{item.elementCount === 1
-													? 'element'
-													: 'elements'}{' '}
-												to review
-											</p>
-										</li>
-									))}
-								</ul>
-							</CardBody>
-						</Card>
+										)}
+										<p className="mt-1 text-xs text-gray-500">
+											{item.elementCount}{' '}
+											{item.elementCount === 1
+												? 'element'
+												: 'elements'}{' '}
+											to review
+										</p>
+									</li>
+								))}
+							</ul>
+						</div>
 					</SectionDropdown>
 				</section>
 			)}

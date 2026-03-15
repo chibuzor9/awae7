@@ -13,6 +13,7 @@ import type { EvaluationResult, ViolationItem } from '@/types'
 
 // ---------------------------------------------------------------------------
 // GET /api/evaluations/[id]  --  Full evaluation detail with reports
+// DELETE /api/evaluations/[id]  --  Remove an evaluation
 // ---------------------------------------------------------------------------
 
 export async function GET(
@@ -157,6 +158,57 @@ export async function GET(
 			{
 				error: 'Failed to fetch evaluation details. Please try again later.',
 			},
+			{ status: 500 }
+		)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// DELETE /api/evaluations/[id]
+// ---------------------------------------------------------------------------
+
+export async function DELETE(
+	_request: NextRequest,
+	{ params }: { params: Promise<{ id: string }> }
+) {
+	try {
+		const { id } = await params
+
+		// ---- Authenticate ----
+		const supabase = await createClient()
+		const {
+			data: { user },
+		} = await supabase.auth.getUser()
+
+		if (!user) {
+			return NextResponse.json(
+				{ error: 'You must be signed in to delete an evaluation.' },
+				{ status: 401 }
+			)
+		}
+
+		// ---- Fetch and verify ownership ----
+		const evaluation = await prisma.evaluation.findUnique({
+			where: { id },
+			select: { userId: true },
+		})
+
+		if (!evaluation || evaluation.userId !== user.id) {
+			return NextResponse.json(
+				{ error: 'Evaluation not found.' },
+				{ status: 404 }
+			)
+		}
+
+		// Violations cascade-delete via the schema relation
+		await prisma.evaluation.delete({ where: { id } })
+
+		return NextResponse.json({ success: true }, { status: 200 })
+	} catch (err: unknown) {
+		const message = err instanceof Error ? err.message : String(err)
+		console.error('[DELETE /api/evaluations/[id]] Error:', message)
+		return NextResponse.json(
+			{ error: 'Failed to delete evaluation. Please try again later.' },
 			{ status: 500 }
 		)
 	}

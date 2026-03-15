@@ -35,6 +35,8 @@ model Evaluation {
   user            User?       @relation(fields: [userId], references: [id])
   violations      Violation[]
 
+  @@index([userId])
+  @@index([timestamp])
   @@map("evaluations")
 }
 
@@ -52,5 +54,6 @@ model Violation {
   remediationGuidance String?
   evaluation          Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
 
+  @@index([evaluationId])
   @@map("violations")
 }

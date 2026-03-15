@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { ChevronDown, ChevronRight, ExternalLink, Code2 } from 'lucide-react'
+import { ChevronDown, ExternalLink, Code2 } from 'lucide-react'
 import { Card, CardBody } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { cn } from '@/lib/utils'
@@ -249,7 +249,6 @@ export function ViolationCard({
 		[onWcagCardClick, wcagCriterion]
 	)
 
-	const ChevronIcon = isExpanded ? ChevronDown : ChevronRight
 	const detailsId = `violation-details-${uniqueId ?? ruleId}`
 
 	return (
@@ -264,10 +263,14 @@ export function ViolationCard({
 				type="button"
 				onClick={toggle}
 				aria-controls={detailsId}
+				aria-expanded={isExpanded}
 				className="flex w-full items-start gap-3 px-6 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-xl"
 			>
-				<ChevronIcon
-					className="mt-0.5 h-5 w-5 shrink-0 text-gray-400"
+				<ChevronDown
+					className={cn(
+						'mt-0.5 h-5 w-5 shrink-0 text-gray-400 transition-transform',
+						isExpanded && 'rotate-180'
+					)}
 					aria-hidden="true"
 				/>
 
