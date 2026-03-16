@@ -109,6 +109,7 @@ export interface RawEvaluationResult {
 	axeCoreVersion: string
 	testEnvironment: RawTestEnvironment
 	fullSourceHtml?: string
+	pageSources?: { url: string; html: string }[]
 	violations: RawAxeViolation[]
 	passes: RawAxePass[]
 	incomplete: RawAxeIncomplete[]
@@ -1425,13 +1426,11 @@ export async function evaluateSiteCrawl(
         testEnvironment: firstSuccessMeta.testEnvironment,
         fullSourceHtml:
             aggregatePageSources.length > 0
-                ? aggregatePageSources
-                    .map(
-                        pageSource =>
-                            `<!-- PAGE: ${ pageSource.url } -->\n${ pageSource.html }`
-                    )
-                    .join('\n\n<!-- PAGE BREAK -->\n\n')
+                ? aggregatePageSources[0].html
                 : undefined,
+        pageSources: aggregatePageSources.length > 0
+            ? aggregatePageSources
+            : undefined,
         violations: aggregateViolations,
         passes: aggregatePasses,
         incomplete: aggregateIncomplete,

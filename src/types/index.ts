@@ -120,6 +120,7 @@ export interface EvaluationResult {
 	axeCoreVersion: string
 	testEnvironment: TestEnvironment
 	fullSourceHtml?: string
+	pageSources?: { url: string; html: string }[]
     crawlSummary?: CrawlSummary
     pageSummaries?: PageEvaluationSummary[]
 	overallScore: number
@@ -303,6 +304,7 @@ export interface AuditorViolation {
 	category: WcagCategory
 	instanceCount: number
 	formalDescription: string
+	pageUrls: string[]
 }
 
 export interface AuditorIncompleteItem {

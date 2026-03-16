@@ -113,6 +113,7 @@ export default function EvaluationResults({
 					report={designerReport}
 					targetUrl={evaluation.targetUrl}
 					fullSourceHtml={developerReport.fullSourceHtml}
+					pageSources={evaluation.pageSources}
 				/>
 			</TabsContent>
 

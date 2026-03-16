@@ -13,8 +13,9 @@ import {
 	Shield,
 	ChevronDown,
 } from 'lucide-react'
-import { Card, CardHeader, CardBody } from '@/components/ui/Card'
+import { CardBody } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
+import { SectionDropdown } from '@/components/ui/SectionDropdown'
 import { ScoreGauge } from '@/components/ui/ScoreGauge'
 import { cn, formatDate } from '@/lib/utils'
 import PourGrid from '@/components/evaluation/PourGrid'
@@ -50,13 +51,6 @@ type SortKey = keyof Pick<
 >
 
 type SortDirection = 'asc' | 'desc'
-type SectionKey =
-	| 'executive'
-	| 'matrix'
-	| 'violations'
-	| 'category'
-	| 'incomplete'
-	| 'inapplicable'
 
 // ---------- Helpers ----------
 function severityBadgeVariant(
@@ -102,33 +96,6 @@ function statusLabel(status: ComplianceEntry['status']): string {
 	}
 }
 
-function SectionToggle({
-	open,
-	onToggle,
-}: {
-	open: boolean
-	onToggle: () => void
-}) {
-	return (
-		<button
-			type="button"
-			onClick={onToggle}
-			className="inline-flex items-center rounded-md p-1.5 text-gray-400 transition-colors hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-		>
-			<span className="sr-only">
-				{open ? 'Collapse section' : 'Expand section'}
-			</span>
-			<ChevronDown
-				className={cn(
-					'h-4 w-4 shrink-0 transition-transform',
-					open && 'rotate-180'
-				)}
-				aria-hidden="true"
-			/>
-		</button>
-	)
-}
-
 // ---------- Component ----------
 export default function AuditorReport({ report }: AuditorReportProps) {
 	const {
@@ -155,16 +122,36 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 	const [expandedViolation, setExpandedViolation] = useState<string | null>(
 		null
 	)
-	const [openSections, setOpenSections] = useState<
-		Record<SectionKey, boolean>
-	>({
-		executive: true,
-		matrix: true,
-		violations: true,
-		category: true,
-		incomplete: true,
-		inapplicable: true,
-	})
+
+	// --- Page filter for crawls ---
+	const allPageUrls = useMemo(() => {
+		const urls = new Set<string>()
+		for (const v of violations) {
+			for (const url of v.pageUrls) urls.add(url)
+		}
+		if (inapplicableRules) {
+			for (const r of inapplicableRules) {
+				if (r.pageUrl) urls.add(r.pageUrl)
+			}
+		}
+		return Array.from(urls).sort()
+	}, [violations, inapplicableRules])
+
+	const isMultiPage = allPageUrls.length > 1
+	const [activePage, setActivePage] = useState<string>('all')
+
+	// --- Deduplicated inapplicable rules ---
+	const uniqueInapplicableRules = useMemo(() => {
+		if (!inapplicableRules) return []
+		const seen = new Map<string, typeof inapplicableRules[0]>()
+		for (const rule of inapplicableRules) {
+			if (activePage !== 'all' && rule.pageUrl && rule.pageUrl !== activePage) continue
+			if (!seen.has(rule.ruleId)) {
+				seen.set(rule.ruleId, rule)
+			}
+		}
+		return Array.from(seen.values())
+	}, [inapplicableRules, activePage])
 
 	// --- Sorted & filtered matrix ---
 	const filteredMatrix = useMemo(() => {
@@ -195,9 +182,15 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 
 	// --- Filtered violations ---
 	const filteredViolations = useMemo(() => {
-		if (filterSeverity === 'all') return violations
-		return violations.filter(v => v.severity === filterSeverity)
-	}, [violations, filterSeverity])
+		let filtered = violations
+		if (filterSeverity !== 'all') {
+			filtered = filtered.filter(v => v.severity === filterSeverity)
+		}
+		if (isMultiPage && activePage !== 'all') {
+			filtered = filtered.filter(v => v.pageUrls.includes(activePage))
+		}
+		return filtered
+	}, [violations, filterSeverity, isMultiPage, activePage])
 
 	function handleSort(key: SortKey) {
 		if (sortKey === key) {
@@ -208,43 +201,52 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 		}
 	}
 
-	function toggleSection(section: SectionKey) {
-		setOpenSections(prev => ({
-			...prev,
-			[section]: !prev[section],
-		}))
-	}
-
 	// ===========================================
 	// RENDER
 	// ===========================================
 	return (
 		<div className="space-y-8">
+			{/* ============ PAGE FILTER FOR CRAWLS ============ */}
+			{isMultiPage && (
+				<div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4 space-y-3">
+					<div className="flex flex-wrap items-center justify-between gap-2">
+						<div>
+							<h3 className="text-sm font-semibold text-gray-900">
+								Site Crawl Results
+							</h3>
+							<p className="text-xs text-gray-500 mt-0.5">
+								{allPageUrls.length} pages scanned &middot;{' '}
+								{activePage === 'all'
+									? `Showing all ${filteredViolations.length} rules`
+									: `Filtered to ${filteredViolations.length} rules on selected page`}
+							</p>
+						</div>
+						<select
+							aria-label="Filter by page"
+							value={activePage}
+							onChange={e => setActivePage(e.target.value)}
+							className="rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-sm text-gray-800 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 max-w-xs truncate"
+						>
+							<option value="all">All pages ({allPageUrls.length})</option>
+							{allPageUrls.map(url => {
+								const short = url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+								return (
+									<option key={url} value={url}>{short}</option>
+								)
+							})}
+						</select>
+					</div>
+				</div>
+			)}
+
 			{/* ============ EXECUTIVE SUMMARY ============ */}
 			<section aria-labelledby="exec-summary-heading">
-				<Card>
-					<CardHeader>
-						<div className="flex items-center justify-between gap-3">
-							<div className="flex items-center gap-2">
-								<FileText
-									className="h-5 w-5 text-blue-600"
-									aria-hidden="true"
-								/>
-								<h2
-									id="exec-summary-heading"
-									className="text-lg font-semibold text-gray-900"
-								>
-									Executive Summary
-								</h2>
-							</div>
-							<SectionToggle
-								open={openSections.executive}
-								onToggle={() => toggleSection('executive')}
-							/>
-						</div>
-					</CardHeader>
-					{openSections.executive && (
-						<CardBody id="exec-summary-panel">
+				<SectionDropdown
+					title="Executive Summary"
+					icon={<FileText className="h-5 w-5 text-blue-600" aria-hidden="true" />}
+					defaultOpen
+				>
+					<CardBody id="exec-summary-panel">
 							<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 								{/* Left column: Score + meta */}
 								<div className="flex flex-col items-center gap-4">
@@ -311,97 +313,83 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 								/>
 							</div>
 						</CardBody>
-					)}
-				</Card>
+				</SectionDropdown>
 			</section>
 
 			{/* ============ COMPLIANCE MATRIX ============ */}
 			<section aria-labelledby="matrix-heading">
-				<Card>
-					<CardHeader>
-						<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-							<div className="flex items-center justify-between gap-3">
-								<h2
-									id="matrix-heading"
-									className="text-lg font-semibold text-gray-900"
+				<SectionDropdown
+					title="Compliance Matrix"
+					defaultOpen
+				>
+					<div className="px-4 py-3">
+						{/* Filter dropdowns */}
+						<div className="flex flex-wrap items-end gap-3">
+							<Filter
+								className="h-4 w-4 text-gray-400 mb-2"
+								aria-hidden="true"
+							/>
+
+							<div className="space-y-1">
+								<label
+									htmlFor="auditor-principle-filter"
+									className="block text-xs font-medium text-gray-600"
 								>
-									Compliance Matrix
-								</h2>
-								<SectionToggle
-									open={openSections.matrix}
-									onToggle={() => toggleSection('matrix')}
-								/>
+									Principle
+								</label>
+								<select
+									id="auditor-principle-filter"
+									value={filterPrinciple}
+									onChange={e =>
+										setFilterPrinciple(
+											e.target.value as
+												| WcagPrinciple
+												| 'all'
+										)
+									}
+									className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
+								>
+									<option value="all">
+										All Principles
+									</option>
+									{PRINCIPLES.map(p => (
+										<option key={p} value={p}>
+											{p}
+										</option>
+									))}
+								</select>
 							</div>
 
-							{/* Filter dropdowns */}
-							<div className="flex flex-wrap items-end gap-3">
-								<Filter
-									className="h-4 w-4 text-gray-400"
-									aria-hidden="true"
-								/>
-
-								<div className="space-y-1">
-									<label
-										htmlFor="auditor-principle-filter"
-										className="block text-xs font-medium text-gray-600"
-									>
-										Principle
-									</label>
-									<select
-										id="auditor-principle-filter"
-										value={filterPrinciple}
-										onChange={e =>
-											setFilterPrinciple(
-												e.target.value as
-													| WcagPrinciple
-													| 'all'
-											)
-										}
-										className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
-									>
-										<option value="all">
-											All Principles
+							<div className="space-y-1">
+								<label
+									htmlFor="auditor-level-filter"
+									className="block text-xs font-medium text-gray-600"
+								>
+									Level
+								</label>
+								<select
+									id="auditor-level-filter"
+									value={filterLevel}
+									onChange={e =>
+										setFilterLevel(
+											e.target.value as
+												| WcagLevel
+												| 'all'
+										)
+									}
+									className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
+								>
+									<option value="all">All Levels</option>
+									{LEVELS.map(l => (
+										<option key={l} value={l}>
+											Level {l}
 										</option>
-										{PRINCIPLES.map(p => (
-											<option key={p} value={p}>
-												{p}
-											</option>
-										))}
-									</select>
-								</div>
-
-								<div className="space-y-1">
-									<label
-										htmlFor="auditor-level-filter"
-										className="block text-xs font-medium text-gray-600"
-									>
-										Level
-									</label>
-									<select
-										id="auditor-level-filter"
-										value={filterLevel}
-										onChange={e =>
-											setFilterLevel(
-												e.target.value as
-													| WcagLevel
-													| 'all'
-											)
-										}
-										className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
-									>
-										<option value="all">All Levels</option>
-										{LEVELS.map(l => (
-											<option key={l} value={l}>
-												Level {l}
-											</option>
-										))}
-									</select>
-								</div>
+									))}
+								</select>
 							</div>
 						</div>
-					</CardHeader>
-					{openSections.matrix && (
-						<CardBody id="matrix-panel" className="p-0">
+					</div>
+					<CardBody id="matrix-panel" className="p-0">
 							<div className="overflow-x-auto">
 								<table className="w-full text-sm">
 									<thead>
@@ -541,72 +529,53 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 								{complianceMatrix.length} criteria
 							</div>
 						</CardBody>
-					)}
-				</Card>
+				</SectionDropdown>
 			</section>
 
 			{/* ============ VIOLATIONS ============ */}
 			<section aria-labelledby="violations-heading">
-				<Card>
-					<CardHeader>
-						<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-							<div className="flex items-center justify-between gap-3">
-								<div className="flex items-center gap-2">
-									<AlertTriangle
-										className="h-5 w-5 text-amber-500"
-										aria-hidden="true"
-									/>
-									<h2
-										id="violations-heading"
-										className="text-lg font-semibold text-gray-900"
-									>
-										Violations ({filteredViolations.length})
-									</h2>
-								</div>
-								<SectionToggle
-									open={openSections.violations}
-									onToggle={() => toggleSection('violations')}
-								/>
-							</div>
-
-							{/* Severity filter */}
-							<div className="flex flex-wrap items-end gap-2">
-								<Filter
-									className="h-4 w-4 text-gray-400 mr-1"
-									aria-hidden="true"
-								/>
-								<div className="space-y-1">
-									<label
-										htmlFor="auditor-severity-filter"
-										className="block text-xs font-medium text-gray-600"
-									>
-										Severity
-									</label>
-									<select
-										id="auditor-severity-filter"
-										value={filterSeverity}
-										onChange={e =>
-											setFilterSeverity(
-												e.target.value as
-													| Severity
-													| 'all'
-											)
-										}
-										className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
-									>
-										<option value="all">All</option>
-										{SEVERITIES.map(s => (
-											<option key={s} value={s}>
-												{s}
-											</option>
-										))}
-									</select>
-								</div>
+				<SectionDropdown
+					title={`Violations (${filteredViolations.length})`}
+					icon={<AlertTriangle className="h-5 w-5 text-amber-500" aria-hidden="true" />}
+					defaultOpen
+				>
+					<div className="px-4 py-3 border-b border-gray-100">
+						{/* Severity filter */}
+						<div className="flex flex-wrap items-end gap-2">
+							<Filter
+								className="h-4 w-4 text-gray-400 mb-2"
+								aria-hidden="true"
+							/>
+							<div className="space-y-1">
+								<label
+									htmlFor="auditor-severity-filter"
+									className="block text-xs font-medium text-gray-600"
+								>
+									Severity
+								</label>
+								<select
+									id="auditor-severity-filter"
+									value={filterSeverity}
+									onChange={e =>
+										setFilterSeverity(
+											e.target.value as
+												| Severity
+												| 'all'
+										)
+									}
+									className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
+								>
+									<option value="all">All</option>
+									{SEVERITIES.map(s => (
+										<option key={s} value={s}>
+											{s}
+										</option>
+									))}
+								</select>
 							</div>
 						</div>
-					</CardHeader>
-					{openSections.violations && (
-						<CardBody id="violations-panel" className="p-0">
+					</div>
+					<CardBody id="violations-panel" className="p-0">
 							{filteredViolations.length === 0 ? (
 								<div className="px-6 py-8 text-center text-sm text-gray-500">
 									No Issues Detected
@@ -717,35 +686,17 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 								</ul>
 							)}
 						</CardBody>
-					)}
-				</Card>
+				</SectionDropdown>
 			</section>
 
 			{/* ============ CATEGORY BREAKDOWN ============ */}
 			{categoryBreakdown && categoryBreakdown.length > 0 && (
 				<section aria-labelledby="category-breakdown-heading">
-					<Card>
-						<CardHeader>
-							<div className="flex items-center justify-between gap-3">
-								<div>
-									<h2
-										id="category-breakdown-heading"
-										className="text-lg font-semibold text-gray-900"
-									>
-										Category Breakdown
-									</h2>
-									<p className="text-sm text-gray-500 mt-1">
-										Results grouped by axe-core rule
-										category
-									</p>
-								</div>
-								<SectionToggle
-									open={openSections.category}
-									onToggle={() => toggleSection('category')}
-								/>
-							</div>
-						</CardHeader>
-						{openSections.category && (
+					<SectionDropdown
+						title="Category Breakdown"
+						description="Results grouped by axe-core rule category"
+						defaultOpen
+					>
 							<CardBody id="category-panel" className="p-0">
 								<div className="overflow-x-auto">
 									<table className="w-full text-sm">
@@ -840,43 +791,19 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 									</table>
 								</div>
 							</CardBody>
-						)}
-					</Card>
+					</SectionDropdown>
 				</section>
 			)}
 
 			{/* ============ NEEDS REVIEW (INCOMPLETE) ============ */}
 			{incompleteItems && incompleteItems.length > 0 && (
 				<section aria-labelledby="incomplete-heading">
-					<Card>
-						<CardHeader>
-							<div className="flex items-center justify-between gap-3">
-								<div>
-									<div className="flex items-center gap-2">
-										<AlertTriangle
-											className="h-5 w-5 text-amber-500"
-											aria-hidden="true"
-										/>
-										<h2
-											id="incomplete-heading"
-											className="text-lg font-semibold text-gray-900"
-										>
-											Needs Manual Review (
-											{incompleteItems.length})
-										</h2>
-									</div>
-									<p className="text-sm text-gray-500 mt-1">
-										Rules that could not be fully evaluated
-										by automated testing
-									</p>
-								</div>
-								<SectionToggle
-									open={openSections.incomplete}
-									onToggle={() => toggleSection('incomplete')}
-								/>
-							</div>
-						</CardHeader>
-						{openSections.incomplete && (
+					<SectionDropdown
+						title={`Needs Manual Review (${incompleteItems.length})`}
+						description="Rules that could not be fully evaluated by automated testing"
+						icon={<AlertTriangle className="h-5 w-5 text-amber-500" aria-hidden="true" />}
+						defaultOpen
+					>
 							<CardBody id="incomplete-panel" className="p-0">
 								<ul
 									className="divide-y divide-gray-100"
@@ -916,55 +843,20 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 									))}
 								</ul>
 							</CardBody>
-						)}
-					</Card>
+					</SectionDropdown>
 				</section>
 			)}
 
 			{/* ============ INAPPLICABLE RULES ============ */}
-			{inapplicableRules && inapplicableRules.length > 0 && (
+			{uniqueInapplicableRules.length > 0 && (
 				<section aria-labelledby="inapplicable-heading">
-					<Card>
-						<CardHeader>
-							<div className="flex items-center justify-between gap-3">
-								<div>
-									<h2
-										id="inapplicable-heading"
-										className="text-lg font-semibold text-gray-900"
-									>
-										Not Applicable (
-										{inapplicableRules.length} rules)
-									</h2>
-									<p className="text-sm text-gray-500 mt-1">
-										Rules that did not apply to any elements
-										on this page
-									</p>
-								</div>
-								<button
-									type="button"
-									onClick={() =>
-										toggleSection('inapplicable')
-									}
-									className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
-								>
-									{openSections.inapplicable
-										? 'Hide'
-										: 'Show'}
-									<ChevronDown
-										className={cn(
-											'h-3.5 w-3.5 transition-transform',
-											openSections.inapplicable &&
-												'rotate-180'
-										)}
-										aria-hidden="true"
-									/>
-								</button>
-							</div>
-						</CardHeader>
-						{openSections.inapplicable && (
+					<SectionDropdown
+						title={`Not Applicable (${uniqueInapplicableRules.length} rules)`}
+						description="Rules that did not apply to any elements on this page"
+					>
 							<CardBody id="inapplicable-panel">
 								<div className="flex flex-wrap gap-2">
-									{inapplicableRules.map(rule => (
+									{uniqueInapplicableRules.map(rule => (
 										<Badge
 											key={rule.ruleId}
 											variant="default"
@@ -974,8 +866,7 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 									))}
 								</div>
 							</CardBody>
-						)}
-					</Card>
+					</SectionDropdown>
 				</section>
 			)}
 		</div>

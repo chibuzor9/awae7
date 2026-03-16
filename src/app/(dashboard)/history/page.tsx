@@ -12,11 +12,13 @@ import {
 	Globe,
 	Clock,
 	X,
+	Trash2,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
+import { Modal } from '@/components/ui/Modal'
 import { ScoreGauge } from '@/components/ui/ScoreGauge'
 import EvaluationResults from '@/components/evaluation/EvaluationResults'
 import { cn, formatDate, getScoreLabel } from '@/lib/utils'
@@ -254,6 +256,40 @@ export default function HistoryPage() {
 		setPage(newPage)
 	}
 
+	// ---- Delete evaluation ----
+	const [deleteTarget, setDeleteTarget] = useState<EvaluationHistoryItem | null>(null)
+	const [deleting, setDeleting] = useState(false)
+
+	async function handleDelete() {
+		if (!deleteTarget) return
+		setDeleting(true)
+		try {
+			const res = await fetch(`/api/evaluations/${deleteTarget.id}`, {
+				method: 'DELETE',
+			})
+			if (!res.ok) {
+				const data = await res.json().catch(() => ({}))
+				throw new Error(data?.error ?? 'Failed to delete evaluation.')
+			}
+
+			// Remove from local state
+			setEvaluations(prev => prev.filter(ev => ev.id !== deleteTarget.id))
+			setDetailCache(prev => {
+				const next = { ...prev }
+				delete next[deleteTarget.id]
+				return next
+			})
+			if (selectedId === deleteTarget.id) setSelectedId(null)
+			toast.success('Evaluation deleted.')
+		} catch (err: unknown) {
+			const message = err instanceof Error ? err.message : 'Failed to delete.'
+			toast.error(message)
+		} finally {
+			setDeleting(false)
+			setDeleteTarget(null)
+		}
+	}
+
 	return (
 		<div className="min-h-full bg-transparent">
 			<div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -411,7 +447,7 @@ export default function HistoryPage() {
 													</div>
 												</div>
 
-												{/* Score label & action */}
+												{/* Score label & actions */}
 												<div className="shrink-0 text-right">
 													<p
 														className={cn(
@@ -423,28 +459,40 @@ export default function HistoryPage() {
 													>
 														{label}
 													</p>
-													<Button
-														variant="outline"
-														size="sm"
-														className="mt-2"
-														tabIndex={-1}
-														onClick={e => {
-															e.stopPropagation()
-															handleViewDetail(
-																ev.id
-															)
-														}}
-													>
-														{isSelected
-															? 'Hide Report'
-															: 'View Report'}
-														{!isSelected && (
-															<ExternalLink
-																className="h-3.5 w-3.5"
-																aria-hidden="true"
-															/>
-														)}
-													</Button>
+													<div className="mt-2 flex items-center gap-1.5 justify-end">
+														<Button
+															variant="outline"
+															size="sm"
+															tabIndex={-1}
+															onClick={e => {
+																e.stopPropagation()
+																handleViewDetail(
+																	ev.id
+																)
+															}}
+														>
+															{isSelected
+																? 'Hide Report'
+																: 'View Report'}
+															{!isSelected && (
+																<ExternalLink
+																	className="h-3.5 w-3.5"
+																	aria-hidden="true"
+																/>
+															)}
+														</Button>
+														<button
+															type="button"
+															onClick={e => {
+																e.stopPropagation()
+																setDeleteTarget(ev)
+															}}
+															className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+															aria-label={`Delete evaluation for ${displayUrl}`}
+														>
+															<Trash2 className="h-4 w-4" aria-hidden="true" />
+														</button>
+													</div>
 												</div>
 											</CardBody>
 										</Card>
@@ -660,6 +708,49 @@ export default function HistoryPage() {
 					</>
 				)}
 			</div>
+
+			{/* ---- Delete confirmation modal ---- */}
+			<Modal
+				open={!!deleteTarget}
+				onClose={() => !deleting && setDeleteTarget(null)}
+				title="Delete Evaluation"
+			>
+				<div className="space-y-4">
+					<p className="text-sm text-gray-600">
+						Are you sure you want to delete this evaluation? This action cannot be undone.
+					</p>
+					{deleteTarget && (
+						<div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+							<p className="text-sm font-medium text-gray-900 truncate">
+								{deleteTarget.targetUrl}
+							</p>
+							<p className="text-xs text-gray-500">
+								{formatDate(deleteTarget.timestamp)} &middot; Score: {deleteTarget.overallScore}
+							</p>
+						</div>
+					)}
+					<div className="flex justify-end gap-2">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => setDeleteTarget(null)}
+							disabled={deleting}
+						>
+							Cancel
+						</Button>
+						<Button
+							variant="primary"
+							size="sm"
+							onClick={handleDelete}
+							loading={deleting}
+							className="bg-red-600 hover:bg-red-700 focus-visible:ring-red-500"
+						>
+							<Trash2 className="h-4 w-4" aria-hidden="true" />
+							Delete
+						</Button>
+					</div>
+				</div>
+			</Modal>
 		</div>
 	)
 }

@@ -12,15 +12,21 @@ function getDateString(): string {
 
 /** Escape a value for CSV: wrap in quotes if it contains commas, quotes, or newlines. */
 function escapeCsvValue(value: string): string {
-	if (
-		value.includes(',') ||
-		value.includes('"') ||
-		value.includes('\n') ||
-		value.includes('\r')
-	) {
-		return `"${value.replace(/"/g, '""')}"`
+	// Guard against formula injection: prefix dangerous leading chars with a tab
+	let safe = value
+	if (/^[=+\-@\t\r]/.test(safe)) {
+		safe = "'" + safe
 	}
-	return value
+
+	if (
+		safe.includes(',') ||
+		safe.includes('"') ||
+		safe.includes('\n') ||
+		safe.includes('\r')
+	) {
+		return `"${safe.replace(/"/g, '""')}"`
+	}
+	return safe
 }
 
 function arrayToCsv(headers: string[], rows: string[][]): string {

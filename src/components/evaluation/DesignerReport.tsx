@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useMemo } from 'react'
 import { AlertTriangle, AlertCircle, Info, ShieldAlert, CheckCircle2 } from 'lucide-react'
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
@@ -10,6 +11,7 @@ interface DesignerReportProps {
 	report: DesignerReportType
 	targetUrl?: string
 	fullSourceHtml?: string
+	pageSources?: { url: string; html: string }[]
 }
 
 const severityConfig = {
@@ -59,10 +61,11 @@ function stripCspMeta(html: string): string {
 	)
 }
 
-function buildPreviewSrcdoc(html: string, highlightCss: string, targetUrl?: string): string {
+function buildPreviewSrcdoc(html: string, highlightCss: string, pageUrl?: string): string {
 	const clean = stripCspMeta(html)
 	const styleTag = `<style data-awae-highlights>${highlightCss}</style>`
-	const baseTag = targetUrl ? `<base href="${targetUrl}" />` : ''
+	// Use page URL as base so relative assets (images, CSS, fonts) resolve correctly
+	const baseTag = pageUrl ? `<base href="${pageUrl}" />` : ''
 	const injected = `${baseTag}${styleTag}`
 	if (clean.includes('</head>')) {
 		return clean.replace('</head>', `${injected}</head>`)
@@ -73,11 +76,29 @@ function buildPreviewSrcdoc(html: string, highlightCss: string, targetUrl?: stri
 	return `${injected}${clean}`
 }
 
-export default function DesignerReport({ report, targetUrl, fullSourceHtml }: DesignerReportProps) {
+export default function DesignerReport({ report, targetUrl, fullSourceHtml, pageSources }: DesignerReportProps) {
+	// Build the list of previewable pages: multi-page crawl or single page
+	const previewPages = useMemo(() => {
+		if (pageSources && pageSources.length > 0) {
+			return pageSources.map(ps => ({ url: ps.url, html: ps.html }))
+		}
+		if (fullSourceHtml?.trim()) {
+			return [{ url: targetUrl ?? 'Page', html: fullSourceHtml }]
+		}
+		return []
+	}, [pageSources, fullSourceHtml, targetUrl])
+
+	const hasPreview = previewPages.length > 0
+	const isMultiPage = previewPages.length > 1
+	const [activePageIndex, setActivePageIndex] = useState(0)
+
+	const activePreview = hasPreview ? previewPages[activePageIndex] : null
+	const highlightCss = buildHighlightCss(report)
+
 	return (
 		<div className="space-y-6">
 			{/* 1. Live Preview */}
-			{(fullSourceHtml || targetUrl) && (
+			{hasPreview && activePreview && (
 				<Card>
 					<CardHeader>
 						<div>
@@ -85,50 +106,62 @@ export default function DesignerReport({ report, targetUrl, fullSourceHtml }: De
 								Live Preview
 							</h3>
 							<p className="mt-0.5 text-sm text-(--muted-text)">
-								{fullSourceHtml
-									? 'Page source rendered with accessibility issues highlighted'
-									: 'Live page preview (highlights unavailable for cross-origin content)'}
+								{isMultiPage
+									? `${previewPages.length} pages scanned — select a page to preview with highlighted issues`
+									: 'Page source rendered with accessibility issues highlighted'}
 							</p>
 						</div>
-						{fullSourceHtml && (
-							<div className="flex gap-3">
-								<span className="inline-flex items-center gap-1.5 text-xs text-(--muted-text)">
-									<span className="inline-block h-2.5 w-2.5 rounded-sm border-2 border-dashed border-red-500" />
-									Contrast
-								</span>
-								<span className="inline-flex items-center gap-1.5 text-xs text-(--muted-text)">
-									<span className="inline-block h-2.5 w-2.5 rounded-sm border-2 border-orange-500" />
-									Touch Targets
-								</span>
-								<span className="inline-flex items-center gap-1.5 text-xs text-(--muted-text)">
-									<span className="inline-block h-2.5 w-2.5 rounded-sm border-2 border-yellow-500" />
-									Hierarchy / Focus
-								</span>
+						<div className="flex gap-3">
+							<span className="inline-flex items-center gap-1.5 text-xs text-(--muted-text)">
+								<span className="inline-block h-2.5 w-2.5 rounded-sm border-2 border-dashed border-red-500" />
+								Contrast
+							</span>
+							<span className="inline-flex items-center gap-1.5 text-xs text-(--muted-text)">
+								<span className="inline-block h-2.5 w-2.5 rounded-sm border-2 border-orange-500" />
+								Touch Targets
+							</span>
+						</div>
+					</CardHeader>
+					<CardBody className="space-y-0 p-0">
+						{/* Page tabs for multi-page crawls */}
+						{isMultiPage && (
+							<div className="flex items-center gap-1.5 overflow-x-auto border-b border-(--border) px-4 py-2 bg-(--surface)">
+								{previewPages.map((page, index) => {
+									const short = page.url.replace(/^https?:\/\/[^/]+/, '').replace(/\/$/, '') || '/'
+									const isActive = index === activePageIndex
+									return (
+										<button
+											key={page.url}
+											type="button"
+											onClick={() => setActivePageIndex(index)}
+											title={page.url}
+											className={cn(
+												'shrink-0 rounded-md px-3 py-1.5 text-xs font-medium transition-colors max-w-[180px] truncate',
+												isActive
+													? 'bg-blue-600 text-white shadow-sm'
+													: 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+											)}
+										>
+											{short}
+										</button>
+									)
+								})}
 							</div>
 						)}
-					</CardHeader>
-					<CardBody className="p-0">
-						{fullSourceHtml ? (
-							<iframe
-								title="Evaluated page preview"
-								sandbox="allow-same-origin allow-scripts"
-								referrerPolicy="no-referrer"
-								className="h-150 w-full border-0"
-								srcDoc={buildPreviewSrcdoc(
-									fullSourceHtml,
-									buildHighlightCss(report),
-									targetUrl
-								)}
-							/>
-						) : (
-							<iframe
-								title="Evaluated page preview"
-								sandbox="allow-same-origin allow-scripts"
-								referrerPolicy="no-referrer"
-								className="h-150 w-full border-0"
-								src={targetUrl}
-							/>
-						)}
+
+						{/* Iframe — always uses srcDoc */}
+						<iframe
+							key={activePreview.url}
+							title={`Preview of ${activePreview.url}`}
+							sandbox="allow-same-origin allow-scripts"
+							referrerPolicy="no-referrer"
+							className="h-150 w-full border-0"
+							srcDoc={buildPreviewSrcdoc(
+								activePreview.html,
+								highlightCss,
+								activePreview.url
+							)}
+						/>
 					</CardBody>
 				</Card>
 			)}

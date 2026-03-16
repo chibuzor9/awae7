@@ -10,6 +10,8 @@ import {
 import { formatHtmlForReport } from '@/lib/html/format'
 import { prisma } from '@/lib/prisma'
 import { createClient } from '@/lib/supabase/server'
+import { isPrivateUrl } from '@/lib/security'
+import { checkRateLimit, getRateLimitKey } from '@/lib/rate-limit'
 
 // ---------------------------------------------------------------------------
 // POST /api/evaluate  —  accepts JSON { url } or FormData with an HTML file
@@ -73,6 +75,30 @@ function mapEvaluationFailure(message: string): {
 }
 
 export async function POST(request: NextRequest) {
+	// ---- Rate limiting: 5 evaluations per minute per IP ----
+	const rlKey = getRateLimitKey(request)
+	const rl = checkRateLimit(rlKey, { limit: 5, windowMs: 60_000 })
+	if (!rl.allowed) {
+		return NextResponse.json(
+			{ error: 'Too many requests. Please wait a moment before trying again.' },
+			{
+				status: 429,
+				headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) },
+			}
+		)
+	}
+
+	// ---- Require authentication ----
+	const supabase = await createClient()
+	const { data: { user } } = await supabase.auth.getUser()
+
+	if (!user) {
+		return NextResponse.json(
+			{ error: 'You must be signed in to run an evaluation.' },
+			{ status: 401 }
+		)
+	}
+
 	const contentType = request.headers.get('content-type') ?? ''
 
 	let rawResults
@@ -192,6 +218,14 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
+		// ---- SSRF guard: block private/internal IPs ----
+		if (isPrivateUrl(trimmedUrl)) {
+			return NextResponse.json(
+				{ error: 'URLs pointing to private or internal networks are not allowed.' },
+				{ status: 400 }
+			)
+		}
+
 		try {
             const requestOrigin = request.nextUrl.origin
             const targetOrigin = new URL(trimmedUrl).origin
@@ -237,56 +271,49 @@ export async function POST(request: NextRequest) {
 	const endUserReport = generateEndUserReport(evaluation)
 	const designerReport = generateDesignerReport(evaluation)
 
-	// ---- Optionally persist to database if authenticated ----
+	// ---- Optionally persist to database ----
 	let savedEvaluationId: string | null = null
 
 	try {
-		const supabase = await createClient()
-		const {
-			data: { user },
-		} = await supabase.auth.getUser()
+		// Look up internal user record
+		const dbUser = await prisma.user.findUnique({
+			where: { id: user.id },
+		})
 
-		if (user) {
-			// Look up internal user record
-			const dbUser = await prisma.user.findUnique({
-				where: { id: user.id },
+		if (dbUser) {
+			const savedEvaluation = await prisma.evaluation.create({
+				data: {
+					userId: dbUser.id,
+					targetUrl: evaluation.targetUrl,
+					axeCoreVersion: evaluation.axeCoreVersion,
+					totalViolations: evaluation.totalViolations,
+					criticalCount: evaluation.criticalCount,
+					seriousCount: evaluation.seriousCount,
+					moderateCount: evaluation.moderateCount,
+					minorCount: evaluation.minorCount,
+					overallScore: evaluation.overallScore,
+					rawResults: rawResults as any,
+					violations: {
+						create: evaluation.violations.map(v => ({
+							ruleId: v.ruleId,
+							wcagCriterion: v.wcagCriterion,
+							wcagLevel: v.wcagLevel,
+							wcagPrinciple: v.wcagPrinciple,
+							severity: v.severity,
+							elementSelector:
+								v.nodes[0]?.target?.join(', ') ?? null,
+							htmlSnippet: v.nodes[0]?.html ?? null,
+							description: v.description,
+							remediationGuidance:
+								developerReport.violations.find(
+									dv => dv.ruleId === v.ruleId
+								)?.remediation ?? null,
+						})),
+					},
+				},
 			})
 
-			if (dbUser) {
-				const savedEvaluation = await prisma.evaluation.create({
-					data: {
-						userId: dbUser.id,
-						targetUrl: evaluation.targetUrl,
-						axeCoreVersion: evaluation.axeCoreVersion,
-						totalViolations: evaluation.totalViolations,
-						criticalCount: evaluation.criticalCount,
-						seriousCount: evaluation.seriousCount,
-						moderateCount: evaluation.moderateCount,
-						minorCount: evaluation.minorCount,
-						overallScore: evaluation.overallScore,
-						rawResults: rawResults as any,
-						violations: {
-							create: evaluation.violations.map(v => ({
-								ruleId: v.ruleId,
-								wcagCriterion: v.wcagCriterion,
-								wcagLevel: v.wcagLevel,
-								wcagPrinciple: v.wcagPrinciple,
-								severity: v.severity,
-								elementSelector:
-									v.nodes[0]?.target?.join(', ') ?? null,
-								htmlSnippet: v.nodes[0]?.html ?? null,
-								description: v.description,
-								remediationGuidance:
-									developerReport.violations.find(
-										dv => dv.ruleId === v.ruleId
-									)?.remediation ?? null,
-							})),
-						},
-					},
-				})
-
-				savedEvaluationId = savedEvaluation.id
-			}
+			savedEvaluationId = savedEvaluation.id
 		}
 	} catch (dbError: unknown) {
 		// Database save failure should NOT block the response.

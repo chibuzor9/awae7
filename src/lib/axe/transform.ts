@@ -406,6 +406,13 @@ export function transformRawResults(rawResults: any): EvaluationResult {
 			typeof rawResults.fullSourceHtml === 'string'
 				? rawResults.fullSourceHtml
 				: undefined,
+		pageSources:
+			Array.isArray(rawResults.pageSources) && rawResults.pageSources.length > 0
+				? rawResults.pageSources.map((ps: any) => ({
+					url: String(ps?.url ?? ''),
+					html: String(ps?.html ?? ''),
+				}))
+				: undefined,
         pageSummaries,
         crawlSummary:
             rawResults.crawlSummary &&
@@ -743,6 +750,7 @@ export function generateAuditorReport(result: EvaluationResult): AuditorReport {
 			category: v.category,
 			instanceCount: v.nodes.length,
 			formalDescription: buildFormalDescription(v),
+			pageUrls: v.pageUrl ? [v.pageUrl] : [],
 		}))
 		.sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity])
 

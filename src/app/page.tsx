@@ -371,7 +371,7 @@ export default async function Home() {
 
 					<div className="mt-8 border-t border-blue-100 pt-6 text-center">
 						<p className="text-sm text-slate-500">
-							Copyright © {currentYear} Group 7, Babcock
+							Copyright © {currentYear} Group 5, Babcock
 							University 25/26 Undergraduate Finalists
 						</p>
 					</div>
