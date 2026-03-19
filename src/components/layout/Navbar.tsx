@@ -122,7 +122,7 @@ export default function Navbar() {
 	}
 
 	return (
-		<nav className="sticky top-0 z-50 border-b border-(--border)/90 bg-white/90 backdrop-blur-xl">
+		<nav aria-label="Main navigation" className="sticky top-0 z-50 border-b border-(--border)/90 bg-white/90 backdrop-blur-xl">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="flex items-center justify-between h-16">
 					{/* Left: Brand */}
@@ -157,6 +157,8 @@ export default function Navbar() {
 									onClick={() => setProfileOpen(!profileOpen)}
 									className="flex items-center justify-center rounded-full p-1.5 text-slate-600 transition-colors hover:bg-(--accent-soft) hover:text-(--accent) focus:outline-none focus:ring-2 focus:ring-(--accent) focus:ring-offset-2"
 									aria-label="Account menu"
+									aria-expanded={profileOpen}
+									aria-haspopup="true"
 								>
 									<CircleUser className="h-6 w-6" aria-hidden="true" />
 								</button>
@@ -238,7 +240,9 @@ export default function Navbar() {
 					<button
 						onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
 						className="cursor-pointer inline-flex items-center justify-center rounded-lg p-2 text-slate-700 transition-colors hover:bg-(--accent-soft) focus:outline-none focus:ring-2 focus:ring-(--accent) md:hidden"
-						aria-label="Toggle navigation menu"
+						aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+						aria-expanded={mobileMenuOpen}
+						aria-controls="mobile-menu"
 					>
 						{mobileMenuOpen ? (
 							<svg
@@ -246,6 +250,7 @@ export default function Navbar() {
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24"
+								aria-hidden="true"
 							>
 								<path
 									strokeLinecap="round"
@@ -260,6 +265,7 @@ export default function Navbar() {
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24"
+								aria-hidden="true"
 							>
 								<path
 									strokeLinecap="round"
@@ -283,7 +289,7 @@ export default function Navbar() {
 						onClick={() => setMobileMenuOpen(false)}
 						className="fixed inset-0 top-16 z-40 bg-slate-900/15 backdrop-blur-[1px] md:hidden"
 					/>
-					<div className="absolute left-0 right-0 top-full z-50 border-t border-(--border) bg-white shadow-lg md:hidden">
+					<div id="mobile-menu" className="absolute left-0 right-0 top-full z-50 border-t border-(--border) bg-white shadow-lg md:hidden" role="region" aria-label="Mobile navigation">
 						<div className="space-y-1 px-4 py-3">
 							{navLinks.map(link => (
 								<Link

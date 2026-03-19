@@ -124,7 +124,7 @@ export default async function Home() {
 	return (
 		<div className="flex flex-col">
 			{/* ─── Hero Section ─── */}
-			<section className="relative flex min-h-[calc(100vh-4rem)] items-center bg-white">
+			<section aria-label="Hero" className="relative flex min-h-[calc(100vh-4rem)] items-center bg-white">
 				<div className="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
 					<div className="mx-auto max-w-6xl text-center">
 						<p className="inline-flex items-center rounded-full border border-(--border) bg-white px-3 py-1 text-xs font-semibold text-(--accent)">
@@ -194,7 +194,7 @@ export default async function Home() {
 			</section>
 
 			{/* ─── Features Section ─── */}
-			<section id="features" className="bg-white py-16 sm:py-20">
+			<section id="features" aria-label="Features" className="bg-white py-16 sm:py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="mx-auto max-w-2xl text-center">
 						<h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
@@ -231,7 +231,7 @@ export default async function Home() {
 			</section>
 
 			{/* ─── How It Works Section ─── */}
-			<section className="bg-linear-to-b from-white to-blue-50/40 py-16 sm:py-20">
+			<section aria-label="How it works" className="bg-linear-to-b from-white to-blue-50/40 py-16 sm:py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="mx-auto max-w-2xl text-center">
 						<h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
@@ -273,7 +273,7 @@ export default async function Home() {
 			</section>
 
 			{/* ─── Report Types Section ─── */}
-			<section className="bg-white py-16 sm:py-20">
+			<section aria-label="Report types" className="bg-white py-16 sm:py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="mx-auto max-w-2xl text-center">
 						<h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
@@ -311,7 +311,7 @@ export default async function Home() {
 			</section>
 
 			{/* ─── Footer CTA ─── */}
-			<section className="bg-linear-to-r from-slate-800 via-blue-800 to-blue-700 py-14 sm:py-16">
+			<section aria-label="Call to action" className="bg-linear-to-r from-slate-800 via-blue-800 to-blue-700 py-14 sm:py-16">
 				<div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
 					<h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
 						Ready to evaluate your website?

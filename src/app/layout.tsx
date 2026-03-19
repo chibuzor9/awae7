@@ -50,8 +50,16 @@ export default function RootLayout({
 				className={`${atkinsonSans.variable} ${geistMono.variable} antialiased bg-[radial-gradient(700px_360px_at_50%_-8%,rgba(99,102,241,0.1),transparent)]`}
 				suppressHydrationWarning
 			>
+				<a
+					href="#main-content"
+					className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-blue-700 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg focus:outline-none"
+				>
+					Skip to main content
+				</a>
 				<Navbar />
-				<main className="min-h-[calc(100dvh-4rem)]">{children}</main>
+				<main id="main-content" tabIndex={-1} className="min-h-[calc(100dvh-4rem)] outline-none">
+					{children}
+				</main>
 				<Toaster position="bottom-right" />
 				<Analytics />
 				<SpeedInsights />
