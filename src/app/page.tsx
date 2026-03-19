@@ -167,20 +167,20 @@ export default async function Home() {
 							</Link>
 						</div>
 
-						<div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600">
-							<span className="rounded-md bg-white px-2.5 py-1">
+						<ul aria-label="Available report views" className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600">
+							<li className="rounded-md bg-white px-2.5 py-1">
 								Developer View
-							</span>
-							<span className="rounded-md bg-white px-2.5 py-1">
+							</li>
+							<li className="rounded-md bg-white px-2.5 py-1">
 								Designer View
-							</span>
-							<span className="rounded-md bg-white px-2.5 py-1">
+							</li>
+							<li className="rounded-md bg-white px-2.5 py-1">
 								Auditor View
-							</span>
-							<span className="rounded-md bg-white px-2.5 py-1">
+							</li>
+							<li className="rounded-md bg-white px-2.5 py-1">
 								End-User View
-							</span>
-						</div>
+							</li>
+						</ul>
 					</div>
 				</div>
 
@@ -206,27 +206,26 @@ export default async function Home() {
 						</p>
 					</div>
 
-					<div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
+					<ul className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3" role="list">
 						{features.map(feature => (
-							<div
-								key={feature.title}
-								className="group rounded-xl border border-blue-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
-							>
-								<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 transition-colors group-hover:bg-blue-100">
-									<feature.icon
-										className="h-5 w-5"
-										aria-hidden="true"
-									/>
-								</div>
-								<h3 className="mt-4 text-lg font-semibold text-slate-900">
-									{feature.title}
-								</h3>
-								<p className="mt-1.5 text-sm leading-6 text-slate-600">
-									{feature.description}
-								</p>
-							</div>
+							<li key={feature.title}>
+								<article className="group rounded-xl border border-blue-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md h-full">
+									<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 transition-colors group-hover:bg-blue-100">
+										<feature.icon
+											className="h-5 w-5"
+											aria-hidden="true"
+										/>
+									</div>
+									<h3 className="mt-4 text-lg font-semibold text-slate-900">
+										{feature.title}
+									</h3>
+									<p className="mt-1.5 text-sm leading-6 text-slate-600">
+										{feature.description}
+									</p>
+								</article>
+							</li>
 						))}
-					</div>
+					</ul>
 				</div>
 			</section>
 
@@ -242,33 +241,32 @@ export default async function Home() {
 						</p>
 					</div>
 
-					<div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
+					<ol className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3" role="list">
 						{steps.map(step => (
-							<div
-								key={step.number}
-								className="rounded-xl border border-blue-100 bg-white p-6 text-center shadow-sm"
-							>
-								{/* Step icon circle */}
-								<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
-									<step.icon
-										className="h-5 w-5"
-										aria-hidden="true"
-									/>
-								</div>
+							<li key={step.number}>
+								<article className="rounded-xl border border-blue-100 bg-white p-6 text-center shadow-sm h-full">
+									{/* Step icon circle */}
+									<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
+										<step.icon
+											className="h-5 w-5"
+											aria-hidden="true"
+										/>
+									</div>
 
-								<span className="mt-3 inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-									Step {step.number}
-								</span>
+									<span className="mt-3 inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700" aria-hidden="true">
+										Step {step.number}
+									</span>
 
-								<h3 className="mt-3 text-lg font-semibold text-slate-900">
-									{step.title}
-								</h3>
-								<p className="mt-1.5 text-sm leading-6 text-slate-600">
-									{step.description}
-								</p>
-							</div>
+									<h3 className="mt-3 text-lg font-semibold text-slate-900">
+										{step.title}
+									</h3>
+									<p className="mt-1.5 text-sm leading-6 text-slate-600">
+										{step.description}
+									</p>
+								</article>
+							</li>
 						))}
-					</div>
+					</ol>
 				</div>
 			</section>
 
@@ -285,28 +283,29 @@ export default async function Home() {
 						</p>
 					</div>
 
-					<div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
+					<ul className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4" role="list">
 						{reportTypes.map(report => (
-							<div
-								key={report.role}
-								className={cn(
-									'rounded-xl border p-6 transition-all hover:-translate-y-0.5 hover:shadow-md',
-									report.accent
-								)}
-							>
-								<report.icon
-									className={cn('h-7 w-7', report.iconAccent)}
-									aria-hidden="true"
-								/>
-								<h3 className="mt-3 text-lg font-semibold">
-									{report.role}
-								</h3>
-								<p className="mt-1.5 text-sm leading-6 text-slate-700">
-									{report.description}
-								</p>
-							</div>
+							<li key={report.role}>
+								<article
+									className={cn(
+										'rounded-xl border p-6 transition-all hover:-translate-y-0.5 hover:shadow-md h-full',
+										report.accent
+									)}
+								>
+									<report.icon
+										className={cn('h-7 w-7', report.iconAccent)}
+										aria-hidden="true"
+									/>
+									<h3 className="mt-3 text-lg font-semibold">
+										{report.role}
+									</h3>
+									<p className="mt-1.5 text-sm leading-6 text-slate-700">
+										{report.description}
+									</p>
+								</article>
+							</li>
 						))}
-					</div>
+					</ul>
 				</div>
 			</section>
 
