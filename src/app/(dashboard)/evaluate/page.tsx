@@ -315,7 +315,7 @@ export default function EvaluatePage() {
 
 				{/* ---- Error State ---- */}
 				{error && !loading && (
-					<Card className="mx-auto max-w-lg border-blue-200 bg-blue-50">
+					<Card className="mx-auto max-w-lg border-blue-200 bg-blue-50" role="alert">
 						<CardBody className="flex flex-col items-center gap-4 py-10 text-center">
 							<AlertCircle
 								className="h-10 w-10 text-blue-600"
@@ -342,7 +342,7 @@ export default function EvaluatePage() {
 
 				{/* ---- Results ---- */}
 				{results && !loading && (
-					<section ref={resultsRef} aria-label="Evaluation results" className="scroll-mt-20">
+					<section ref={resultsRef} aria-label="Evaluation results" aria-live="polite" className="scroll-mt-20">
 						<EvaluationResults
 							key={`${results.evaluation.id ?? results.evaluation.targetUrl}-${preferredRole}`}
 							evaluation={results.evaluation}

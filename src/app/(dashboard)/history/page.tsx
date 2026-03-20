@@ -351,7 +351,7 @@ export default function HistoryPage() {
 				{/* ---- Evaluation List ---- */}
 				{!loading && !error && evaluations.length > 0 && (
 					<>
-						<div className="space-y-4">
+						<div className="space-y-4" role="region" aria-label="Evaluation list">
 							{evaluations.map(ev => {
 								const { label } = getScoreLabel(ev.overallScore)
 								const isSelected = selectedId === ev.id
@@ -582,7 +582,7 @@ export default function HistoryPage() {
 
 						{/* ---- Pagination ---- */}
 						{pagination && pagination.totalPages > 1 && (
-							<div className="mt-8 flex items-center justify-between">
+							<nav aria-label="Pagination" className="mt-8 flex items-center justify-between">
 								<p className="text-sm text-gray-500">
 									Showing{' '}
 									<span className="font-medium">
@@ -703,7 +703,7 @@ export default function HistoryPage() {
 										/>
 									</Button>
 								</div>
-							</div>
+							</nav>
 						)}
 					</>
 				)}

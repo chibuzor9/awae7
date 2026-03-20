@@ -124,19 +124,19 @@ export default async function Home() {
 	return (
 		<div className="flex flex-col">
 			{/* ─── Hero Section ─── */}
-			<section className="relative flex min-h-[calc(100vh-4rem)] items-center bg-white">
+			<section aria-label="Hero" className="relative flex min-h-[calc(100vh-4rem)] items-center bg-white">
 				<div className="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
 					<div className="mx-auto max-w-6xl text-center">
-						<p className="inline-flex items-center rounded-full border border-(--border) bg-white px-3 py-1 text-xs font-semibold text-(--accent)">
+						<p tabIndex={0} className="inline-flex items-center rounded-full border border-(--border) bg-white px-3 py-1 text-xs font-semibold text-(--accent)">
 							WCAG 2.2 Multi-Audience Reports
 						</p>
-						<h1 className="mx-auto mt-4 max-w-5xl text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+						<h1 tabIndex={0} className="mx-auto mt-4 max-w-5xl text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
 							Automated Web{' '}
 							<span className="text-blue-700">Accessibility</span>{' '}
 							Evaluator
 						</h1>
 
-						<p className="mx-auto mt-5 max-w-4xl text-base leading-7 text-slate-700 sm:text-lg">
+						<p tabIndex={0} className="mx-auto mt-5 max-w-4xl text-base leading-7 text-slate-700 sm:text-lg">
 							Evaluate any website against WCAG 2.2 standards and
 							get tailored reports for developers, designers,
 							auditors, and end-users.
@@ -167,20 +167,20 @@ export default async function Home() {
 							</Link>
 						</div>
 
-						<div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600">
-							<span className="rounded-md bg-white px-2.5 py-1">
+						<ul aria-label="Available report views" className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600">
+							<li tabIndex={0} className="rounded-md bg-white px-2.5 py-1">
 								Developer View
-							</span>
-							<span className="rounded-md bg-white px-2.5 py-1">
+							</li>
+							<li tabIndex={0} className="rounded-md bg-white px-2.5 py-1">
 								Designer View
-							</span>
-							<span className="rounded-md bg-white px-2.5 py-1">
+							</li>
+							<li tabIndex={0} className="rounded-md bg-white px-2.5 py-1">
 								Auditor View
-							</span>
-							<span className="rounded-md bg-white px-2.5 py-1">
+							</li>
+							<li tabIndex={0} className="rounded-md bg-white px-2.5 py-1">
 								End-User View
-							</span>
-						</div>
+							</li>
+						</ul>
 					</div>
 				</div>
 
@@ -194,129 +194,128 @@ export default async function Home() {
 			</section>
 
 			{/* ─── Features Section ─── */}
-			<section id="features" className="bg-white py-16 sm:py-20">
+			<section id="features" aria-label="Features" className="bg-white py-16 sm:py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="mx-auto max-w-2xl text-center">
-						<h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+						<h2 tabIndex={0} className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
 							Everything you need for accessibility evaluation
 						</h2>
-						<p className="mt-3 text-base text-slate-700 sm:text-lg">
+						<p tabIndex={0} className="mt-3 text-base text-slate-700 sm:text-lg">
 							A complete toolkit to audit, understand, and improve
 							web accessibility.
 						</p>
 					</div>
 
-					<div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
+					<ul className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3" role="list">
 						{features.map(feature => (
-							<div
-								key={feature.title}
-								className="group rounded-xl border border-blue-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
-							>
-								<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 transition-colors group-hover:bg-blue-100">
-									<feature.icon
-										className="h-5 w-5"
-										aria-hidden="true"
-									/>
-								</div>
-								<h3 className="mt-4 text-lg font-semibold text-slate-900">
-									{feature.title}
-								</h3>
-								<p className="mt-1.5 text-sm leading-6 text-slate-600">
-									{feature.description}
-								</p>
-							</div>
+							<li key={feature.title}>
+								<article className="group rounded-xl border border-blue-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md h-full">
+									<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 transition-colors group-hover:bg-blue-100">
+										<feature.icon
+											className="h-5 w-5"
+											aria-hidden="true"
+										/>
+									</div>
+									<h3 tabIndex={0} className="mt-4 text-lg font-semibold text-slate-900">
+										{feature.title}
+									</h3>
+									<p tabIndex={0} className="mt-1.5 text-sm leading-6 text-slate-600">
+										{feature.description}
+									</p>
+								</article>
+							</li>
 						))}
-					</div>
+					</ul>
 				</div>
 			</section>
 
 			{/* ─── How It Works Section ─── */}
-			<section className="bg-linear-to-b from-white to-blue-50/40 py-16 sm:py-20">
+			<section aria-label="How it works" className="bg-linear-to-b from-white to-blue-50/40 py-16 sm:py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="mx-auto max-w-2xl text-center">
-						<h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+						<h2 tabIndex={0} className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
 							How it works
 						</h2>
-						<p className="mt-3 text-base text-slate-700 sm:text-lg">
+						<p tabIndex={0} className="mt-3 text-base text-slate-700 sm:text-lg">
 							Three simple steps to a more accessible website.
 						</p>
 					</div>
 
-					<div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
+					<ol className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3" role="list">
 						{steps.map(step => (
-							<div
-								key={step.number}
-								className="rounded-xl border border-blue-100 bg-white p-6 text-center shadow-sm"
-							>
-								{/* Step icon circle */}
-								<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
-									<step.icon
-										className="h-5 w-5"
-										aria-hidden="true"
-									/>
-								</div>
+							<li key={step.number}>
+								<article className="rounded-xl border border-blue-100 bg-white p-6 text-center shadow-sm h-full">
+									{/* Step icon circle */}
+									<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
+										<step.icon
+											className="h-5 w-5"
+											aria-hidden="true"
+										/>
+									</div>
 
-								<span className="mt-3 inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-									Step {step.number}
-								</span>
+									<span tabIndex={0} className="mt-3 inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+										Step {step.number}
+									</span>
 
-								<h3 className="mt-3 text-lg font-semibold text-slate-900">
-									{step.title}
-								</h3>
-								<p className="mt-1.5 text-sm leading-6 text-slate-600">
-									{step.description}
-								</p>
-							</div>
+									<h3 tabIndex={0} className="mt-3 text-lg font-semibold text-slate-900">
+										{step.title}
+									</h3>
+									<p tabIndex={0} className="mt-1.5 text-sm leading-6 text-slate-600">
+										{step.description}
+									</p>
+								</article>
+							</li>
 						))}
-					</div>
+					</ol>
 				</div>
 			</section>
 
 			{/* ─── Report Types Section ─── */}
-			<section className="bg-white py-16 sm:py-20">
+			<section aria-label="Report types" className="bg-white py-16 sm:py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="mx-auto max-w-2xl text-center">
-						<h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+						<h2 tabIndex={0} className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
 							Reports tailored to your role
 						</h2>
-						<p className="mt-3 text-base text-slate-700 sm:text-lg">
+						<p tabIndex={0} className="mt-3 text-base text-slate-700 sm:text-lg">
 							Every stakeholder gets the information they need, in
 							the format that works for them.
 						</p>
 					</div>
 
-					<div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
+					<ul className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4" role="list">
 						{reportTypes.map(report => (
-							<div
-								key={report.role}
-								className={cn(
-									'rounded-xl border p-6 transition-all hover:-translate-y-0.5 hover:shadow-md',
-									report.accent
-								)}
-							>
-								<report.icon
-									className={cn('h-7 w-7', report.iconAccent)}
-									aria-hidden="true"
-								/>
-								<h3 className="mt-3 text-lg font-semibold">
-									{report.role}
-								</h3>
-								<p className="mt-1.5 text-sm leading-6 text-slate-700">
-									{report.description}
-								</p>
-							</div>
+							<li key={report.role}>
+								<article
+									className={cn(
+										'rounded-xl border p-6 transition-all hover:-translate-y-0.5 hover:shadow-md h-full',
+										report.accent
+									)}
+								>
+									<report.icon
+										className={cn('h-7 w-7', report.iconAccent)}
+										aria-hidden="true"
+									/>
+									<h3 tabIndex={0} className="mt-3 text-lg font-semibold">
+										{report.role}
+									</h3>
+									<p tabIndex={0} className="mt-1.5 text-sm leading-6 text-slate-700">
+										{report.description}
+									</p>
+								</article>
+							</li>
 						))}
-					</div>
+					</ul>
 				</div>
 			</section>
 
 			{/* ─── Footer CTA ─── */}
-			<section className="bg-linear-to-r from-slate-800 via-blue-800 to-blue-700 py-14 sm:py-16">
+			<section aria-label="Call to action" className="bg-linear-to-r from-slate-800 via-blue-800 to-blue-700 py-14 sm:py-16">
 				<div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-					<h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+					<h2 tabIndex={0} className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
 						Ready to evaluate your website?
 					</h2>
-					<p className="mx-auto mt-3 max-w-xl text-base text-blue-100/95 sm:text-lg">
+					<p tabIndex={0} className="mx-auto mt-3 max-w-xl text-base text-blue-100/95 sm:text-lg">
 						Start a free accessibility evaluation now and get
 						actionable reports in seconds.
 					</p>
@@ -344,10 +343,10 @@ export default async function Home() {
 					<div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between">
 						{/* Brand */}
 						<div className="flex flex-col items-center gap-1 sm:items-start">
-							<span className="text-lg font-semibold tracking-tight text-blue-700">
+							<span tabIndex={0} className="text-lg font-semibold tracking-tight text-blue-700">
 								AWAE
 							</span>
-							<span className="text-sm text-slate-600">
+							<span tabIndex={0} className="text-sm text-slate-600">
 								Automated Web Accessibility Evaluator
 							</span>
 						</div>
@@ -370,7 +369,7 @@ export default async function Home() {
 					</div>
 
 					<div className="mt-8 border-t border-blue-100 pt-6 text-center">
-						<p className="text-sm text-slate-500">
+						<p tabIndex={0} className="text-sm text-slate-500">
 							Copyright © {currentYear} Group 5, Babcock
 							University 25/26 Undergraduate Finalists
 						</p>
