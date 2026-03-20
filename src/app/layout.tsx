@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Toaster } from 'react-hot-toast'
 import Navbar from '@/components/layout/Navbar'
+import { NarratorFocusHelper } from '@/components/layout/NarratorFocusHelper'
 import './globals.css'
 
 const atkinsonSans = Atkinson_Hyperlegible({
@@ -60,6 +61,7 @@ export default function RootLayout({
 				<main id="main-content" tabIndex={-1} className="min-h-[calc(100dvh-4rem)] outline-none">
 					{children}
 				</main>
+				<NarratorFocusHelper />
 				<Toaster position="bottom-right" />
 				<Analytics />
 				<SpeedInsights />

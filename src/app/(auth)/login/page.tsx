@@ -48,10 +48,10 @@ function LoginForm() {
 		<div className="flex min-h-[70vh] items-center justify-center bg-transparent px-4 py-12">
 			<div className="w-full max-w-md">
 				<div className="text-center mb-8">
-					<h1 className="text-3xl font-semibold text-slate-900">
+					<h1 tabIndex={0} className="text-3xl font-semibold text-slate-900">
 						Welcome back
 					</h1>
-					<p className="mt-2 text-sm text-slate-600">
+					<p tabIndex={0} className="mt-2 text-sm text-slate-600">
 						Sign in to your AWAE account
 					</p>
 				</div>
@@ -64,7 +64,7 @@ function LoginForm() {
 							<div className="w-full border-t border-gray-200" />
 						</div>
 						<div className="relative flex justify-center text-sm">
-							<span className="bg-white px-3 text-gray-500">
+							<span tabIndex={0} className="bg-white px-3 text-gray-500">
 								or continue with email
 							</span>
 						</div>
@@ -128,7 +128,7 @@ function LoginForm() {
 					</form>
 				</div>
 
-				<p className="mt-6 text-center text-sm text-slate-600">
+				<p tabIndex={0} className="mt-6 text-center text-sm text-slate-600">
 					Don&apos;t have an account?{' '}
 					<Link
 						href="/signup"
