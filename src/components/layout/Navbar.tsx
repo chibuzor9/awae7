@@ -311,7 +311,7 @@ export default function Navbar() {
 									</p>
 									{/* Mobile preference selector */}
 									<div className="space-y-2 px-3">
-										<p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Preferred View</p>
+										<p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Select Preferred View</p>
 										<div className="flex flex-wrap gap-1">
 											{ROLE_OPTIONS.map(option => (
 												<button
