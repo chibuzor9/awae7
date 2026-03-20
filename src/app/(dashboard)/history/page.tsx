@@ -97,10 +97,10 @@ function EmptyState() {
 					/>
 				</div>
 				<div>
-					<h2 className="text-lg font-semibold text-gray-900">
+					<h2 tabIndex={0} className="text-lg font-semibold text-gray-900">
 						No evaluations yet
 					</h2>
-					<p className="mt-1 text-sm text-gray-500">
+					<p tabIndex={0} className="mt-1 text-sm text-gray-500">
 						You have not run any accessibility evaluations. Start by
 						evaluating a website to see your history here.
 					</p>
@@ -302,11 +302,11 @@ export default function HistoryPage() {
 								aria-hidden="true"
 							/>
 						</div>
-						<h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+						<h1 tabIndex={0} className="text-3xl font-semibold tracking-tight text-slate-900">
 							Evaluation History
 						</h1>
 					</div>
-					<p className="text-base text-slate-600 sm:text-lg">
+					<p tabIndex={0} className="text-base text-slate-600 sm:text-lg">
 						Review your past accessibility evaluations. Click on any
 						evaluation to view the full report with developer,
 						designer, auditor, and end-user perspectives.
@@ -325,10 +325,10 @@ export default function HistoryPage() {
 								aria-hidden="true"
 							/>
 							<div>
-								<p className="text-lg font-semibold text-blue-800">
+								<p tabIndex={0} className="text-lg font-semibold text-blue-800">
 									Failed to Load History
 								</p>
-								<p className="mt-1 text-sm text-blue-700">
+								<p tabIndex={0} className="mt-1 text-sm text-blue-700">
 									{error}
 								</p>
 							</div>
@@ -716,7 +716,7 @@ export default function HistoryPage() {
 				title="Delete Evaluation"
 			>
 				<div className="space-y-4">
-					<p className="text-sm text-gray-600">
+					<p tabIndex={0} className="text-sm text-gray-600">
 						Are you sure you want to delete this evaluation? This action cannot be undone.
 					</p>
 					{deleteTarget && (

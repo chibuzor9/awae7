@@ -106,3 +106,16 @@ main {
 		transform: translateY(4px);
 	}
 }
+
+/* Focus styles for tabbable text content (screen-reader navigation) */
+h1[tabindex='0']:focus-visible,
+h2[tabindex='0']:focus-visible,
+h3[tabindex='0']:focus-visible,
+h4[tabindex='0']:focus-visible,
+p[tabindex='0']:focus-visible,
+span[tabindex='0']:focus-visible,
+li[tabindex='0']:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+	border-radius: 0.25rem;
+}
