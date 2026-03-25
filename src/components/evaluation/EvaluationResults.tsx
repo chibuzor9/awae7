@@ -57,7 +57,7 @@ export default function EvaluationResults({
 			}
 			className="w-full"
 		>
-			<div className="flex items-center justify-between gap-4">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
 				<TabsList className="mb-2">
 					<TabsTrigger value="end-user">
 						<span className="inline-flex items-center gap-1.5">

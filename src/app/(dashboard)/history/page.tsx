@@ -388,7 +388,7 @@ export default function HistoryPage() {
 												}
 											}}
 										>
-											<CardBody className="flex items-center gap-6">
+											<CardBody className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
 												{/* Score gauge */}
 												<div className="shrink-0">
 													<ScoreGauge
@@ -448,7 +448,7 @@ export default function HistoryPage() {
 												</div>
 
 												{/* Score label & actions */}
-												<div className="shrink-0 text-right">
+												<div className="shrink-0 w-full sm:w-auto flex items-center justify-between sm:block sm:text-right">
 													<p
 														className={cn(
 															'text-sm font-bold',
@@ -582,7 +582,7 @@ export default function HistoryPage() {
 
 						{/* ---- Pagination ---- */}
 						{pagination && pagination.totalPages > 1 && (
-							<nav aria-label="Pagination" className="mt-8 flex items-center justify-between">
+							<nav aria-label="Pagination" className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 								<p className="text-sm text-gray-500">
 									Showing{' '}
 									<span className="font-medium">
