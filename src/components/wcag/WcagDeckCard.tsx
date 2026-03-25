@@ -63,6 +63,7 @@ export interface WcagDeckCardProps {
 export default function WcagDeckCard({ card }: WcagDeckCardProps) {
 	const [isFlipped, setIsFlipped] = useState(false)
 	const [imageLoaded, setImageLoaded] = useState(false)
+	const [imageError, setImageError] = useState(false)
 
 	const borderClass = principleBorderClass[card.principle]
 	const backBgClass = principleBackBgClass[card.principle]
@@ -114,18 +115,37 @@ export default function WcagDeckCard({ card }: WcagDeckCardProps) {
 					)}
 					onClick={toggleFlip}
 				>
-					<object
-						data={getSvgPath(
-							card.criterionNumber,
-							card.principle,
-							card.level
-						)}
-						type="image/svg+xml"
-						aria-hidden="true"
-						tabIndex={-1}
-						className="pointer-events-none h-full w-full"
-						onLoad={() => setImageLoaded(true)}
-					/>
+					{imageError ? (
+						<div
+							className={cn(
+								'absolute inset-0 flex flex-col items-center justify-center rounded-[5.2%] border-2 p-4 text-center',
+								borderClass,
+								backBgClass
+							)}
+						>
+							<span className={cn('text-2xl font-bold', textClass)}>
+								{card.criterionNumber}
+							</span>
+							<span className="mt-1 text-sm font-semibold text-gray-800">
+								{card.title}
+							</span>
+							<span className="mt-1 rounded-full bg-gray-900 px-2 py-0.5 text-[10px] font-bold text-white">
+								{card.level}
+							</span>
+						</div>
+					) : (
+						<img
+							src={getSvgPath(
+								card.criterionNumber,
+								card.principle,
+								card.level
+							)}
+							alt={`WCAG ${card.criterionNumber} ${card.title} - Level ${card.level}`}
+							className="pointer-events-none h-full w-full object-contain"
+							onLoad={() => setImageLoaded(true)}
+							onError={() => setImageError(true)}
+						/>
+					)}
 
 					{/* Flip hint overlay */}
 					<button
