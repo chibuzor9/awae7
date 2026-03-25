@@ -180,17 +180,17 @@ export default async function Home() {
 							</Link>
 						</div>
 
-						<ul aria-label="Available report views" className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600">
-							<li tabIndex={0} className="rounded-md bg-white px-2.5 py-1">
+						<ul tabIndex={0} aria-label="Available report views" className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600">
+							<li className="rounded-md bg-white px-2.5 py-1">
 								Developer View
 							</li>
-							<li tabIndex={0} className="rounded-md bg-white px-2.5 py-1">
+							<li className="rounded-md bg-white px-2.5 py-1">
 								Designer View
 							</li>
-							<li tabIndex={0} className="rounded-md bg-white px-2.5 py-1">
+							<li className="rounded-md bg-white px-2.5 py-1">
 								Auditor View
 							</li>
-							<li tabIndex={0} className="rounded-md bg-white px-2.5 py-1">
+							<li className="rounded-md bg-white px-2.5 py-1">
 								End-User View
 							</li>
 						</ul>
@@ -220,24 +220,33 @@ export default async function Home() {
 					</div>
 
 					<ul className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3" role="list">
-						{features.map(feature => (
+						{features.map(feature => {
+							const slug = feature.title.toLowerCase().replace(/\s+/g, '-')
+							return (
 							<li key={feature.title}>
-								<article className="group rounded-xl border border-blue-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md h-full">
+								<article
+									tabIndex={0}
+									role="group"
+									aria-labelledby={`feature-title-${slug}`}
+									aria-describedby={`feature-desc-${slug}`}
+									className="group rounded-xl border border-blue-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+								>
 									<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 transition-colors group-hover:bg-blue-100">
 										<feature.icon
 											className="h-5 w-5"
 											aria-hidden="true"
 										/>
 									</div>
-									<h3 tabIndex={0} className="mt-4 text-lg font-semibold text-slate-900">
+									<h3 id={`feature-title-${slug}`} className="mt-4 text-lg font-semibold text-slate-900">
 										<WcagText>{feature.title}</WcagText>
 									</h3>
-									<p tabIndex={0} className="mt-1.5 text-sm leading-6 text-slate-600">
+									<p id={`feature-desc-${slug}`} className="mt-1.5 text-sm leading-6 text-slate-600">
 										<WcagText>{feature.description}</WcagText>
 									</p>
 								</article>
 							</li>
-						))}
+							)
+						})}
 					</ul>
 				</div>
 			</section>
@@ -257,7 +266,13 @@ export default async function Home() {
 					<ol className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3" role="list">
 						{steps.map(step => (
 							<li key={step.number}>
-								<article className="rounded-xl border border-blue-100 bg-white p-6 text-center shadow-sm h-full">
+								<article
+									tabIndex={0}
+									role="group"
+									aria-labelledby={`step-title-${step.number}`}
+									aria-describedby={`step-desc-${step.number}`}
+									className="rounded-xl border border-blue-100 bg-white p-6 text-center shadow-sm h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+								>
 									{/* Step icon circle */}
 									<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
 										<step.icon
@@ -266,14 +281,14 @@ export default async function Home() {
 										/>
 									</div>
 
-									<span tabIndex={0} className="mt-3 inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+									<span className="mt-3 inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
 										Step {step.number}
 									</span>
 
-									<h3 tabIndex={0} className="mt-3 text-lg font-semibold text-slate-900">
+									<h3 id={`step-title-${step.number}`} className="mt-3 text-lg font-semibold text-slate-900">
 										{step.title}
 									</h3>
-									<p tabIndex={0} className="mt-1.5 text-sm leading-6 text-slate-600">
+									<p id={`step-desc-${step.number}`} className="mt-1.5 text-sm leading-6 text-slate-600">
 										<WcagText>{step.description}</WcagText>
 									</p>
 								</article>
@@ -300,8 +315,12 @@ export default async function Home() {
 						{reportTypes.map(report => (
 							<li key={report.role}>
 								<article
+									tabIndex={0}
+									role="group"
+									aria-labelledby={`report-title-${report.role.toLowerCase()}`}
+									aria-describedby={`report-desc-${report.role.toLowerCase()}`}
 									className={cn(
-										'rounded-xl border p-6 transition-all hover:-translate-y-0.5 hover:shadow-md h-full',
+										'rounded-xl border p-6 transition-all hover:-translate-y-0.5 hover:shadow-md h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
 										report.accent
 									)}
 								>
@@ -309,10 +328,10 @@ export default async function Home() {
 										className={cn('h-7 w-7', report.iconAccent)}
 										aria-hidden="true"
 									/>
-									<h3 tabIndex={0} className="mt-3 text-lg font-semibold">
+									<h3 id={`report-title-${report.role.toLowerCase()}`} className="mt-3 text-lg font-semibold">
 										{report.role}
 									</h3>
-									<p tabIndex={0} className="mt-1.5 text-sm leading-6 text-slate-700">
+									<p id={`report-desc-${report.role.toLowerCase()}`} className="mt-1.5 text-sm leading-6 text-slate-700">
 										{report.description}
 									</p>
 								</article>
