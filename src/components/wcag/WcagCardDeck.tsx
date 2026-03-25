@@ -154,6 +154,7 @@ export default function WcagCardDeck() {
 									onClick={() =>
 										handlePrincipleToggle(principle)
 									}
+									aria-pressed={isActive}
 									className={cn(
 										'cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
 										isActive
@@ -189,6 +190,7 @@ export default function WcagCardDeck() {
 									key={level}
 									type="button"
 									onClick={() => handleLevelToggle(level)}
+									aria-pressed={isActive}
 									className={cn(
 										'cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
 										isActive

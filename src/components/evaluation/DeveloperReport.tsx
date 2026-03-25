@@ -698,6 +698,7 @@ export default function DeveloperReport({
 						<button
 							type="button"
 							onClick={() => setActivePage('all')}
+							aria-pressed={activePage === 'all'}
 							className={cn(
 								'rounded-full px-3 py-1 text-xs font-medium transition-colors',
 								activePage === 'all'
@@ -716,6 +717,7 @@ export default function DeveloperReport({
 									type="button"
 									onClick={() => setActivePage(url)}
 									title={url}
+									aria-pressed={isActive}
 									className={cn(
 										'rounded-full px-3 py-1 text-xs font-medium transition-colors max-w-[200px] truncate',
 										isActive
