@@ -146,45 +146,72 @@ export default function EvaluationForm({
 	}
 
 	return (
-		<div className="w-full max-w-2xl mx-auto space-y-4">
-			{/* Mode toggle */}
-			<div className="flex items-center justify-center gap-1 rounded-lg bg-gray-100 p-1 w-fit mx-auto">
-				<button
-					type="button"
-					onClick={() => {
-						setMode('url')
-						setError(null)
-					}}
-					className={cn(
-						'flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors',
-						mode === 'url'
-							? 'bg-white text-gray-900 shadow-sm'
-							: 'text-gray-600 hover:text-gray-900'
-					)}
-				>
-					<Globe className="h-4 w-4" aria-hidden="true" />
-					URL
-				</button>
-				<button
-					type="button"
-					onClick={() => {
-						setMode('file')
-						setError(null)
-					}}
-					className={cn(
-						'flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors',
-						mode === 'file'
-							? 'bg-white text-gray-900 shadow-sm'
-							: 'text-gray-600 hover:text-gray-900'
-					)}
-				>
-					<Upload className="h-4 w-4" aria-hidden="true" />
-					HTML File
-				</button>
-			</div>
+		<div className="w-full max-w-2xl mx-auto">
+			<form onSubmit={handleSubmit} noValidate className="space-y-4">
+				{/* Mode toggle */}
+				<div role="tablist" aria-label="Input method" className="flex items-center justify-center gap-1 rounded-lg bg-gray-100 p-1 w-fit mx-auto">
+					<button
+						type="button"
+						role="tab"
+						id="input-tab-url"
+						aria-selected={mode === 'url'}
+						tabIndex={mode === 'url' ? 0 : -1}
+						onClick={() => {
+							setMode('url')
+							setError(null)
+						}}
+						onKeyDown={(e) => {
+							if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+								e.preventDefault()
+								const newMode = mode === 'url' ? 'file' : 'url'
+								setMode(newMode)
+								setError(null)
+								const targetId = newMode === 'url' ? 'input-tab-url' : 'input-tab-file'
+								document.getElementById(targetId)?.focus()
+							}
+						}}
+						className={cn(
+							'flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+							mode === 'url'
+								? 'bg-white text-gray-900 shadow-sm'
+								: 'text-gray-600 hover:text-gray-900'
+						)}
+					>
+						<Globe className="h-4 w-4" aria-hidden="true" />
+						URL
+					</button>
+					<button
+						type="button"
+						role="tab"
+						id="input-tab-file"
+						aria-selected={mode === 'file'}
+						tabIndex={mode === 'file' ? 0 : -1}
+						onClick={() => {
+							setMode('file')
+							setError(null)
+						}}
+						onKeyDown={(e) => {
+							if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+								e.preventDefault()
+								const newMode = mode === 'url' ? 'file' : 'url'
+								setMode(newMode)
+								setError(null)
+								const targetId = newMode === 'url' ? 'input-tab-url' : 'input-tab-file'
+								document.getElementById(targetId)?.focus()
+							}
+						}}
+						className={cn(
+							'flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+							mode === 'file'
+								? 'bg-white text-gray-900 shadow-sm'
+								: 'text-gray-600 hover:text-gray-900'
+						)}
+					>
+						<Upload className="h-4 w-4" aria-hidden="true" />
+						HTML File
+					</button>
+				</div>
 
-			{/* Form */}
-			<form onSubmit={handleSubmit} noValidate>
 				{mode === 'url' ? (
 					/* URL input */
 					<div className="flex flex-col gap-3 sm:flex-row sm:items-start">
@@ -214,10 +241,11 @@ export default function EvaluationForm({
 										}}
 										disabled={loading}
 										className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+										aria-describedby="crawl-help-text"
 									/>
 									Crawl full website (same origin)
 								</label>
-								<p className="mt-1 text-xs text-(--muted-text)">
+								<p id="crawl-help-text" className="mt-1 text-xs text-(--muted-text)">
 									Automatically excludes admin paths like
 									/wp-admin, /admin, /administrator, and
 									/wp-login.php.
