@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const protectedPaths = ['/evaluate', '/history']
+const protectedPaths = ['/history']
 const authPaths = ['/login', '/signup']
 const THREE_DAYS_IN_SECONDS = 60 * 60 * 24 * 3
 

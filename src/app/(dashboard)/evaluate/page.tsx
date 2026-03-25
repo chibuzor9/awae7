@@ -2,13 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
-import { AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2, X } from 'lucide-react'
+import Link from 'next/link'
 import EvaluationForm from '@/components/evaluation/EvaluationForm'
 import type { UrlEvaluationOptions } from '@/components/evaluation/EvaluationForm'
 import EvaluationResults from '@/components/evaluation/EvaluationResults'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
 import { Wcag } from '@/components/ui/Wcag'
+import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 import type {
 	EvaluationResult,
 	DeveloperReport,
@@ -75,7 +78,14 @@ export default function EvaluatePage() {
 	const [results, setResults] = useState<EvaluationData | null>(null)
 	const [preferredRole, setPreferredRole] =
 		useState<PreferredRole>('end-user')
+	const [user, setUser] = useState<User | null>(null)
+	const [bannerDismissed, setBannerDismissed] = useState(false)
 	const resultsRef = useRef<HTMLElement>(null)
+
+	useEffect(() => {
+		const supabase = createClient()
+		supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
+	}, [])
 
 	useEffect(() => {
 		if (results && !loading) {
@@ -358,6 +368,31 @@ export default function EvaluatePage() {
 							defaultTab={preferredRole}
 						/>
 					</section>
+				)}
+
+				{results && !loading && !user && !bannerDismissed && (
+					<div className="mx-auto max-w-2xl mt-6 flex items-center justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+						<p className="text-sm text-blue-800">
+							<strong>Want to save this evaluation?</strong>{' '}
+							Sign up to keep a history of all your evaluations.
+						</p>
+						<div className="flex items-center gap-2 shrink-0">
+							<Link
+								href="/signup"
+								className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
+							>
+								Sign up
+							</Link>
+							<button
+								type="button"
+								onClick={() => setBannerDismissed(true)}
+								className="text-blue-400 hover:text-blue-600 transition-colors"
+								aria-label="Dismiss signup suggestion"
+							>
+								<X className="h-4 w-4" />
+							</button>
+						</div>
+					</div>
 				)}
 			</div>
 		</div>
