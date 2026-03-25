@@ -170,6 +170,8 @@ export async function POST(request: NextRequest) {
             url?: string
             crawlWholeSite?: boolean
             maxPages?: number
+            wcagVersion?: '2.1' | '2.2'
+            wcagLevel?: 'A' | 'AA'
         }
 		try {
 			body = await request.json()
@@ -186,6 +188,8 @@ export async function POST(request: NextRequest) {
             typeof body.maxPages === 'number'
                 ? Math.min(50, Math.max(1, Math.floor(body.maxPages)))
                 : 10
+        const wcagVersion = body.wcagVersion === '2.1' ? '2.1' : '2.2'
+        const wcagLevel = body.wcagLevel === 'A' ? 'A' : 'AA'
         let cookieHeaderForTarget: string | undefined
 
 		if (!url || typeof url !== 'string') {
@@ -244,9 +248,13 @@ export async function POST(request: NextRequest) {
                 ? await evaluateSiteCrawl(trimmedUrl, {
                     maxPages,
                     cookieHeader: cookieHeaderForTarget,
+                    wcagVersion,
+                    wcagLevel,
                 })
                 : await evaluateUrl(trimmedUrl, {
                     cookieHeader: cookieHeaderForTarget,
+                    wcagVersion,
+                    wcagLevel,
                 })
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : String(err)

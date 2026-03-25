@@ -4,7 +4,11 @@ import { useState, useRef, type FormEvent, type ChangeEvent } from 'react'
 import { Globe, Search, Upload, FileText, X } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { Wcag } from '@/components/ui/Wcag'
 import { cn, isValidUrl } from '@/lib/utils'
+
+export type WcagVersion = '2.1' | '2.2'
+export type WcagLevel = 'A' | 'AA'
 
 type InputMode = 'url' | 'file'
 
@@ -12,6 +16,8 @@ export interface UrlEvaluationOptions {
 	url: string
 	crawlWholeSite: boolean
 	maxPages: number
+	wcagVersion: WcagVersion
+	wcagLevel: WcagLevel
 }
 
 export interface EvaluationFormProps {
@@ -34,6 +40,8 @@ export default function EvaluationForm({
 	const [selectedFile, setSelectedFile] = useState<File | null>(null)
 	const [crawlWholeSite, setCrawlWholeSite] = useState(false)
 	const [maxPages, setMaxPages] = useState('10')
+	const [wcagVersion, setWcagVersion] = useState<WcagVersion>('2.2')
+	const [wcagLevel, setWcagLevel] = useState<WcagLevel>('AA')
 	const fileInputRef = useRef<HTMLInputElement>(null)
 
 	// ---- URL helpers ----
@@ -135,6 +143,8 @@ export default function EvaluationForm({
 				url: normalized,
 				crawlWholeSite,
 				maxPages: crawlWholeSite ? parsedMaxPages : 1,
+				wcagVersion,
+				wcagLevel,
 			})
 		} else {
 			if (!selectedFile) {
@@ -148,6 +158,41 @@ export default function EvaluationForm({
 	return (
 		<div className="w-full max-w-2xl mx-auto">
 			<form onSubmit={handleSubmit} noValidate className="space-y-4">
+				{/* WCAG settings */}
+				<fieldset className="flex flex-wrap items-end justify-center gap-4 mb-4">
+					<legend className="sr-only">Evaluation Settings</legend>
+					<div className="flex flex-col gap-1">
+						<label htmlFor="wcag-version" className="text-xs font-medium text-gray-600">
+							<Wcag /> Version
+						</label>
+						<select
+							id="wcag-version"
+							value={wcagVersion}
+							onChange={e => setWcagVersion(e.target.value as WcagVersion)}
+							disabled={loading}
+							className="h-9 rounded-lg border border-(--border) bg-white px-3 text-sm text-(--text) focus:ring-2 focus:ring-blue-500 focus:outline-none"
+						>
+							<option value="2.1">WCAG 2.1</option>
+							<option value="2.2">WCAG 2.2</option>
+						</select>
+					</div>
+					<div className="flex flex-col gap-1">
+						<label htmlFor="wcag-level" className="text-xs font-medium text-gray-600">
+							Conformance Level
+						</label>
+						<select
+							id="wcag-level"
+							value={wcagLevel}
+							onChange={e => setWcagLevel(e.target.value as WcagLevel)}
+							disabled={loading}
+							className="h-9 rounded-lg border border-(--border) bg-white px-3 text-sm text-(--text) focus:ring-2 focus:ring-blue-500 focus:outline-none"
+						>
+							<option value="A">Level A</option>
+							<option value="AA">Level AA</option>
+						</select>
+					</div>
+				</fieldset>
+
 				{/* Mode toggle */}
 				<div role="tablist" aria-label="Input method" className="flex items-center justify-center gap-1 rounded-lg bg-gray-100 p-1 w-fit mx-auto">
 					<button

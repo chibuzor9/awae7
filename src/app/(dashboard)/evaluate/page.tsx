@@ -170,6 +170,8 @@ export default function EvaluatePage() {
 		url,
 		crawlWholeSite,
 		maxPages,
+		wcagVersion,
+		wcagLevel,
 	}: UrlEvaluationOptions) {
 		const validationError = getUrlValidationError(url)
 		if (validationError) {
@@ -192,6 +194,8 @@ export default function EvaluatePage() {
 					url: normalizedUrl,
 					crawlWholeSite,
 					maxPages,
+					wcagVersion,
+					wcagLevel,
 				}),
 			})
 
