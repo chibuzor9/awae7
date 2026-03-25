@@ -7,6 +7,7 @@ import { CircleUser, LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { User } from '@supabase/supabase-js'
+import { Wcag } from '@/components/ui/Wcag'
 
 const navLinks = [
 	{ href: '/evaluate', label: 'Evaluate' },
@@ -142,7 +143,7 @@ export default function Navbar() {
 									href={link.href}
 									className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-(--accent-soft) hover:text-(--accent)"
 								>
-									{link.label}
+									{link.href === '/wcag-cards' ? <><Wcag /> Cards</> : link.label}
 								</Link>
 							))}
 						</div>
@@ -298,7 +299,7 @@ export default function Navbar() {
 									onClick={() => setMobileMenuOpen(false)}
 									className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-(--accent-soft) hover:text-(--accent)"
 								>
-									{link.label}
+									{link.href === '/wcag-cards' ? <><Wcag /> Cards</> : link.label}
 								</Link>
 							))}
 						</div>

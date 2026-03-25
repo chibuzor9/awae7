@@ -5,6 +5,7 @@ import { Search, Filter, Layers } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { cn } from '@/lib/utils'
 import WcagDeckCard from '@/components/wcag/WcagDeckCard'
+import { Wcag } from '@/components/ui/Wcag'
 import { wcagCards } from '@/data/wcag-cards'
 import type { WcagPrinciple, WcagLevel } from '@/types'
 
@@ -239,7 +240,7 @@ export default function WcagCardDeck() {
 						No criteria found
 					</h3>
 					<p className="mt-1 max-w-md text-sm text-slate-600">
-						No WCAG criteria match your current search or filters.
+						No <Wcag /> criteria match your current search or filters.
 						Try adjusting your search term or clearing the filters
 						to see more results.
 					</p>

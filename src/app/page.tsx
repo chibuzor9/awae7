@@ -15,6 +15,19 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/server'
+import { Wcag } from '@/components/ui/Wcag'
+
+/* ================================================================
+   Helpers
+   ================================================================ */
+
+function WcagText({ children }: { children: string }) {
+	const parts = children.split('WCAG')
+	if (parts.length === 1) return <>{children}</>
+	return <>{parts.map((part, i) => (
+		<span key={i}>{i > 0 && <Wcag />}{part}</span>
+	))}</>
+}
 
 /* ================================================================
    Data
@@ -128,7 +141,7 @@ export default async function Home() {
 				<div className="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
 					<div className="mx-auto max-w-6xl text-center">
 						<p tabIndex={0} className="inline-flex items-center rounded-full border border-(--border) bg-white px-3 py-1 text-xs font-semibold text-(--accent)">
-							WCAG 2.2 Multi-Audience Reports
+							<Wcag /> 2.2 Multi-Audience Reports
 						</p>
 						<h1 tabIndex={0} className="mx-auto mt-4 max-w-5xl text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
 							Automated Web{' '}
@@ -137,7 +150,7 @@ export default async function Home() {
 						</h1>
 
 						<p tabIndex={0} className="mx-auto mt-5 max-w-4xl text-base leading-7 text-slate-700 sm:text-lg">
-							Evaluate any website against WCAG 2.2 standards and
+							Evaluate any website against <Wcag /> 2.2 standards and
 							get tailored reports for developers, designers,
 							auditors, and end-users.
 						</p>
@@ -163,7 +176,7 @@ export default async function Home() {
 									'transition-all hover:-translate-y-0.5 hover:bg-(--accent-soft) focus:outline-none focus:ring-2 focus:ring-(--accent) focus:ring-offset-2'
 								)}
 							>
-								Browse WCAG Cards
+								Browse <Wcag /> Cards
 							</Link>
 						</div>
 
@@ -217,10 +230,10 @@ export default async function Home() {
 										/>
 									</div>
 									<h3 tabIndex={0} className="mt-4 text-lg font-semibold text-slate-900">
-										{feature.title}
+										<WcagText>{feature.title}</WcagText>
 									</h3>
 									<p tabIndex={0} className="mt-1.5 text-sm leading-6 text-slate-600">
-										{feature.description}
+										<WcagText>{feature.description}</WcagText>
 									</p>
 								</article>
 							</li>
@@ -261,7 +274,7 @@ export default async function Home() {
 										{step.title}
 									</h3>
 									<p tabIndex={0} className="mt-1.5 text-sm leading-6 text-slate-600">
-										{step.description}
+										<WcagText>{step.description}</WcagText>
 									</p>
 								</article>
 							</li>
@@ -360,7 +373,7 @@ export default async function Home() {
 											href={link.href}
 											className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-700"
 										>
-											{link.label}
+											{link.href === '/wcag-cards' ? <><Wcag /> Cards</> : link.label}
 										</Link>
 									</li>
 								))}

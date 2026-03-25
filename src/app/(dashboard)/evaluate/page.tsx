@@ -8,6 +8,7 @@ import type { UrlEvaluationOptions } from '@/components/evaluation/EvaluationFor
 import EvaluationResults from '@/components/evaluation/EvaluationResults'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
+import { Wcag } from '@/components/ui/Wcag'
 import type {
 	EvaluationResult,
 	DeveloperReport,
@@ -269,7 +270,7 @@ export default function EvaluatePage() {
 					</h1>
 					<p tabIndex={0} className="mx-auto mt-3 max-w-3xl text-base text-slate-600 sm:text-lg">
 						Enter a URL or upload an HTML file to run an automated
-						WCAG 2.2 accessibility audit.
+						<Wcag /> 2.2 accessibility audit.
 					</p>
 				</header>
 
