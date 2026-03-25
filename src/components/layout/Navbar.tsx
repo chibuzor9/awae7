@@ -179,7 +179,7 @@ export default function Navbar() {
 
 											{/* Preferred View */}
 											<div className="px-4 py-2.5 border-b border-(--border)">
-												<p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 mb-2">Preferred View</p>
+												<p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 mb-2">Select preferred view</p>
 												<div className="space-y-0.5">
 													{ROLE_OPTIONS.map(option => (
 														<button
@@ -311,7 +311,7 @@ export default function Navbar() {
 									</p>
 									{/* Mobile preference selector */}
 									<div className="space-y-2 px-3">
-										<p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Preferred View</p>
+										<p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Select preferred view</p>
 										<div className="flex flex-wrap gap-1">
 											{ROLE_OPTIONS.map(option => (
 												<button
