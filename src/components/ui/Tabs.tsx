@@ -99,7 +99,6 @@ export function TabsList({ className, children, ...props }: TabsListProps) {
 		if (nextIndex !== null) {
 			e.preventDefault()
 			triggers[nextIndex].focus()
-			triggers[nextIndex].click()
 		}
 	}, [])
 
