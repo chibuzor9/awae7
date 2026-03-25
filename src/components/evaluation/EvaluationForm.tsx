@@ -369,7 +369,7 @@ export default function EvaluationForm({
 									<button
 										type="button"
 										onClick={clearFile}
-										className="ml-2 rounded-full p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+										className="ml-2 rounded-full p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
 										aria-label="Remove file"
 									>
 										<X className="h-4 w-4" />

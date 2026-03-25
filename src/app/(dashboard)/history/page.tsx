@@ -548,7 +548,7 @@ export default function HistoryPage() {
 																		null
 																	)
 																}}
-																className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+																className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
 																aria-label="Collapse report"
 															>
 																<X className="h-4 w-4" />
@@ -669,7 +669,7 @@ export default function HistoryPage() {
 															)
 														}
 														className={cn(
-															'h-8 w-8 rounded-lg text-sm font-medium transition-colors',
+															'h-8 w-8 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
 															item ===
 																pagination.page
 																? 'bg-blue-600 text-white'

@@ -200,7 +200,7 @@ export default async function Home() {
 				<Link
 					href="#features"
 					aria-label="Scroll to features"
-					className="absolute bottom-8 right-8 hidden h-8 w-8 items-center justify-center rounded-full border border-(--border) bg-white text-(--accent) shadow-sm transition-colors hover:bg-(--accent-soft) motion-safe:animate-[scroll-nudge_2.2s_ease-in-out_infinite] md:inline-flex lg:bottom-10 lg:right-10"
+					className="absolute bottom-8 right-8 hidden h-8 w-8 items-center justify-center rounded-full border border-(--border) bg-white text-(--accent) shadow-sm transition-colors hover:bg-(--accent-soft) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 motion-safe:animate-[scroll-nudge_2.2s_ease-in-out_infinite] md:inline-flex lg:bottom-10 lg:right-10"
 				>
 					<ChevronDown className="h-4 w-4" aria-hidden="true" />
 				</Link>
@@ -390,7 +390,7 @@ export default async function Home() {
 									<li key={link.href}>
 										<Link
 											href={link.href}
-											className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-700"
+											className="rounded-sm text-sm font-medium text-slate-600 transition-colors hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
 										>
 											{link.href === '/wcag-cards' ? <><Wcag /> Cards</> : link.label}
 										</Link>
