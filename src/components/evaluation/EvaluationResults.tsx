@@ -13,6 +13,7 @@ import AuditorReport from '@/components/evaluation/AuditorReport'
 import EndUserReport from '@/components/evaluation/EndUserReport'
 import DesignerReport from '@/components/evaluation/DesignerReport'
 import { ExportButton } from '@/components/export/ExportButton'
+import { Wcag } from '@/components/ui/Wcag'
 import type {
 	EvaluationResult,
 	DeveloperReport as DeveloperReportType,
@@ -57,6 +58,9 @@ export default function EvaluationResults({
 			}
 			className="w-full"
 		>
+			<p className="mb-3 text-xs font-medium text-gray-500">
+				Evaluated against <Wcag /> {evaluation.wcagVersion ?? '2.2'} Level {evaluation.wcagLevel ?? 'AA'}
+			</p>
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
 				<TabsList className="mb-2">
 					<TabsTrigger value="end-user">

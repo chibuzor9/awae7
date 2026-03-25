@@ -102,6 +102,8 @@ export async function POST(request: NextRequest) {
 	const contentType = request.headers.get('content-type') ?? ''
 
 	let rawResults
+	let wcagVersion: '2.1' | '2.2' = '2.2'
+	let wcagLevel: 'A' | 'AA' = 'AA'
 
 	// ================================================================
 	// Branch A — HTML file upload (multipart/form-data)
@@ -188,8 +190,8 @@ export async function POST(request: NextRequest) {
             typeof body.maxPages === 'number'
                 ? Math.min(50, Math.max(1, Math.floor(body.maxPages)))
                 : 10
-        const wcagVersion = body.wcagVersion === '2.1' ? '2.1' : '2.2'
-        const wcagLevel = body.wcagLevel === 'A' ? 'A' : 'AA'
+        wcagVersion = body.wcagVersion === '2.1' ? '2.1' : '2.2'
+        wcagLevel = body.wcagLevel === 'A' ? 'A' : 'AA'
         let cookieHeaderForTarget: string | undefined
 
 		if (!url || typeof url !== 'string') {
@@ -269,6 +271,8 @@ export async function POST(request: NextRequest) {
 
 	// ---- Transform ----
 	const evaluation = transformRawResults(rawResults)
+	evaluation.wcagVersion = wcagVersion
+	evaluation.wcagLevel = wcagLevel
     if (evaluation.fullSourceHtml?.trim()) {
         evaluation.fullSourceHtml = await formatHtmlForReport(
             evaluation.fullSourceHtml

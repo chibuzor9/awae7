@@ -117,6 +117,8 @@ export interface EvaluationResult {
 	id?: string
 	targetUrl: string
 	timestamp: string
+	wcagVersion?: string    // '2.1' | '2.2'
+	wcagLevel?: string      // 'A' | 'AA'
 	axeCoreVersion: string
 	testEnvironment: TestEnvironment
 	fullSourceHtml?: string
