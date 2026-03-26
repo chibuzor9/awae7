@@ -114,6 +114,7 @@ function addHeader(
 		55
 	)
 	doc.text(`axe-core Version: ${summary.axeCoreVersion}`, 20, 62)
+	doc.text(`WCAG Standard: WCAG ${summary.wcagVersion ?? '2.2'} Level ${summary.wcagLevel ?? 'AA'}`, 20, 69)
 
 	// Score box
 	const scoreX = pageWidth - 70
@@ -129,7 +130,7 @@ function addHeader(
 	})
 
 	// Severity summary line
-	const startY = 72
+	const startY = 79
 	doc.setFontSize(9)
 	doc.setTextColor(...COLORS.darkGray)
 	doc.text(

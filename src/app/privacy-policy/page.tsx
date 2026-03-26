@@ -8,15 +8,15 @@ export const metadata: Metadata = {
 export default function PrivacyPolicyPage() {
 	return (
 		<article className="container mx-auto px-4 py-12 max-w-4xl">
-			<h1 tabIndex={0} className="text-4xl font-bold mb-8">Privacy Policy</h1>
-			<p tabIndex={0} className="text-gray-600 mb-8">Last Updated: March 7, 2026</p>
+			<h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
+			<p className="text-gray-600 mb-8">Last Updated: March 7, 2026</p>
 
 			<div className="prose prose-lg max-w-none space-y-6">
 				<section>
-					<h2 tabIndex={0} className="text-2xl font-semibold mb-4">
+					<h2 className="text-2xl font-semibold mb-4">
 						1. Introduction
 					</h2>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						Welcome to AWAE (Web Accessibility Evaluator). We are
 						committed to protecting your privacy and ensuring the
 						security of your personal information. This Privacy
@@ -27,41 +27,41 @@ export default function PrivacyPolicyPage() {
 				</section>
 
 				<section>
-					<h2 tabIndex={0} className="text-2xl font-semibold mb-4">
+					<h2 className="text-2xl font-semibold mb-4">
 						2. Information We Collect
 					</h2>
-					<h3 tabIndex={0} className="text-xl font-semibold mb-3">
+					<h3 className="text-xl font-semibold mb-3">
 						2.1 Personal Information
 					</h3>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						When you create an account, we collect:
 					</p>
 					<ul className="list-disc pl-6 mb-4">
-						<li tabIndex={0}>Email address</li>
-						<li tabIndex={0}>Name (if provided)</li>
-						<li tabIndex={0}>Authentication credentials</li>
+						<li>Email address</li>
+						<li>Name (if provided)</li>
+						<li>Authentication credentials</li>
 					</ul>
 
-					<h3 tabIndex={0} className="text-xl font-semibold mb-3">
+					<h3 className="text-xl font-semibold mb-3">
 						2.2 Usage Data
 					</h3>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						We automatically collect certain information when you
 						use our service:
 					</p>
 					<ul className="list-disc pl-6 mb-4">
-						<li tabIndex={0}>URLs of websites you evaluate</li>
-						<li tabIndex={0}>Accessibility evaluation results</li>
-						<li tabIndex={0}>Browser type and version</li>
-						<li tabIndex={0}>Device information</li>
-						<li tabIndex={0}>IP address</li>
-						<li tabIndex={0}>Usage patterns and preferences</li>
+						<li>URLs of websites you evaluate</li>
+						<li>Accessibility evaluation results</li>
+						<li>Browser type and version</li>
+						<li>Device information</li>
+						<li>IP address</li>
+						<li>Usage patterns and preferences</li>
 					</ul>
 
-					<h3 tabIndex={0} className="text-xl font-semibold mb-3">
+					<h3 className="text-xl font-semibold mb-3">
 						2.3 Cookies and Tracking
 					</h3>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						We use cookies and similar tracking technologies to
 						enhance your experience, analyze usage patterns, and
 						improve our service.
@@ -69,49 +69,49 @@ export default function PrivacyPolicyPage() {
 				</section>
 
 				<section>
-					<h2 tabIndex={0} className="text-2xl font-semibold mb-4">
+					<h2 className="text-2xl font-semibold mb-4">
 						3. How We Use Your Information
 					</h2>
-					<p tabIndex={0} className="mb-4">We use the collected information to:</p>
+					<p className="mb-4">We use the collected information to:</p>
 					<ul className="list-disc pl-6 mb-4">
-						<li tabIndex={0}>
+						<li>
 							Provide and maintain our accessibility evaluation
 							service
 						</li>
-						<li tabIndex={0}>Process and store your evaluation results</li>
-						<li tabIndex={0}>
+						<li>Process and store your evaluation results</li>
+						<li>
 							Send you service-related notifications and updates
 						</li>
-						<li tabIndex={0}>Improve and optimize our service</li>
-						<li tabIndex={0}>Analyze usage patterns and trends</li>
-						<li tabIndex={0}>Detect and prevent fraud or abuse</li>
-						<li tabIndex={0}>Comply with legal obligations</li>
+						<li>Improve and optimize our service</li>
+						<li>Analyze usage patterns and trends</li>
+						<li>Detect and prevent fraud or abuse</li>
+						<li>Comply with legal obligations</li>
 					</ul>
 				</section>
 
 				<section>
-					<h2 tabIndex={0} className="text-2xl font-semibold mb-4">
+					<h2 className="text-2xl font-semibold mb-4">
 						4. Data Sharing and Disclosure
 					</h2>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						We do not sell your personal information. We may share
 						your information only in the following circumstances:
 					</p>
 					<ul className="list-disc pl-6 mb-4">
-						<li tabIndex={0}>
+						<li>
 							<strong>Service Providers:</strong> With third-party
 							service providers who assist in operating our
 							service (e.g., hosting, analytics, authentication)
 						</li>
-						<li tabIndex={0}>
+						<li>
 							<strong>Legal Requirements:</strong> When required
 							by law or to protect our rights, safety, or property
 						</li>
-						<li tabIndex={0}>
+						<li>
 							<strong>Business Transfers:</strong> In connection
 							with a merger, acquisition, or sale of assets
 						</li>
-						<li tabIndex={0}>
+						<li>
 							<strong>With Your Consent:</strong> When you
 							explicitly consent to sharing your information
 						</li>
@@ -119,22 +119,22 @@ export default function PrivacyPolicyPage() {
 				</section>
 
 				<section>
-					<h2 tabIndex={0} className="text-2xl font-semibold mb-4">
+					<h2 className="text-2xl font-semibold mb-4">
 						5. Data Security
 					</h2>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						We implement appropriate technical and organizational
 						measures to protect your personal information against
 						unauthorized access, alteration, disclosure, or
 						destruction. These measures include:
 					</p>
 					<ul className="list-disc pl-6 mb-4">
-						<li tabIndex={0}>Encryption of data in transit and at rest</li>
-						<li tabIndex={0}>Secure authentication mechanisms</li>
-						<li tabIndex={0}>Regular security assessments</li>
-						<li tabIndex={0}>Access controls and monitoring</li>
+						<li>Encryption of data in transit and at rest</li>
+						<li>Secure authentication mechanisms</li>
+						<li>Regular security assessments</li>
+						<li>Access controls and monitoring</li>
 					</ul>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						However, no method of transmission over the internet or
 						electronic storage is 100% secure. While we strive to
 						protect your personal information, we cannot guarantee
@@ -143,10 +143,10 @@ export default function PrivacyPolicyPage() {
 				</section>
 
 				<section>
-					<h2 tabIndex={0} className="text-2xl font-semibold mb-4">
+					<h2 className="text-2xl font-semibold mb-4">
 						6. Data Retention
 					</h2>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						We retain your personal information for as long as
 						necessary to provide our service and fulfill the
 						purposes outlined in this Privacy Policy. Evaluation
@@ -157,38 +157,38 @@ export default function PrivacyPolicyPage() {
 				</section>
 
 				<section>
-					<h2 tabIndex={0} className="text-2xl font-semibold mb-4">
+					<h2 className="text-2xl font-semibold mb-4">
 						7. Your Rights
 					</h2>
-					<p tabIndex={0} className="mb-4">You have the right to:</p>
+					<p className="mb-4">You have the right to:</p>
 					<ul className="list-disc pl-6 mb-4">
-						<li tabIndex={0}>Access your personal information</li>
-						<li tabIndex={0}>Correct inaccurate or incomplete information</li>
-						<li tabIndex={0}>Request deletion of your personal information</li>
-						<li tabIndex={0}>
+						<li>Access your personal information</li>
+						<li>Correct inaccurate or incomplete information</li>
+						<li>Request deletion of your personal information</li>
+						<li>
 							Object to or restrict processing of your information
 						</li>
-						<li tabIndex={0}>Export your data in a portable format</li>
-						<li tabIndex={0}>Withdraw consent at any time</li>
+						<li>Export your data in a portable format</li>
+						<li>Withdraw consent at any time</li>
 					</ul>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						To exercise these rights, please contact us using the
 						information provided below.
 					</p>
 				</section>
 
 				<section>
-					<h2 tabIndex={0} className="text-2xl font-semibold mb-4">
+					<h2 className="text-2xl font-semibold mb-4">
 						8. Third-Party Services
 					</h2>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						Our service uses third-party services for authentication
 						(Supabase), analytics (Vercel Analytics), and hosting.
 						These services have their own privacy policies, and we
 						encourage you to review them:
 					</p>
 					<ul className="list-disc pl-6 mb-4">
-						<li tabIndex={0}>
+						<li>
 							<a
 								href="https://supabase.com/privacy"
 								target="_blank"
@@ -198,7 +198,7 @@ export default function PrivacyPolicyPage() {
 								Supabase Privacy Policy
 							</a>
 						</li>
-						<li tabIndex={0}>
+						<li>
 							<a
 								href="https://vercel.com/legal/privacy-policy"
 								target="_blank"
@@ -212,10 +212,10 @@ export default function PrivacyPolicyPage() {
 				</section>
 
 				<section>
-					<h2 tabIndex={0} className="text-2xl font-semibold mb-4">
+					<h2 className="text-2xl font-semibold mb-4">
 						9. Children&apos;s Privacy
 					</h2>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						Our service is not intended for children under the age
 						of 13. We do not knowingly collect personal information
 						from children under 13. If you believe we have collected
@@ -225,10 +225,10 @@ export default function PrivacyPolicyPage() {
 				</section>
 
 				<section>
-					<h2 tabIndex={0} className="text-2xl font-semibold mb-4">
+					<h2 className="text-2xl font-semibold mb-4">
 						10. International Data Transfers
 					</h2>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						Your information may be transferred to and processed in
 						countries other than your country of residence. These
 						countries may have different data protection laws. We
@@ -238,10 +238,10 @@ export default function PrivacyPolicyPage() {
 				</section>
 
 				<section>
-					<h2 tabIndex={0} className="text-2xl font-semibold mb-4">
+					<h2 className="text-2xl font-semibold mb-4">
 						11. Changes to This Privacy Policy
 					</h2>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						We may update this Privacy Policy from time to time. We
 						will notify you of any material changes by posting the
 						new Privacy Policy on this page and updating the &quot;Last
@@ -252,19 +252,19 @@ export default function PrivacyPolicyPage() {
 				</section>
 
 				<section>
-					<h2 tabIndex={0} className="text-2xl font-semibold mb-4">
+					<h2 className="text-2xl font-semibold mb-4">
 						12. Contact Us
 					</h2>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						If you have any questions, concerns, or requests
 						regarding this Privacy Policy or our data practices,
 						please contact us at:
 					</p>
 					<div className="bg-gray-50 p-4 rounded-lg">
-						<p tabIndex={0} className="mb-2">
+						<p className="mb-2">
 							<strong>Email:</strong> privacy@awae.app
 						</p>
-						<p tabIndex={0} className="mb-2">
+						<p className="mb-2">
 							<strong>Repository:</strong>{' '}
 							<a
 								href="https://github.com/chibuzor9/awae7"
@@ -279,29 +279,29 @@ export default function PrivacyPolicyPage() {
 				</section>
 
 				<section className="mt-8 pt-8 border-t">
-					<h2 tabIndex={0} className="text-2xl font-semibold mb-4">
+					<h2 className="text-2xl font-semibold mb-4">
 						13. GDPR Compliance
 					</h2>
-					<p tabIndex={0} className="mb-4">
+					<p className="mb-4">
 						For users in the European Economic Area (EEA), we comply
 						with the General Data Protection Regulation (GDPR). Our
 						legal basis for processing your personal information
 						includes:
 					</p>
 					<ul className="list-disc pl-6 mb-4">
-						<li tabIndex={0}>
+						<li>
 							<strong>Consent:</strong> You have given explicit
 							consent for processing your personal information
 						</li>
-						<li tabIndex={0}>
+						<li>
 							<strong>Contract:</strong> Processing is necessary
 							to provide our service
 						</li>
-						<li tabIndex={0}>
+						<li>
 							<strong>Legal Obligation:</strong> Processing is
 							required to comply with legal obligations
 						</li>
-						<li tabIndex={0}>
+						<li>
 							<strong>Legitimate Interest:</strong> Processing is
 							necessary for our legitimate business interests
 						</li>

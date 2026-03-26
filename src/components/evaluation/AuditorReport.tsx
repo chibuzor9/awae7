@@ -11,6 +11,7 @@ import {
 	Globe,
 	Calendar,
 	Shield,
+	BookOpen,
 	ChevronDown,
 } from 'lucide-react'
 import { CardBody } from '@/components/ui/Card'
@@ -31,6 +32,8 @@ import type {
 // ---------- Props ----------
 interface AuditorReportProps {
 	report: AuditorReportType
+	wcagVersion?: string
+	wcagLevel?: string
 }
 
 // ---------- Constants ----------
@@ -97,7 +100,7 @@ function statusLabel(status: ComplianceEntry['status']): string {
 }
 
 // ---------- Component ----------
-export default function AuditorReport({ report }: AuditorReportProps) {
+export default function AuditorReport({ report, wcagVersion, wcagLevel }: AuditorReportProps) {
 	const {
 		summary,
 		complianceMatrix,
@@ -304,6 +307,20 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 												</p>
 											</div>
 										</div>
+										<div className="flex items-start gap-3">
+											<BookOpen
+												className="h-4 w-4 mt-0.5 text-gray-400 shrink-0"
+												aria-hidden="true"
+											/>
+											<div>
+												<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+													Standard
+												</p>
+												<p className="text-sm text-gray-900">
+													WCAG {wcagVersion ?? summary.wcagVersion ?? '2.2'} Level {wcagLevel ?? summary.wcagLevel ?? 'AA'}
+												</p>
+											</div>
+										</div>
 									</div>
 								</div>
 
@@ -340,13 +357,13 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 								<select
 									id="auditor-principle-filter"
 									value={filterPrinciple}
-									onChange={e =>
+									onChange={e => {
 										setFilterPrinciple(
 											e.target.value as
 												| WcagPrinciple
 												| 'all'
 										)
-									}
+									}}
 									className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
 								>
 									<option value="all">
@@ -370,13 +387,13 @@ export default function AuditorReport({ report }: AuditorReportProps) {
 								<select
 									id="auditor-level-filter"
 									value={filterLevel}
-									onChange={e =>
+									onChange={e => {
 										setFilterLevel(
 											e.target.value as
 												| WcagLevel
 												| 'all'
 										)
-									}
+									}}
 									className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
 								>
 									<option value="all">All Levels</option>

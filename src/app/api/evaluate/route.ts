@@ -75,9 +75,16 @@ function mapEvaluationFailure(message: string): {
 }
 
 export async function POST(request: NextRequest) {
-	// ---- Rate limiting: 5 evaluations per minute per IP ----
+	// ---- Check authentication (optional — anonymous use allowed) ----
+	const supabase = await createClient()
+	const { data: { user } } = await supabase.auth.getUser()
+
+	// ---- Rate limiting: stricter for anonymous users ----
 	const rlKey = getRateLimitKey(request)
-	const rl = checkRateLimit(rlKey, { limit: 5, windowMs: 60_000 })
+	const rlConfig = user
+		? { limit: 5, windowMs: 60_000 }   // Authenticated: 5/min
+		: { limit: 2, windowMs: 60_000 }   // Anonymous: 2/min
+	const rl = checkRateLimit(rlKey, rlConfig)
 	if (!rl.allowed) {
 		return NextResponse.json(
 			{ error: 'Too many requests. Please wait a moment before trying again.' },
@@ -88,20 +95,11 @@ export async function POST(request: NextRequest) {
 		)
 	}
 
-	// ---- Require authentication ----
-	const supabase = await createClient()
-	const { data: { user } } = await supabase.auth.getUser()
-
-	if (!user) {
-		return NextResponse.json(
-			{ error: 'You must be signed in to run an evaluation.' },
-			{ status: 401 }
-		)
-	}
-
 	const contentType = request.headers.get('content-type') ?? ''
 
 	let rawResults
+	let wcagVersion: '2.1' | '2.2' = '2.2'
+	let wcagLevel: 'A' | 'AA' = 'AA'
 
 	// ================================================================
 	// Branch A — HTML file upload (multipart/form-data)
@@ -170,6 +168,8 @@ export async function POST(request: NextRequest) {
             url?: string
             crawlWholeSite?: boolean
             maxPages?: number
+            wcagVersion?: '2.1' | '2.2'
+            wcagLevel?: 'A' | 'AA'
         }
 		try {
 			body = await request.json()
@@ -186,6 +186,8 @@ export async function POST(request: NextRequest) {
             typeof body.maxPages === 'number'
                 ? Math.min(50, Math.max(1, Math.floor(body.maxPages)))
                 : 10
+        wcagVersion = body.wcagVersion === '2.1' ? '2.1' : '2.2'
+        wcagLevel = body.wcagLevel === 'A' ? 'A' : 'AA'
         let cookieHeaderForTarget: string | undefined
 
 		if (!url || typeof url !== 'string') {
@@ -244,9 +246,13 @@ export async function POST(request: NextRequest) {
                 ? await evaluateSiteCrawl(trimmedUrl, {
                     maxPages,
                     cookieHeader: cookieHeaderForTarget,
+                    wcagVersion,
+                    wcagLevel,
                 })
                 : await evaluateUrl(trimmedUrl, {
                     cookieHeader: cookieHeaderForTarget,
+                    wcagVersion,
+                    wcagLevel,
                 })
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : String(err)
@@ -261,6 +267,8 @@ export async function POST(request: NextRequest) {
 
 	// ---- Transform ----
 	const evaluation = transformRawResults(rawResults)
+	evaluation.wcagVersion = wcagVersion
+	evaluation.wcagLevel = wcagLevel
     if (evaluation.fullSourceHtml?.trim()) {
         evaluation.fullSourceHtml = await formatHtmlForReport(
             evaluation.fullSourceHtml
@@ -274,56 +282,58 @@ export async function POST(request: NextRequest) {
 	// ---- Optionally persist to database ----
 	let savedEvaluationId: string | null = null
 
-	try {
-		// Look up internal user record
-		const dbUser = await prisma.user.findUnique({
-			where: { id: user.id },
-		})
-
-		if (dbUser) {
-			const savedEvaluation = await prisma.evaluation.create({
-				data: {
-					userId: dbUser.id,
-					targetUrl: evaluation.targetUrl,
-					axeCoreVersion: evaluation.axeCoreVersion,
-					totalViolations: evaluation.totalViolations,
-					criticalCount: evaluation.criticalCount,
-					seriousCount: evaluation.seriousCount,
-					moderateCount: evaluation.moderateCount,
-					minorCount: evaluation.minorCount,
-					overallScore: evaluation.overallScore,
-					rawResults: rawResults as any,
-					violations: {
-						create: evaluation.violations.map(v => ({
-							ruleId: v.ruleId,
-							wcagCriterion: v.wcagCriterion,
-							wcagLevel: v.wcagLevel,
-							wcagPrinciple: v.wcagPrinciple,
-							severity: v.severity,
-							elementSelector:
-								v.nodes[0]?.target?.join(', ') ?? null,
-							htmlSnippet: v.nodes[0]?.html ?? null,
-							description: v.description,
-							remediationGuidance:
-								developerReport.violations.find(
-									dv => dv.ruleId === v.ruleId
-								)?.remediation ?? null,
-						})),
-					},
-				},
+	if (user) {
+		try {
+			// Look up internal user record
+			const dbUser = await prisma.user.findUnique({
+				where: { id: user.id },
 			})
 
-			savedEvaluationId = savedEvaluation.id
+			if (dbUser) {
+				const savedEvaluation = await prisma.evaluation.create({
+					data: {
+						userId: dbUser.id,
+						targetUrl: evaluation.targetUrl,
+						axeCoreVersion: evaluation.axeCoreVersion,
+						totalViolations: evaluation.totalViolations,
+						criticalCount: evaluation.criticalCount,
+						seriousCount: evaluation.seriousCount,
+						moderateCount: evaluation.moderateCount,
+						minorCount: evaluation.minorCount,
+						overallScore: evaluation.overallScore,
+						rawResults: rawResults as any,
+						violations: {
+							create: evaluation.violations.map(v => ({
+								ruleId: v.ruleId,
+								wcagCriterion: v.wcagCriterion,
+								wcagLevel: v.wcagLevel,
+								wcagPrinciple: v.wcagPrinciple,
+								severity: v.severity,
+								elementSelector:
+									v.nodes[0]?.target?.join(', ') ?? null,
+								htmlSnippet: v.nodes[0]?.html ?? null,
+								description: v.description,
+								remediationGuidance:
+									developerReport.violations.find(
+										dv => dv.ruleId === v.ruleId
+									)?.remediation ?? null,
+							})),
+						},
+					},
+				})
+
+				savedEvaluationId = savedEvaluation.id
+			}
+		} catch (dbError: unknown) {
+			// Database save failure should NOT block the response.
+			// The user still gets their evaluation results.
+			const message =
+				dbError instanceof Error ? dbError.message : String(dbError)
+			console.error(
+				'[/api/evaluate] Failed to save evaluation to database:',
+				message
+			)
 		}
-	} catch (dbError: unknown) {
-		// Database save failure should NOT block the response.
-		// The user still gets their evaluation results.
-		const message =
-			dbError instanceof Error ? dbError.message : String(dbError)
-		console.error(
-			'[/api/evaluate] Failed to save evaluation to database:',
-			message
-		)
 	}
 
 	// ---- Respond ----

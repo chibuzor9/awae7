@@ -7,6 +7,7 @@ import { CircleUser, LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { User } from '@supabase/supabase-js'
+import { Wcag } from '@/components/ui/Wcag'
 
 const navLinks = [
 	{ href: '/evaluate', label: 'Evaluate' },
@@ -142,7 +143,7 @@ export default function Navbar() {
 									href={link.href}
 									className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-(--accent-soft) hover:text-(--accent)"
 								>
-									{link.label}
+									{link.href === '/wcag-cards' ? <><Wcag /> Cards</> : link.label}
 								</Link>
 							))}
 						</div>
@@ -179,7 +180,7 @@ export default function Navbar() {
 
 											{/* Preferred View */}
 											<div className="px-4 py-2.5 border-b border-(--border)">
-												<p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 mb-2">Preferred View</p>
+												<p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 mb-2">Select preferred view</p>
 												<div className="space-y-0.5">
 													{ROLE_OPTIONS.map(option => (
 														<button
@@ -298,7 +299,7 @@ export default function Navbar() {
 									onClick={() => setMobileMenuOpen(false)}
 									className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-(--accent-soft) hover:text-(--accent)"
 								>
-									{link.label}
+									{link.href === '/wcag-cards' ? <><Wcag /> Cards</> : link.label}
 								</Link>
 							))}
 						</div>

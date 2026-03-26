@@ -12,6 +12,8 @@ interface DesignerReportProps {
 	targetUrl?: string
 	fullSourceHtml?: string
 	pageSources?: { url: string; html: string }[]
+	wcagVersion?: string
+	wcagLevel?: string
 }
 
 const severityConfig = {
@@ -76,7 +78,7 @@ function buildPreviewSrcdoc(html: string, highlightCss: string, pageUrl?: string
 	return `${injected}${clean}`
 }
 
-export default function DesignerReport({ report, targetUrl, fullSourceHtml, pageSources }: DesignerReportProps) {
+export default function DesignerReport({ report, targetUrl, fullSourceHtml, pageSources, wcagVersion, wcagLevel }: DesignerReportProps) {
 	// Build the list of previewable pages: multi-page crawl or single page
 	const previewPages = useMemo(() => {
 		if (pageSources && pageSources.length > 0) {
@@ -97,6 +99,9 @@ export default function DesignerReport({ report, targetUrl, fullSourceHtml, page
 
 	return (
 		<div className="space-y-6">
+			<p className="text-xs font-medium text-gray-500">
+				Evaluated against WCAG {wcagVersion ?? report.summary.wcagVersion ?? '2.2'} Level {wcagLevel ?? report.summary.wcagLevel ?? 'AA'}
+			</p>
 			{/* 1. Live Preview */}
 			{hasPreview && activePreview && (
 				<Card>

@@ -27,6 +27,8 @@ function shouldMakeFocusable(el: HTMLElement): boolean {
 	if (el.closest('button, a, [role="button"]')) return false
 	// Skip hidden elements
 	if (el.getAttribute('aria-hidden') === 'true') return false
+	// Skip elements inside a role="group" container (cards handled as single tab stops)
+	if (el.closest('[role="group"]')) return false
 	// Skip empty elements
 	if (!el.textContent?.trim()) return false
 	return true

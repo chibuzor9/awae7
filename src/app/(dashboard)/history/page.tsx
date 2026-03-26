@@ -97,10 +97,10 @@ function EmptyState() {
 					/>
 				</div>
 				<div>
-					<h2 tabIndex={0} className="text-lg font-semibold text-gray-900">
+					<h2 className="text-lg font-semibold text-gray-900">
 						No evaluations yet
 					</h2>
-					<p tabIndex={0} className="mt-1 text-sm text-gray-500">
+					<p className="mt-1 text-sm text-gray-500">
 						You have not run any accessibility evaluations. Start by
 						evaluating a website to see your history here.
 					</p>
@@ -302,11 +302,11 @@ export default function HistoryPage() {
 								aria-hidden="true"
 							/>
 						</div>
-						<h1 tabIndex={0} className="text-3xl font-semibold tracking-tight text-slate-900">
+						<h1 className="text-3xl font-semibold tracking-tight text-slate-900">
 							Evaluation History
 						</h1>
 					</div>
-					<p tabIndex={0} className="text-base text-slate-600 sm:text-lg">
+					<p className="text-base text-slate-600 sm:text-lg">
 						Review your past accessibility evaluations. Click on any
 						evaluation to view the full report with developer,
 						designer, auditor, and end-user perspectives.
@@ -325,10 +325,10 @@ export default function HistoryPage() {
 								aria-hidden="true"
 							/>
 							<div>
-								<p tabIndex={0} className="text-lg font-semibold text-blue-800">
+								<p className="text-lg font-semibold text-blue-800">
 									Failed to Load History
 								</p>
-								<p tabIndex={0} className="mt-1 text-sm text-blue-700">
+								<p className="mt-1 text-sm text-blue-700">
 									{error}
 								</p>
 							</div>
@@ -388,7 +388,7 @@ export default function HistoryPage() {
 												}
 											}}
 										>
-											<CardBody className="flex items-center gap-6">
+											<CardBody className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
 												{/* Score gauge */}
 												<div className="shrink-0">
 													<ScoreGauge
@@ -419,6 +419,8 @@ export default function HistoryPage() {
 														{formatDate(
 															ev.timestamp
 														)}
+														<span className="text-gray-300">&middot;</span>
+														WCAG {ev.wcagVersion ?? '2.2'} {ev.wcagLevel ?? 'AA'}
 													</p>
 													<div className="mt-2 flex flex-wrap items-center gap-1.5">
 														<Badge
@@ -448,7 +450,7 @@ export default function HistoryPage() {
 												</div>
 
 												{/* Score label & actions */}
-												<div className="shrink-0 text-right">
+												<div className="shrink-0 w-full sm:w-auto flex items-center justify-between sm:block sm:text-right">
 													<p
 														className={cn(
 															'text-sm font-bold',
@@ -548,7 +550,7 @@ export default function HistoryPage() {
 																		null
 																	)
 																}}
-																className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+																className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
 																aria-label="Collapse report"
 															>
 																<X className="h-4 w-4" />
@@ -582,7 +584,7 @@ export default function HistoryPage() {
 
 						{/* ---- Pagination ---- */}
 						{pagination && pagination.totalPages > 1 && (
-							<nav aria-label="Pagination" className="mt-8 flex items-center justify-between">
+							<nav aria-label="Pagination" className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 								<p className="text-sm text-gray-500">
 									Showing{' '}
 									<span className="font-medium">
@@ -669,7 +671,7 @@ export default function HistoryPage() {
 															)
 														}
 														className={cn(
-															'h-8 w-8 rounded-lg text-sm font-medium transition-colors',
+															'h-8 w-8 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
 															item ===
 																pagination.page
 																? 'bg-blue-600 text-white'
@@ -716,7 +718,7 @@ export default function HistoryPage() {
 				title="Delete Evaluation"
 			>
 				<div className="space-y-4">
-					<p tabIndex={0} className="text-sm text-gray-600">
+					<p className="text-sm text-gray-600">
 						Are you sure you want to delete this evaluation? This action cannot be undone.
 					</p>
 					{deleteTarget && (

@@ -5,6 +5,7 @@ import { Search, Filter, Layers } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { cn } from '@/lib/utils'
 import WcagDeckCard from '@/components/wcag/WcagDeckCard'
+import { Wcag } from '@/components/ui/Wcag'
 import { wcagCards } from '@/data/wcag-cards'
 import type { WcagPrinciple, WcagLevel } from '@/types'
 
@@ -140,7 +141,10 @@ export default function WcagCardDeck() {
 						role="group"
 						aria-label="Filter by WCAG principle"
 					>
-						<span className="flex items-center gap-1.5 text-sm font-medium text-gray-600">
+						<span
+							id="principle-filter-label"
+							className="flex items-center gap-1.5 text-sm font-medium text-gray-600"
+						>
 							<Filter className="h-4 w-4" aria-hidden="true" />
 							Principle:
 						</span>
@@ -153,6 +157,8 @@ export default function WcagCardDeck() {
 									onClick={() =>
 										handlePrincipleToggle(principle)
 									}
+									aria-pressed={isActive}
+									aria-describedby="principle-filter-label"
 									className={cn(
 										'cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
 										isActive
@@ -177,7 +183,10 @@ export default function WcagCardDeck() {
 						role="group"
 						aria-label="Filter by WCAG level"
 					>
-						<span className="flex items-center gap-1.5 text-sm font-medium text-gray-600">
+						<span
+							id="level-filter-label"
+							className="flex items-center gap-1.5 text-sm font-medium text-gray-600"
+						>
 							<Layers className="h-4 w-4" aria-hidden="true" />
 							Level:
 						</span>
@@ -188,6 +197,8 @@ export default function WcagCardDeck() {
 									key={level}
 									type="button"
 									onClick={() => handleLevelToggle(level)}
+									aria-pressed={isActive}
+									aria-describedby="level-filter-label"
 									className={cn(
 										'cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
 										isActive
@@ -239,7 +250,7 @@ export default function WcagCardDeck() {
 						No criteria found
 					</h3>
 					<p className="mt-1 max-w-md text-sm text-slate-600">
-						No WCAG criteria match your current search or filters.
+						No <Wcag /> criteria match your current search or filters.
 						Try adjusting your search term or clearing the filters
 						to see more results.
 					</p>

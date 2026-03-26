@@ -1,5 +1,6 @@
 import WcagCardDeck from '@/components/wcag/WcagCardDeck'
 import { Badge } from '@/components/ui/Badge'
+import { Wcag } from '@/components/ui/Wcag'
 
 export const metadata = {
 	title: 'WCAG 2.2 Card Deck - AWAE',
@@ -36,11 +37,11 @@ export default function WcagCardsPage() {
 							</a>
 						</Badge>
 					</div>
-					<h1 tabIndex={0} className="text-3xl font-semibold text-slate-900">
-						WCAG 2.2 Card Deck
+					<h1 className="text-3xl font-semibold text-slate-900">
+						<Wcag /> 2.2 Card Deck
 					</h1>
-					<p tabIndex={0} className="mt-2 text-slate-600">
-						Browse all WCAG 2.2 Level A, AA and AAA success criteria
+					<p className="mt-2 text-slate-600">
+						Browse all <Wcag /> 2.2 Level A, AA and AAA success criteria
 						as interactive cards
 					</p>
 					<div className="mt-3 sm:hidden">

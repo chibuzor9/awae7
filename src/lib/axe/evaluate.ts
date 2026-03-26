@@ -161,10 +161,41 @@ export interface CrawlEvaluationOptions {
     maxPages?: number
     cookieHeader?: string
     excludePathPrefixes?: string[]
+    wcagVersion?: '2.1' | '2.2'
+    wcagLevel?: 'A' | 'AA'
 }
 
 export interface UrlEvaluationOptions {
     cookieHeader?: string
+    wcagVersion?: '2.1' | '2.2'
+    wcagLevel?: 'A' | 'AA'
+}
+
+export interface WcagOptions {
+    wcagVersion?: '2.1' | '2.2'
+    wcagLevel?: 'A' | 'AA'
+}
+
+export function buildAxeTags(options: WcagOptions = {}): string[] {
+    const version = options.wcagVersion ?? '2.2'
+    const level = options.wcagLevel ?? 'AA'
+
+    const tags: string[] = ['best-practice']
+
+    // WCAG 2.0 base
+    tags.push('wcag2a')
+    if (level === 'AA') tags.push('wcag2aa')
+
+    // WCAG 2.1 additions
+    tags.push('wcag21a')
+    if (level === 'AA') tags.push('wcag21aa')
+
+    // WCAG 2.2 additions (only AA exists; axe-core has no wcag22a tag)
+    if (version === '2.2' && level === 'AA') {
+        tags.push('wcag22aa')
+    }
+
+    return tags
 }
 
 const DEFAULT_CRAWL_EXCLUDED_PATH_PREFIXES = [
@@ -495,15 +526,8 @@ export async function evaluateUrl(
         await activePage.waitForTimeout(1_500)
 
 		// ---- Run axe-core (retry once if context is destroyed by late navigation) ----
-		// Tags: WCAG 2.0 A/AA, WCAG 2.1 A/AA, WCAG 2.2 AA + best-practice rules
-		const axeTags = [
-			'wcag2a',
-			'wcag2aa',
-			'wcag21a',
-			'wcag21aa',
-			'wcag22aa',
-			'best-practice',
-		]
+		// Tags: built dynamically based on WCAG version/level selection
+		const axeTags = buildAxeTags({ wcagVersion: options.wcagVersion, wcagLevel: options.wcagLevel })
 
 		let axeResults
 		const axeOptions = {
@@ -744,7 +768,8 @@ export async function evaluateUrl(
  */
 export async function evaluateHtml(
 	html: string,
-	fileName?: string
+	fileName?: string,
+	wcagOptions?: WcagOptions
 ): Promise<RawEvaluationResult> {
 	if (!html || typeof html !== 'string' || !html.trim()) {
 		throw new Error(
@@ -784,14 +809,7 @@ export async function evaluateHtml(
         await activePage.waitForTimeout(500)
 
 		// ---- Run axe-core ----
-		const axeTags = [
-			'wcag2a',
-			'wcag2aa',
-			'wcag21a',
-			'wcag21aa',
-			'wcag22aa',
-			'best-practice',
-		]
+		const axeTags = buildAxeTags(wcagOptions)
 
         const axeResults = await new AxeBuilder({ page: activePage })
 			.withTags(axeTags)
@@ -1067,14 +1085,7 @@ export async function evaluateSiteCrawl(
         const runAxeOnCurrentPage = async (
             currentUrl: string
         ): Promise<RawEvaluationResult> => {
-            const axeTags = [
-                'wcag2a',
-                'wcag2aa',
-                'wcag21a',
-                'wcag21aa',
-                'wcag22aa',
-                'best-practice',
-            ]
+            const axeTags = buildAxeTags({ wcagVersion: options.wcagVersion, wcagLevel: options.wcagLevel })
 
             const axeOptions = {
                 resultTypes: [

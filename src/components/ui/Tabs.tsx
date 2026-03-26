@@ -99,7 +99,6 @@ export function TabsList({ className, children, ...props }: TabsListProps) {
 		if (nextIndex !== null) {
 			e.preventDefault()
 			triggers[nextIndex].focus()
-			triggers[nextIndex].click()
 		}
 	}, [])
 
@@ -108,7 +107,7 @@ export function TabsList({ className, children, ...props }: TabsListProps) {
 			ref={listRef}
 			role="tablist"
 			aria-label="Report tabs"
-			className={cn('flex gap-1 border-b border-gray-200', className)}
+			className={cn('flex gap-1 border-b border-gray-200 overflow-x-auto', className)}
 			onKeyDown={handleKeyDown}
 			{...props}
 		>

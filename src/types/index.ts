@@ -117,6 +117,8 @@ export interface EvaluationResult {
 	id?: string
 	targetUrl: string
 	timestamp: string
+	wcagVersion?: string    // '2.1' | '2.2'
+	wcagLevel?: string      // 'A' | 'AA'
 	axeCoreVersion: string
 	testEnvironment: TestEnvironment
 	fullSourceHtml?: string
@@ -353,6 +355,8 @@ export interface ReportSummary {
 	moderateCount: number
 	minorCount: number
 	axeCoreVersion: string
+	wcagVersion?: string
+	wcagLevel?: string
 	testEnvironment: TestEnvironment
 }
 
@@ -448,4 +452,6 @@ export interface EvaluationHistoryItem {
 	totalViolations: number
 	criticalCount: number
 	seriousCount: number
+	wcagVersion?: string
+	wcagLevel?: string
 }

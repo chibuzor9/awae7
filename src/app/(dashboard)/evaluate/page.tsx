@@ -2,12 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
-import { AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2, X } from 'lucide-react'
+import Link from 'next/link'
 import EvaluationForm from '@/components/evaluation/EvaluationForm'
 import type { UrlEvaluationOptions } from '@/components/evaluation/EvaluationForm'
 import EvaluationResults from '@/components/evaluation/EvaluationResults'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
+import { Wcag } from '@/components/ui/Wcag'
+import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 import type {
 	EvaluationResult,
 	DeveloperReport,
@@ -74,7 +78,14 @@ export default function EvaluatePage() {
 	const [results, setResults] = useState<EvaluationData | null>(null)
 	const [preferredRole, setPreferredRole] =
 		useState<PreferredRole>('end-user')
+	const [user, setUser] = useState<User | null>(null)
+	const [bannerDismissed, setBannerDismissed] = useState(false)
 	const resultsRef = useRef<HTMLElement>(null)
+
+	useEffect(() => {
+		const supabase = createClient()
+		supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
+	}, [])
 
 	useEffect(() => {
 		if (results && !loading) {
@@ -169,6 +180,8 @@ export default function EvaluatePage() {
 		url,
 		crawlWholeSite,
 		maxPages,
+		wcagVersion,
+		wcagLevel,
 	}: UrlEvaluationOptions) {
 		const validationError = getUrlValidationError(url)
 		if (validationError) {
@@ -191,6 +204,8 @@ export default function EvaluatePage() {
 					url: normalizedUrl,
 					crawlWholeSite,
 					maxPages,
+					wcagVersion,
+					wcagLevel,
 				}),
 			})
 
@@ -264,12 +279,12 @@ export default function EvaluatePage() {
 			<div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
 				{/* ---- Header ---- */}
 				<header className="mb-10 text-center">
-					<h1 tabIndex={0} className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+					<h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
 						Evaluate Website Accessibility
 					</h1>
-					<p tabIndex={0} className="mx-auto mt-3 max-w-3xl text-base text-slate-600 sm:text-lg">
-						Enter a URL or upload an HTML file to run an automated
-						WCAG 2.2 accessibility audit.
+					<p className="mx-auto mt-3 max-w-3xl text-base text-slate-600 sm:text-lg">
+						Enter a URL or upload an HTML file to run an automated{' '}
+						<Wcag />{' '}2.2 accessibility audit.
 					</p>
 				</header>
 
@@ -291,10 +306,10 @@ export default function EvaluatePage() {
 								aria-hidden="true"
 							/>
 							<div>
-								<p tabIndex={0} className="text-lg font-medium text-gray-900">
+								<p className="text-lg font-medium text-gray-900">
 									Analyzing accessibility...
 								</p>
-								<p tabIndex={0} className="mt-1 text-sm text-gray-500">
+								<p className="mt-1 text-sm text-gray-500">
 									This may take a moment while we scan the
 									page and generate your reports.
 								</p>
@@ -322,10 +337,10 @@ export default function EvaluatePage() {
 								aria-hidden="true"
 							/>
 							<div>
-								<p tabIndex={0} className="text-lg font-semibold text-blue-800">
+								<p className="text-lg font-semibold text-blue-800">
 									Evaluation Failed
 								</p>
-								<p tabIndex={0} className="mt-1 text-sm text-blue-700">
+								<p className="mt-1 text-sm text-blue-700">
 									{error}
 								</p>
 							</div>
@@ -353,6 +368,31 @@ export default function EvaluatePage() {
 							defaultTab={preferredRole}
 						/>
 					</section>
+				)}
+
+				{results && !loading && !user && !bannerDismissed && (
+					<div className="mx-auto max-w-2xl mt-6 flex items-center justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+						<p className="text-sm text-blue-800">
+							<strong>Want to save this evaluation?</strong>{' '}
+							Sign up to keep a history of all your evaluations.
+						</p>
+						<div className="flex items-center gap-2 shrink-0">
+							<Link
+								href="/signup"
+								className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
+							>
+								Sign up
+							</Link>
+							<button
+								type="button"
+								onClick={() => setBannerDismissed(true)}
+								className="text-blue-400 hover:text-blue-600 transition-colors"
+								aria-label="Dismiss signup suggestion"
+							>
+								<X className="h-4 w-4" />
+							</button>
+						</div>
+					</div>
 				)}
 			</div>
 		</div>

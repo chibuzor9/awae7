@@ -49,10 +49,10 @@ export default function SignupPage() {
 			<div className="w-full max-w-md">
 				{/* Header */}
 				<div className="text-center mb-8">
-					<h1 tabIndex={0} className="text-3xl font-semibold text-slate-900">
+					<h1 className="text-3xl font-semibold text-slate-900">
 						Create an account
 					</h1>
-					<p tabIndex={0} className="mt-2 text-sm text-slate-600">
+					<p className="mt-2 text-sm text-slate-600">
 						Get started with AWAE today
 					</p>
 				</div>
@@ -76,10 +76,10 @@ export default function SignupPage() {
 									/>
 								</svg>
 							</div>
-							<h3 tabIndex={0} className="text-lg font-semibold text-gray-900 mb-2">
+							<h3 className="text-lg font-semibold text-gray-900 mb-2">
 								Check your email
 							</h3>
-							<p tabIndex={0} className="text-sm text-gray-600 mb-6">
+							<p className="text-sm text-gray-600 mb-6">
 								We&apos;ve sent a confirmation link to{' '}
 								<span className="font-medium text-gray-900">
 									{email}
@@ -103,7 +103,7 @@ export default function SignupPage() {
 									<div className="w-full border-t border-gray-200" />
 								</div>
 								<div className="relative flex justify-center text-sm">
-									<span tabIndex={0} className="bg-white px-3 text-gray-500">
+									<span className="bg-white px-3 text-gray-500">
 										or continue with email
 									</span>
 								</div>
@@ -199,7 +199,7 @@ export default function SignupPage() {
 
 				{/* Footer Link */}
 				{!success && (
-					<p tabIndex={0} className="mt-6 text-center text-sm text-slate-600">
+					<p className="mt-6 text-center text-sm text-slate-600">
 						Already have an account?{' '}
 						<Link
 							href="/login"

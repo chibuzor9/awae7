@@ -57,7 +57,7 @@ export default function EvaluationResults({
 			}
 			className="w-full"
 		>
-			<div className="flex items-center justify-between gap-4">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
 				<TabsList className="mb-2">
 					<TabsTrigger value="end-user">
 						<span className="inline-flex items-center gap-1.5">
@@ -98,13 +98,15 @@ export default function EvaluationResults({
 			</div>
 
 			<TabsContent value="end-user">
-				<EndUserReport report={endUserReport} />
+				<EndUserReport report={endUserReport} wcagVersion={evaluation.wcagVersion} wcagLevel={evaluation.wcagLevel} />
 			</TabsContent>
 
 			<TabsContent value="developer">
 				<DeveloperReport
 					report={developerReport}
 					onWcagCardClick={onWcagCardClick}
+					wcagVersion={evaluation.wcagVersion}
+					wcagLevel={evaluation.wcagLevel}
 				/>
 			</TabsContent>
 
@@ -114,11 +116,13 @@ export default function EvaluationResults({
 					targetUrl={evaluation.targetUrl}
 					fullSourceHtml={developerReport.fullSourceHtml}
 					pageSources={evaluation.pageSources}
+					wcagVersion={evaluation.wcagVersion}
+					wcagLevel={evaluation.wcagLevel}
 				/>
 			</TabsContent>
 
 			<TabsContent value="auditor">
-				<AuditorReport report={auditorReport} />
+				<AuditorReport report={auditorReport} wcagVersion={evaluation.wcagVersion} wcagLevel={evaluation.wcagLevel} />
 			</TabsContent>
 		</Tabs>
 	)

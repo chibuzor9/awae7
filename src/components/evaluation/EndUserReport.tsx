@@ -21,6 +21,8 @@ import type {
 // ---------- Props ----------
 interface EndUserReportProps {
 	report: EndUserReportType
+	wcagVersion?: string
+	wcagLevel?: string
 }
 
 // ---------- Icon Mapping ----------
@@ -106,7 +108,7 @@ function getInterpretation(score: number): {
 }
 
 // ---------- Component ----------
-export default function EndUserReport({ report }: EndUserReportProps) {
+export default function EndUserReport({ report, wcagVersion, wcagLevel }: EndUserReportProps) {
 	const {
 		score,
 		scoreLabel,
@@ -118,6 +120,9 @@ export default function EndUserReport({ report }: EndUserReportProps) {
 
 	return (
 		<div className="space-y-8">
+			<p className="text-xs font-medium text-gray-500 text-center">
+				Evaluated against WCAG {wcagVersion ?? report.summary.wcagVersion ?? '2.2'} Level {wcagLevel ?? report.summary.wcagLevel ?? 'AA'}
+			</p>
 			{/* ============ LARGE SCORE DISPLAY ============ */}
 			<section
 				aria-labelledby="score-heading"
