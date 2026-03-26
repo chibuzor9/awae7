@@ -222,13 +222,12 @@ export default async function Home() {
 					<ul className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3" role="list">
 						{features.map(feature => {
 							const slug = feature.title.toLowerCase().replace(/\s+/g, '-')
+							const cardA11yLabel = `${feature.title}. ${feature.description}`
 							return (
 							<li key={feature.title}>
 								<article
 									tabIndex={0}
-									role="group"
-									aria-labelledby={`feature-title-${slug}`}
-									aria-describedby={`feature-desc-${slug}`}
+									aria-label={cardA11yLabel}
 									className="group rounded-xl border border-blue-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
 								>
 									<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 transition-colors group-hover:bg-blue-100">
@@ -268,9 +267,7 @@ export default async function Home() {
 							<li key={step.number}>
 								<article
 									tabIndex={0}
-									role="group"
-									aria-labelledby={`step-title-${step.number}`}
-									aria-describedby={`step-desc-${step.number}`}
+									aria-label={`Step ${step.number}. ${step.title}. ${step.description}`}
 									className="rounded-xl border border-blue-100 bg-white p-6 text-center shadow-sm h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
 								>
 									{/* Step icon circle */}
@@ -316,9 +313,7 @@ export default async function Home() {
 							<li key={report.role}>
 								<article
 									tabIndex={0}
-									role="group"
-									aria-labelledby={`report-title-${report.role.toLowerCase()}`}
-									aria-describedby={`report-desc-${report.role.toLowerCase()}`}
+									aria-label={`${report.role} report. ${report.description}`}
 									className={cn(
 										'rounded-xl border p-6 transition-all hover:-translate-y-0.5 hover:shadow-md h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
 										report.accent
