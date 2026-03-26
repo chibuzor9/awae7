@@ -37,10 +37,10 @@ export default function WcagCardsPage() {
 							</a>
 						</Badge>
 					</div>
-					<h1 tabIndex={0} className="text-3xl font-semibold text-slate-900">
+					<h1 className="text-3xl font-semibold text-slate-900">
 						<Wcag /> 2.2 Card Deck
 					</h1>
-					<p tabIndex={0} className="mt-2 text-slate-600">
+					<p className="mt-2 text-slate-600">
 						Browse all <Wcag /> 2.2 Level A, AA and AAA success criteria
 						as interactive cards
 					</p>

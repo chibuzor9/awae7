@@ -502,6 +502,8 @@ function buildSummary(result: EvaluationResult): ReportSummary {
 		moderateCount: result.moderateCount,
 		minorCount: result.minorCount,
 		axeCoreVersion: result.axeCoreVersion,
+		wcagVersion: result.wcagVersion,
+		wcagLevel: result.wcagLevel,
 		testEnvironment: result.testEnvironment,
 	}
 }

@@ -279,12 +279,12 @@ export default function EvaluatePage() {
 			<div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
 				{/* ---- Header ---- */}
 				<header className="mb-10 text-center">
-					<h1 tabIndex={0} className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+					<h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
 						Evaluate Website Accessibility
 					</h1>
-					<p tabIndex={0} className="mx-auto mt-3 max-w-3xl text-base text-slate-600 sm:text-lg">
+					<p className="mx-auto mt-3 max-w-3xl text-base text-slate-600 sm:text-lg">
 						Enter a URL or upload an HTML file to run an automated
-						<Wcag /> 2.2 accessibility audit.
+						<Wcag />{' '}2.2 accessibility audit.
 					</p>
 				</header>
 
@@ -306,10 +306,10 @@ export default function EvaluatePage() {
 								aria-hidden="true"
 							/>
 							<div>
-								<p tabIndex={0} className="text-lg font-medium text-gray-900">
+								<p className="text-lg font-medium text-gray-900">
 									Analyzing accessibility...
 								</p>
-								<p tabIndex={0} className="mt-1 text-sm text-gray-500">
+								<p className="mt-1 text-sm text-gray-500">
 									This may take a moment while we scan the
 									page and generate your reports.
 								</p>
@@ -337,10 +337,10 @@ export default function EvaluatePage() {
 								aria-hidden="true"
 							/>
 							<div>
-								<p tabIndex={0} className="text-lg font-semibold text-blue-800">
+								<p className="text-lg font-semibold text-blue-800">
 									Evaluation Failed
 								</p>
-								<p tabIndex={0} className="mt-1 text-sm text-blue-700">
+								<p className="mt-1 text-sm text-blue-700">
 									{error}
 								</p>
 							</div>

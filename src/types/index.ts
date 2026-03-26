@@ -355,6 +355,8 @@ export interface ReportSummary {
 	moderateCount: number
 	minorCount: number
 	axeCoreVersion: string
+	wcagVersion?: string
+	wcagLevel?: string
 	testEnvironment: TestEnvironment
 }
 
@@ -450,4 +452,6 @@ export interface EvaluationHistoryItem {
 	totalViolations: number
 	criticalCount: number
 	seriousCount: number
+	wcagVersion?: string
+	wcagLevel?: string
 }

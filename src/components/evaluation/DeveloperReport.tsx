@@ -26,6 +26,8 @@ import type {
 export interface DeveloperReportProps {
 	report: DeveloperReportType
 	onWcagCardClick?: (criterionNumber: string) => void
+	wcagVersion?: string
+	wcagLevel?: string
 }
 
 /* ---- Constants ---- */
@@ -360,6 +362,8 @@ function renderHtmlLine(line: string, keyPrefix: string): React.ReactNode {
 export default function DeveloperReport({
 	report,
 	onWcagCardClick,
+	wcagVersion,
+	wcagLevel,
 }: DeveloperReportProps) {
 	const { summary, violations } = report
 
@@ -660,6 +664,9 @@ export default function DeveloperReport({
 
 	return (
 		<div className="space-y-4">
+			<p className="text-xs font-medium text-gray-500">
+				Evaluated against WCAG {wcagVersion ?? report.summary.wcagVersion ?? '2.2'} Level {wcagLevel ?? report.summary.wcagLevel ?? 'AA'}
+			</p>
 			{/* ==================== Crawl Page Navigator ==================== */}
 			{isMultiPage && (
 				<div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4 space-y-3">
