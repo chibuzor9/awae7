@@ -13,8 +13,6 @@ import {
 	Shield,
 	BookOpen,
 	ChevronDown,
-	ChevronLeft,
-	ChevronRight,
 } from 'lucide-react'
 import { CardBody } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
@@ -119,8 +117,6 @@ export default function AuditorReport({ report, wcagVersion, wcagLevel }: Audito
 		WcagPrinciple | 'all'
 	>('all')
 	const [filterLevel, setFilterLevel] = useState<WcagLevel | 'all'>('all')
-	const [matrixPage, setMatrixPage] = useState(1)
-	const MATRIX_PAGE_SIZE = 10
 
 	// --- Violations state ---
 	const [filterSeverity, setFilterSeverity] = useState<Severity | 'all'>(
@@ -206,7 +202,6 @@ export default function AuditorReport({ report, wcagVersion, wcagLevel }: Audito
 			setSortKey(key)
 			setSortDir('asc')
 		}
-		setMatrixPage(1)
 	}
 
 	// ===========================================
@@ -368,7 +363,6 @@ export default function AuditorReport({ report, wcagVersion, wcagLevel }: Audito
 												| WcagPrinciple
 												| 'all'
 										)
-										setMatrixPage(1)
 									}}
 									className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
 								>
@@ -399,7 +393,6 @@ export default function AuditorReport({ report, wcagVersion, wcagLevel }: Audito
 												| WcagLevel
 												| 'all'
 										)
-										setMatrixPage(1)
 									}}
 									className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
 								>
@@ -488,9 +481,7 @@ export default function AuditorReport({ report, wcagVersion, wcagLevel }: Audito
 												</td>
 											</tr>
 										) : (
-											filteredMatrix
-												.slice((matrixPage - 1) * MATRIX_PAGE_SIZE, matrixPage * MATRIX_PAGE_SIZE)
-												.map(entry => (
+											filteredMatrix.map(entry => (
 												<tr
 													key={entry.criterion}
 													className="hover:bg-gray-50 transition-colors"
@@ -550,37 +541,9 @@ export default function AuditorReport({ report, wcagVersion, wcagLevel }: Audito
 									</tbody>
 								</table>
 							</div>
-							<div className="px-4 py-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2">
-								<p className="text-xs text-gray-500">
-									Showing {Math.min((matrixPage - 1) * MATRIX_PAGE_SIZE + 1, filteredMatrix.length)}–{Math.min(matrixPage * MATRIX_PAGE_SIZE, filteredMatrix.length)} of{' '}
-									{filteredMatrix.length} criteria
-									{filteredMatrix.length !== complianceMatrix.length && ` (${complianceMatrix.length} total)`}
-								</p>
-								{filteredMatrix.length > MATRIX_PAGE_SIZE && (
-									<div className="flex items-center gap-1">
-										<button
-											type="button"
-											disabled={matrixPage === 1}
-											onClick={() => setMatrixPage(p => p - 1)}
-											className="rounded-md p-1 text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-											aria-label="Previous page"
-										>
-											<ChevronLeft className="h-4 w-4" aria-hidden="true" />
-										</button>
-										<span className="text-xs text-gray-600 tabular-nums px-1">
-											{matrixPage} / {Math.ceil(filteredMatrix.length / MATRIX_PAGE_SIZE)}
-										</span>
-										<button
-											type="button"
-											disabled={matrixPage >= Math.ceil(filteredMatrix.length / MATRIX_PAGE_SIZE)}
-											onClick={() => setMatrixPage(p => p + 1)}
-											className="rounded-md p-1 text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-											aria-label="Next page"
-										>
-											<ChevronRight className="h-4 w-4" aria-hidden="true" />
-										</button>
-									</div>
-								)}
+							<div className="px-4 py-3 border-t border-gray-100 text-xs text-gray-500">
+								Showing {filteredMatrix.length} of{' '}
+								{complianceMatrix.length} criteria
 							</div>
 						</CardBody>
 				</SectionDropdown>

@@ -140,8 +140,8 @@ export default async function Home() {
 			<section aria-label="Hero" className="relative flex min-h-[calc(100vh-4rem)] items-center bg-white">
 				<div className="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
 					<div className="mx-auto max-w-6xl text-center">
-						<p className="inline-flex items-center rounded-full border border-(--border) bg-white px-3 py-1 text-xs font-semibold text-(--accent)">
-							<Wcag />{' '}2.2 Multi-Audience Reports
+						<p className="inline-flex items-center gap-1 rounded-full border border-(--border) bg-white px-3 py-1 text-xs font-semibold text-(--accent)">
+							<Wcag /> 2.2 Multi-Audience Reports
 						</p>
 						<h1 className="mx-auto mt-4 max-w-5xl text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
 							Automated Web{' '}

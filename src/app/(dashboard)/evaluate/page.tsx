@@ -283,7 +283,7 @@ export default function EvaluatePage() {
 						Evaluate Website Accessibility
 					</h1>
 					<p className="mx-auto mt-3 max-w-3xl text-base text-slate-600 sm:text-lg">
-						Enter a URL or upload an HTML file to run an automated
+						Enter a URL or upload an HTML file to run an automated{' '}
 						<Wcag />{' '}2.2 accessibility audit.
 					</p>
 				</header>
