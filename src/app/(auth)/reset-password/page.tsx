@@ -9,18 +9,15 @@ function ResetPasswordForm() {
 	const [message, setMessage] = useState<string | null>(null)
 	const [error, setError] = useState<string | null>(null)
 	const [loading, setLoading] = useState(false)
-	const [hasSession, setHasSession] = useState(false)
 	const [password, setPassword] = useState('')
 	const searchParams = useSearchParams()
-	const resetToken = searchParams.get('token')
-	const canSetPassword = hasSession || Boolean(resetToken)
+	const resetToken =
+		searchParams.get('token') ?? searchParams.get('resetToken')
+	const canSetPassword = Boolean(resetToken)
 
 	useEffect(() => {
 		const address = searchParams.get('email')
 		if (address) setEmail(address)
-		client.auth.getSession().then(({ data }) => {
-			setHasSession(Boolean(data.session))
-		})
 	}, [searchParams])
 
 	async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -45,20 +42,8 @@ function ResetPasswordForm() {
 		if (resetError) {
 			setError(resetError.message)
 		} else if (canSetPassword) {
-			const migrationResponse = await fetch('/api/auth/migrate', {
-				method: 'POST',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({
-					provider: 'password',
-					completePasswordReset: true,
-				}),
-			})
-			const migration = (await migrationResponse.json()) as {
-				showWelcomeBack?: boolean
-			}
-
 			window.location.assign(
-				migration.showWelcomeBack ? '/welcome-back' : '/evaluate'
+				`/login?reset=success&email=${encodeURIComponent(email)}`
 			)
 		} else {
 			setMessage('Check your email for a secure password reset link.')

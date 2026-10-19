@@ -10,6 +10,7 @@ function LoginForm() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const redirectTo = searchParams.get('redirect') || '/evaluate'
+	const resetComplete = searchParams.get('reset') === 'success'
 
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
@@ -37,7 +38,10 @@ function LoginForm() {
 			const migrationResponse = await fetch('/api/auth/migrate', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ provider: 'password' }),
+				body: JSON.stringify({
+					provider: 'password',
+					completePasswordReset: resetComplete,
+				}),
 			})
 			const migration = (await migrationResponse.json()) as {
 				showWelcomeBack?: boolean
@@ -67,7 +71,9 @@ function LoginForm() {
 						Welcome back
 					</h1>
 					<p className="mt-2 text-sm text-slate-600">
-						Sign in to your AWAE account
+					{resetComplete
+						? 'Your password was updated. Sign in to finish reconnecting your account.'
+						: 'Sign in to your AWAE account'}
 					</p>
 				</div>
 
