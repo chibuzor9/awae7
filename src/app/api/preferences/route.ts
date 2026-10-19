@@ -1,26 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthenticatedUser as getNeonUser } from '@/lib/neon-auth'
+import { resolveApplicationUser } from '@/lib/auth-migration'
 
 type PreferredRole = 'end-user' | 'developer' | 'designer' | 'auditor'
 
 function isPreferredRole(value: unknown): value is PreferredRole {
 	return value === 'end-user' || value === 'developer' || value === 'designer' || value === 'auditor'
-}
-
-function deriveUsername(email: string): string {
-	const base = email.split('@')[0]?.trim().toLowerCase()
-	return base && base.length > 0 ? base : 'user'
-}
-
-function getUsernameMetadata(user: Awaited<ReturnType<typeof getNeonUser>>) {
-	const metadata = user && 'user_metadata' in user
-		? user.user_metadata
-		: undefined
-	return metadata && typeof metadata === 'object' && 'username' in metadata &&
-		typeof metadata.username === 'string' && metadata.username.trim().length > 0
-		? metadata.username
-		: undefined
 }
 
 async function getAuthenticatedUser() {
@@ -38,17 +24,10 @@ export async function GET() {
 			)
 		}
 
-		const userRecord = await prisma.user.upsert({
-			where: { id: user.id },
-			update: {
-				email: user.email,
-			},
-			create: {
-				id: user.id,
-				email: user.email,
-				username:
-					getUsernameMetadata(user) ?? deriveUsername(user.email),
-			},
+		const applicationUser = await resolveApplicationUser(user)
+		const userRecord = await prisma.user.update({
+			where: { id: applicationUser.id },
+			data: { email: user.email },
 			select: {
 				preferredRole: true,
 			},
@@ -103,17 +82,11 @@ export async function PUT(request: NextRequest) {
 			)
 		}
 
-		const updatedUser = await prisma.user.upsert({
-			where: { id: user.id },
-			update: {
+		const applicationUser = await resolveApplicationUser(user)
+		const updatedUser = await prisma.user.update({
+			where: { id: applicationUser.id },
+			data: {
 				email: user.email,
-				preferredRole,
-			},
-			create: {
-				id: user.id,
-				email: user.email,
-				username:
-					getUsernameMetadata(user) ?? deriveUsername(user.email),
 				preferredRole,
 			},
 			select: {

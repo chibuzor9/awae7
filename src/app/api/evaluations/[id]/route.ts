@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthenticatedUser } from '@/lib/neon-auth'
+import { resolveApplicationUser } from '@/lib/auth-migration'
 import {
 	transformRawResults,
 	generateDeveloperReport,
@@ -31,6 +32,7 @@ export async function GET(
 				{ status: 401 }
 			)
 		}
+		const applicationUser = await resolveApplicationUser(user)
 
 		// ---- Fetch evaluation with violations ----
 		const evaluation = await prisma.evaluation.findUnique({
@@ -46,7 +48,7 @@ export async function GET(
 		}
 
 		// ---- Verify ownership ----
-		if (evaluation.userId !== user.id) {
+		if (evaluation.userId !== applicationUser.id) {
 			return NextResponse.json(
 				{ error: 'Evaluation not found.' },
 				{ status: 404 }
@@ -178,6 +180,7 @@ export async function DELETE(
 				{ status: 401 }
 			)
 		}
+		const applicationUser = await resolveApplicationUser(user)
 
 		// ---- Fetch and verify ownership ----
 		const evaluation = await prisma.evaluation.findUnique({
@@ -185,7 +188,7 @@ export async function DELETE(
 			select: { userId: true },
 		})
 
-		if (!evaluation || evaluation.userId !== user.id) {
+		if (!evaluation || evaluation.userId !== applicationUser.id) {
 			return NextResponse.json(
 				{ error: 'Evaluation not found.' },
 				{ status: 404 }

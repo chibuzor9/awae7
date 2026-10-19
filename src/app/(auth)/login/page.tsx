@@ -29,7 +29,7 @@ function LoginForm() {
 
 			if (authError) {
 				setError(
-					'This migration requires a new password. Use the reset link below to continue.'
+					"We recently upgraded AWAE's sign-in system, so your previous password is no longer available. Set a new password to access your existing account and evaluation history."
 				)
 				return
 			}
@@ -94,12 +94,12 @@ function LoginForm() {
 								{error}
 							</div>
 						)}
-						{error?.includes('reset link') && (
+						{error?.includes('previous password') && (
 							<Link
 								href={`/reset-password?email=${encodeURIComponent(email)}`}
 								className="block text-sm font-semibold text-(--accent)"
 							>
-								Send me a password reset link
+								Set a new password
 							</Link>
 						)}
 

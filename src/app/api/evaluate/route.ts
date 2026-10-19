@@ -10,6 +10,7 @@ import {
 import { formatHtmlForReport } from '@/lib/html/format'
 import { prisma } from '@/lib/prisma'
 import { getAuthenticatedUser } from '@/lib/neon-auth'
+import { resolveApplicationUser } from '@/lib/auth-migration'
 import { isPrivateUrl } from '@/lib/security'
 import { checkRateLimit, getRateLimitKey } from '@/lib/rate-limit'
 
@@ -283,10 +284,7 @@ export async function POST(request: NextRequest) {
 
 	if (user) {
 		try {
-			// Look up internal user record
-			const dbUser = await prisma.user.findUnique({
-				where: { id: user.id },
-			})
+			const dbUser = await resolveApplicationUser(user)
 
 			if (dbUser) {
 				const savedEvaluation = await prisma.evaluation.create({

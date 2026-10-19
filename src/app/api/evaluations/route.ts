@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthenticatedUser } from '@/lib/neon-auth'
+import { resolveApplicationUser } from '@/lib/auth-migration'
 
 // ---------------------------------------------------------------------------
 // GET /api/evaluations  --  List evaluation history for the authenticated user
@@ -17,6 +18,7 @@ export async function GET(request: NextRequest) {
 				{ status: 401 }
 			)
 		}
+		const applicationUser = await resolveApplicationUser(user)
 
 		// ---- Parse pagination params ----
 		const { searchParams } = new URL(request.url)
@@ -33,7 +35,7 @@ export async function GET(request: NextRequest) {
 		// ---- Fetch evaluations with count ----
 		const [evaluations, total] = await Promise.all([
 			prisma.evaluation.findMany({
-				where: { userId: user.id },
+				where: { userId: applicationUser.id },
 				orderBy: { timestamp: 'desc' },
 				skip,
 				take: limit,
@@ -50,7 +52,7 @@ export async function GET(request: NextRequest) {
 				},
 			}),
 			prisma.evaluation.count({
-				where: { userId: user.id },
+				where: { userId: applicationUser.id },
 			}),
 		])
 

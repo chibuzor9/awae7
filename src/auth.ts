@@ -33,8 +33,8 @@ export type NeonAuthClient = {
 		email: string,
 		options?: { redirectTo?: string }
 	): Promise<{ error: { message: string } | null }>
-	updateUser(input: {
-		password?: string
+	changePassword(input: {
+		newPassword: string
 	}): Promise<{ error: { message: string } | null }>
 	signOut(): Promise<{ error: { message: string } | null }>
 	onAuthStateChange(

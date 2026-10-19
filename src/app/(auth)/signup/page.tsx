@@ -20,7 +20,7 @@ export default function SignupPage() {
 		setLoading(true)
 
 		try {
-			const { error: authError } = await client.auth.signUp({
+			const { data, error: authError } = await client.auth.signUp({
 				email,
 				password,
 				options: {
@@ -33,6 +33,14 @@ export default function SignupPage() {
 			if (authError) {
 				setError(authError.message)
 				return
+			}
+
+			if (data.session) {
+				await fetch('/api/auth/migrate', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ provider: 'password' }),
+				})
 			}
 
 			setSuccess(true)

@@ -11,6 +11,48 @@ type AuthUser = {
 	email?: string | null
 }
 
+export async function resolveApplicationUser(authUser: AuthUser) {
+	if (!authUser.email) {
+		throw new Error('The authenticated account does not have an email address.')
+	}
+
+	const existing = await prisma.user.findFirst({
+		where: {
+			OR: [{ authUserId: authUser.id }, { email: authUser.email }],
+		},
+	})
+
+	if (existing) {
+		if (
+			existing.authUserId !== authUser.id ||
+			existing.lastLogin === null ||
+			existing.migrationRequired
+		) {
+			return prisma.user.update({
+				where: { id: existing.id },
+				data: {
+					authUserId: authUser.id,
+					lastLogin: new Date(),
+					migrationRequired: false,
+				},
+			})
+		}
+		return existing
+	}
+
+	return prisma.user.create({
+		data: {
+			id: authUser.id,
+			email: authUser.email,
+			username: authUser.email.split('@')[0] || 'user',
+			authUserId: authUser.id,
+			authProvider: 'password',
+			migrationRequired: false,
+			lastLogin: new Date(),
+		},
+	})
+}
+
 export async function linkMigratedAccount(
 	authUser: AuthUser,
 	provider: MigrationProvider
