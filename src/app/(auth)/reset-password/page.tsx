@@ -62,7 +62,7 @@ function ResetPasswordForm() {
 				</h1>
 				<p className="mt-2 text-sm text-slate-600">
 					{canSetPassword
-						? 'Choose a new password to finish reconnecting your account.'
+						? 'AWAE has moved from Supabase to Neon for a more reliable database foundation and improved uptime. Choose a new password to securely reconnect your account and keep access to your evaluation history.'
 						: "Enter your email and we'll send a secure reset link."}
 				</p>
 				{message && <p className="mt-4 text-sm text-green-700">{message}</p>}
