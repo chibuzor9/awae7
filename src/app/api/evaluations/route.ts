@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/neon-auth'
+import { resolveApplicationUser } from '@/lib/auth-migration'
 
 // ---------------------------------------------------------------------------
 // GET /api/evaluations  --  List evaluation history for the authenticated user
@@ -9,11 +10,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
 	try {
-		// ---- Authenticate ----
-		const supabase = await createClient()
-		const {
-			data: { user },
-		} = await supabase.auth.getUser()
+		const user = await getAuthenticatedUser()
 
 		if (!user) {
 			return NextResponse.json(
@@ -21,6 +18,7 @@ export async function GET(request: NextRequest) {
 				{ status: 401 }
 			)
 		}
+		const applicationUser = await resolveApplicationUser(user)
 
 		// ---- Parse pagination params ----
 		const { searchParams } = new URL(request.url)
@@ -37,7 +35,7 @@ export async function GET(request: NextRequest) {
 		// ---- Fetch evaluations with count ----
 		const [evaluations, total] = await Promise.all([
 			prisma.evaluation.findMany({
-				where: { userId: user.id },
+				where: { userId: applicationUser.id },
 				orderBy: { timestamp: 'desc' },
 				skip,
 				take: limit,
@@ -54,7 +52,7 @@ export async function GET(request: NextRequest) {
 				},
 			}),
 			prisma.evaluation.count({
-				where: { userId: user.id },
+				where: { userId: applicationUser.id },
 			}),
 		])
 

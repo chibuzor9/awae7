@@ -190,7 +190,7 @@ export default function PrivacyPolicyPage() {
 					<ul className="list-disc pl-6 mb-4">
 						<li>
 							<a
-								href="https://supabase.com/privacy"
+								href="https://client.com/privacy"
 								target="_blank"
 								rel="noopener noreferrer"
 								className="text-indigo-600 hover:text-indigo-800 underline"
@@ -244,10 +244,10 @@ export default function PrivacyPolicyPage() {
 					<p className="mb-4">
 						We may update this Privacy Policy from time to time. We
 						will notify you of any material changes by posting the
-						new Privacy Policy on this page and updating the &quot;Last
-						Updated&quot; date. Your continued use of our service after
-						any changes constitutes acceptance of the updated
-						Privacy Policy.
+						new Privacy Policy on this page and updating the
+						&quot;Last Updated&quot; date. Your continued use of our
+						service after any changes constitutes acceptance of the
+						updated Privacy Policy.
 					</p>
 				</section>
 
@@ -263,6 +263,15 @@ export default function PrivacyPolicyPage() {
 					<div className="bg-gray-50 p-4 rounded-lg">
 						<p className="mb-2">
 							<strong>Email:</strong> privacy@awae.app
+						</p>
+						<p className="mb-2">
+							<strong>General inquiries:</strong>{' '}
+							<a
+								href="mailto:hello@chibuzor.app"
+								className="text-indigo-600 hover:text-indigo-800 underline"
+							>
+								hello@chibuzor.app
+							</a>
 						</p>
 						<p className="mb-2">
 							<strong>Repository:</strong>{' '}

@@ -1,87 +1,6 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { auth } from '@/lib/neon-auth'
 
-const protectedPaths = ['/history']
-const authPaths = ['/login', '/signup']
-const THREE_DAYS_IN_SECONDS = 60 * 60 * 24 * 3
-
-export async function proxy(request: NextRequest) {
-	let supabaseResponse = NextResponse.next({ request })
-
-	const supabase = createServerClient(
-		process.env.NEXT_PUBLIC_SUPABASE_URL!,
-		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-		{
-			cookieOptions: {
-				maxAge: THREE_DAYS_IN_SECONDS,
-			},
-			cookies: {
-				getAll() {
-					return request.cookies.getAll()
-				},
-				setAll(cookiesToSet) {
-					cookiesToSet.forEach(({ name, value }) =>
-						request.cookies.set(name, value)
-					)
-					supabaseResponse = NextResponse.next({ request })
-					cookiesToSet.forEach(({ name, value, options }) =>
-						supabaseResponse.cookies.set(name, value, options)
-					)
-				},
-			},
-		}
-	)
-
-    let user: Awaited<ReturnType<typeof supabase.auth.getUser>>['data']['user'] = null
-
-    try {
-        const {
-            data: { user: authenticatedUser },
-            error,
-        } = await supabase.auth.getUser()
-
-        if (error) {
-            throw error
-        }
-
-        user = authenticatedUser
-    } catch (error) {
-        console.error('Supabase auth check failed in proxy:', error)
-    }
-
-	const pathname = request.nextUrl.pathname
-
-	// Redirect unauthenticated users away from protected routes
-	if (!user && protectedPaths.some(path => pathname.startsWith(path))) {
-		const url = request.nextUrl.clone()
-		url.pathname = '/login'
-        url.searchParams.set('redirect', `${ pathname }${ request.nextUrl.search }`)
-		return NextResponse.redirect(url)
-	}
-
-	// Redirect authenticated users away from auth pages
-	if (user && authPaths.some(path => pathname.startsWith(path))) {
-		const url = request.nextUrl.clone()
-        const redirectTarget = request.nextUrl.searchParams.get('redirect')
-        url.search = ''
-
-        if (
-            typeof redirectTarget === 'string' &&
-            redirectTarget.startsWith('/') &&
-            !redirectTarget.startsWith('//')
-        ) {
-            const parsedRedirect = new URL(redirectTarget, request.url)
-            url.pathname = parsedRedirect.pathname
-            url.search = parsedRedirect.search
-        } else {
-            url.pathname = '/evaluate'
-        }
-
-		return NextResponse.redirect(url)
-	}
-
-	return supabaseResponse
-}
+export const proxy = auth.middleware({ loginUrl: '/login' })
 
 export const config = {
 	matcher: [
@@ -91,6 +10,7 @@ export const config = {
 		 * - _next/image (image optimization files)
 		 * - favicon.ico (favicon file)
 		 */
-		'/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+		'/auth/callback',
+		'/history/:path*',
 	],
 }

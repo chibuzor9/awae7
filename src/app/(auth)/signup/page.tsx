@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { client } from '../../../auth'
 import { OAuthButtons } from '@/components/auth/oauth-buttons'
 
 export default function SignupPage() {
@@ -20,8 +20,7 @@ export default function SignupPage() {
 		setLoading(true)
 
 		try {
-			const supabase = createClient()
-			const { error: authError } = await supabase.auth.signUp({
+			const { data, error: authError } = await client.auth.signUp({
 				email,
 				password,
 				options: {
@@ -34,6 +33,14 @@ export default function SignupPage() {
 			if (authError) {
 				setError(authError.message)
 				return
+			}
+
+			if (data.session) {
+				await fetch('/api/auth/migrate', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ provider: 'password' }),
+				})
 			}
 
 			setSuccess(true)

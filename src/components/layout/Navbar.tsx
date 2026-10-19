@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { CircleUser, LogOut } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { client } from '@/auth'
 import { cn } from '@/lib/utils'
-import type { User } from '@supabase/supabase-js'
 import { Wcag } from '@/components/ui/Wcag'
+
+type AuthUser = { id: string; email?: string | null }
 
 const navLinks = [
 	{ href: '/evaluate', label: 'Evaluate' },
@@ -28,25 +29,27 @@ const ROLE_OPTIONS: { value: PreferredRole; label: string }[] = [
 export default function Navbar() {
 	const router = useRouter()
 	const pathname = usePathname()
-	const [user, setUser] = useState<User | null>(null)
+	const [user, setUser] = useState<AuthUser | null>(null)
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 	const [loggingOut, setLoggingOut] = useState(false)
 	const [preferredRole, setPreferredRole] = useState<PreferredRole>('end-user')
 	const [profileOpen, setProfileOpen] = useState(false)
 
 	useEffect(() => {
-		const supabase = createClient()
-
 		// Get initial session
-		supabase.auth.getUser().then(({ data: { user } }) => {
-			setUser(user)
+		client.auth.getUser().then(({ data: { user } }) => {
+			setUser(user ? { id: user.id, email: user.email } : null)
 		})
 
 		// Listen for auth changes
 		const {
 			data: { subscription },
-		} = supabase.auth.onAuthStateChange((_event, session) => {
-			setUser(session?.user ?? null)
+		} = client.auth.onAuthStateChange((_event, session) => {
+			setUser(
+				session?.user
+					? { id: session.user.id, email: session.user.email }
+					: null
+			)
 		})
 
 		return () => {
@@ -60,8 +63,15 @@ export default function Navbar() {
 
 	useEffect(() => {
 		try {
-			const stored = window.localStorage.getItem(PREFERRED_ROLE_STORAGE_KEY)
-			if (stored && ['end-user', 'developer', 'designer', 'auditor'].includes(stored)) {
+			const stored = window.localStorage.getItem(
+				PREFERRED_ROLE_STORAGE_KEY
+			)
+			if (
+				stored &&
+				['end-user', 'developer', 'designer', 'auditor'].includes(
+					stored
+				)
+			) {
 				setPreferredRole(stored as PreferredRole)
 			}
 		} catch {
@@ -93,8 +103,12 @@ export default function Navbar() {
 	async function handleLogout() {
 		setLoggingOut(true)
 		try {
-			const supabase = createClient()
-			await supabase.auth.signOut()
+			const { error } = await client.auth.signOut()
+			if (error) {
+				throw new Error(error.message)
+			}
+			setUser(null)
+			setProfileOpen(false)
 			router.push('/login')
 			router.refresh()
 		} finally {

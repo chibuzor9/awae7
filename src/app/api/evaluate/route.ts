@@ -9,7 +9,8 @@ import {
 } from '@/lib/axe/transform'
 import { formatHtmlForReport } from '@/lib/html/format'
 import { prisma } from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/neon-auth'
+import { resolveApplicationUser } from '@/lib/auth-migration'
 import { isPrivateUrl } from '@/lib/security'
 import { checkRateLimit, getRateLimitKey } from '@/lib/rate-limit'
 
@@ -76,8 +77,7 @@ function mapEvaluationFailure(message: string): {
 
 export async function POST(request: NextRequest) {
 	// ---- Check authentication (optional — anonymous use allowed) ----
-	const supabase = await createClient()
-	const { data: { user } } = await supabase.auth.getUser()
+    const user = await getAuthenticatedUser()
 
 	// ---- Rate limiting: stricter for anonymous users ----
 	const rlKey = getRateLimitKey(request)
@@ -284,10 +284,7 @@ export async function POST(request: NextRequest) {
 
 	if (user) {
 		try {
-			// Look up internal user record
-			const dbUser = await prisma.user.findUnique({
-				where: { id: user.id },
-			})
+			const dbUser = await resolveApplicationUser(user)
 
 			if (dbUser) {
 				const savedEvaluation = await prisma.evaluation.create({

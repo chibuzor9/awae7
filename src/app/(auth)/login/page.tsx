@@ -3,13 +3,14 @@
 import { Suspense, useState, FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { client } from '../../../auth'
 import { OAuthButtons } from '@/components/auth/oauth-buttons'
 
 function LoginForm() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const redirectTo = searchParams.get('redirect') || '/evaluate'
+	const resetComplete = searchParams.get('reset') === 'success'
 
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
@@ -22,20 +23,38 @@ function LoginForm() {
 		setLoading(true)
 
 		try {
-			const supabase = createClient()
-			const { error: authError } = await supabase.auth.signInWithPassword(
-				{
-					email,
-					password,
-				}
-			)
+			const { error: authError } = await client.auth.signInWithPassword({
+				email,
+				password,
+			})
 
 			if (authError) {
-				setError(authError.message)
+				setError(
+					"We recently upgraded AWAE's sign-in system, so your previous password is no longer available. Set a new password to access your existing account and evaluation history."
+				)
 				return
 			}
 
-			router.push(redirectTo)
+			const migrationResponse = await fetch('/api/auth/migrate', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({
+					provider: 'password',
+					completePasswordReset: resetComplete,
+				}),
+			})
+			const migration = (await migrationResponse.json()) as {
+				showWelcomeBack?: boolean
+				requiresPasswordReset?: boolean
+			}
+
+			if (migration.requiresPasswordReset) {
+				router.push(`/reset-password?email=${encodeURIComponent(email)}`)
+			} else if (migration.showWelcomeBack) {
+				router.push('/welcome-back')
+			} else {
+				router.push(redirectTo)
+			}
 			router.refresh()
 		} catch {
 			setError('An unexpected error occurred. Please try again.')
@@ -52,7 +71,9 @@ function LoginForm() {
 						Welcome back
 					</h1>
 					<p className="mt-2 text-sm text-slate-600">
-						Sign in to your AWAE account
+					{resetComplete
+						? 'Your password was updated. Sign in to finish reconnecting your account.'
+						: 'Sign in to your AWAE account'}
 					</p>
 				</div>
 
@@ -78,6 +99,14 @@ function LoginForm() {
 							>
 								{error}
 							</div>
+						)}
+						{error?.includes('previous password') && (
+							<Link
+								href={`/reset-password?email=${encodeURIComponent(email)}`}
+								className="block text-sm font-semibold text-(--accent)"
+							>
+								Set a new password
+							</Link>
 						)}
 
 						<div>

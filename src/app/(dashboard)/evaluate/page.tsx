@@ -10,8 +10,9 @@ import EvaluationResults from '@/components/evaluation/EvaluationResults'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
 import { Wcag } from '@/components/ui/Wcag'
-import { createClient } from '@/lib/supabase/client'
-import type { User } from '@supabase/supabase-js'
+import { client } from '../../../auth'
+
+type AuthUser = { id: string; email?: string | null }
 import type {
 	EvaluationResult,
 	DeveloperReport,
@@ -78,13 +79,14 @@ export default function EvaluatePage() {
 	const [results, setResults] = useState<EvaluationData | null>(null)
 	const [preferredRole, setPreferredRole] =
 		useState<PreferredRole>('end-user')
-	const [user, setUser] = useState<User | null>(null)
+	const [user, setUser] = useState<AuthUser | null>(null)
 	const [bannerDismissed, setBannerDismissed] = useState(false)
 	const resultsRef = useRef<HTMLElement>(null)
 
 	useEffect(() => {
-		const supabase = createClient()
-		supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
+		client.auth.getUser().then(({ data: { user } }) =>
+			setUser(user ? { id: user.id, email: user.email } : null)
+		)
 	}, [])
 
 	useEffect(() => {
