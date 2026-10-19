@@ -58,7 +58,12 @@ export type NeonAuthClient = {
 	): { data: { subscription: { unsubscribe(): void } } }
 }
 
-const authClient = createAuthClient(process.env.NEXT_PUBLIC_NEON_AUTH_URL!, {
+const authUrl =
+	typeof window === 'undefined'
+		? process.env.NEXT_PUBLIC_NEON_AUTH_URL!
+		: `${window.location.origin}/api/auth`
+
+const authClient = createAuthClient(authUrl, {
 	adapter: SupabaseAuthAdapter(),
 }) as unknown as NeonAuthClient & {
 	getBetterAuthInstance(): BetterAuthPasswordClient
