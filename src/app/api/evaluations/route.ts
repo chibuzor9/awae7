@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/neon-auth'
 
 // ---------------------------------------------------------------------------
 // GET /api/evaluations  --  List evaluation history for the authenticated user
@@ -9,11 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
 	try {
-		// ---- Authenticate ----
-		const supabase = await createClient()
-		const {
-			data: { user },
-		} = await supabase.auth.getUser()
+		const user = await getAuthenticatedUser()
 
 		if (!user) {
 			return NextResponse.json(

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/neon-auth'
 import {
 	transformRawResults,
 	generateDeveloperReport,
@@ -23,11 +23,7 @@ export async function GET(
 	try {
 		const { id } = await params
 
-		// ---- Authenticate ----
-		const supabase = await createClient()
-		const {
-			data: { user },
-		} = await supabase.auth.getUser()
+		const user = await getAuthenticatedUser()
 
 		if (!user) {
 			return NextResponse.json(
@@ -174,11 +170,7 @@ export async function DELETE(
 	try {
 		const { id } = await params
 
-		// ---- Authenticate ----
-		const supabase = await createClient()
-		const {
-			data: { user },
-		} = await supabase.auth.getUser()
+		const user = await getAuthenticatedUser()
 
 		if (!user) {
 			return NextResponse.json(

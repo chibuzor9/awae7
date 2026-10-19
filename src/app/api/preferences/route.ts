@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
+import { getAuthenticatedUser as getNeonUser } from '@/lib/neon-auth'
 
 type PreferredRole = 'end-user' | 'developer' | 'designer' | 'auditor'
 
@@ -13,12 +13,18 @@ function deriveUsername(email: string): string {
 	return base && base.length > 0 ? base : 'user'
 }
 
+function getUsernameMetadata(user: Awaited<ReturnType<typeof getNeonUser>>) {
+	const metadata = user && 'user_metadata' in user
+		? user.user_metadata
+		: undefined
+	return metadata && typeof metadata === 'object' && 'username' in metadata &&
+		typeof metadata.username === 'string' && metadata.username.trim().length > 0
+		? metadata.username
+		: undefined
+}
+
 async function getAuthenticatedUser() {
-	const supabase = await createClient()
-	const {
-		data: { user },
-	} = await supabase.auth.getUser()
-	return user
+	return getNeonUser()
 }
 
 export async function GET() {
@@ -41,10 +47,7 @@ export async function GET() {
 				id: user.id,
 				email: user.email,
 				username:
-					typeof user.user_metadata?.username === 'string' &&
-					user.user_metadata.username.trim().length > 0
-						? user.user_metadata.username
-						: deriveUsername(user.email),
+					getUsernameMetadata(user) ?? deriveUsername(user.email),
 			},
 			select: {
 				preferredRole: true,
@@ -110,10 +113,7 @@ export async function PUT(request: NextRequest) {
 				id: user.id,
 				email: user.email,
 				username:
-					typeof user.user_metadata?.username === 'string' &&
-					user.user_metadata.username.trim().length > 0
-						? user.user_metadata.username
-						: deriveUsername(user.email),
+					getUsernameMetadata(user) ?? deriveUsername(user.email),
 				preferredRole,
 			},
 			select: {

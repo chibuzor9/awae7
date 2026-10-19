@@ -3,7 +3,7 @@
 import { Suspense, useState, FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { client } from '../../../auth'
 import { OAuthButtons } from '@/components/auth/oauth-buttons'
 
 function LoginForm() {
@@ -22,20 +22,35 @@ function LoginForm() {
 		setLoading(true)
 
 		try {
-			const supabase = createClient()
-			const { error: authError } = await supabase.auth.signInWithPassword(
-				{
-					email,
-					password,
-				}
-			)
+			const { error: authError } = await client.auth.signInWithPassword({
+				email,
+				password,
+			})
 
 			if (authError) {
-				setError(authError.message)
+				setError(
+					'This migration requires a new password. Use the reset link below to continue.'
+				)
 				return
 			}
 
-			router.push(redirectTo)
+			const migrationResponse = await fetch('/api/auth/migrate', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ provider: 'password' }),
+			})
+			const migration = (await migrationResponse.json()) as {
+				showWelcomeBack?: boolean
+				requiresPasswordReset?: boolean
+			}
+
+			if (migration.requiresPasswordReset) {
+				router.push(`/reset-password?email=${encodeURIComponent(email)}`)
+			} else if (migration.showWelcomeBack) {
+				router.push('/welcome-back')
+			} else {
+				router.push(redirectTo)
+			}
 			router.refresh()
 		} catch {
 			setError('An unexpected error occurred. Please try again.')
@@ -78,6 +93,14 @@ function LoginForm() {
 							>
 								{error}
 							</div>
+						)}
+						{error?.includes('reset link') && (
+							<Link
+								href={`/reset-password?email=${encodeURIComponent(email)}`}
+								className="block text-sm font-semibold text-(--accent)"
+							>
+								Send me a password reset link
+							</Link>
 						)}
 
 						<div>

@@ -14,8 +14,10 @@ import {
 	CheckCircle2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/neon-auth'
 import { Wcag } from '@/components/ui/Wcag'
+
+export const dynamic = 'force-dynamic'
 
 /* ================================================================
    Helpers
@@ -24,9 +26,16 @@ import { Wcag } from '@/components/ui/Wcag'
 function WcagText({ children }: { children: string }) {
 	const parts = children.split('WCAG')
 	if (parts.length === 1) return <>{children}</>
-	return <>{parts.map((part, i) => (
-		<span key={i}>{i > 0 && <Wcag />}{part}</span>
-	))}</>
+	return (
+		<>
+			{parts.map((part, i) => (
+				<span key={i}>
+					{i > 0 && <Wcag />}
+					{part}
+				</span>
+			))}
+		</>
+	)
 }
 
 /* ================================================================
@@ -123,10 +132,7 @@ const footerLinks = [
    ================================================================ */
 
 export default async function Home() {
-	const supabase = await createClient()
-	const {
-		data: { user },
-	} = await supabase.auth.getUser()
+	const user = await getAuthenticatedUser()
 
 	const footerAuthLink = user
 		? { href: '/history', label: 'History' }
@@ -137,7 +143,10 @@ export default async function Home() {
 	return (
 		<div className="flex flex-col">
 			{/* ─── Hero Section ─── */}
-			<section aria-label="Hero" className="relative flex min-h-[calc(100vh-4rem)] items-center bg-white">
+			<section
+				aria-label="Hero"
+				className="relative flex min-h-[calc(100vh-4rem)] items-center bg-white"
+			>
 				<div className="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
 					<div className="mx-auto max-w-6xl text-center">
 						<p className="inline-flex items-center gap-1 rounded-full border border-(--border) bg-white px-3 py-1 text-xs font-semibold text-(--accent)">
@@ -150,8 +159,8 @@ export default async function Home() {
 						</h1>
 
 						<p className="mx-auto mt-5 max-w-4xl text-base leading-7 text-slate-700 sm:text-lg">
-							Evaluate any website against <Wcag />{' '}2.2 standards and
-							get tailored reports for developers, designers,
+							Evaluate any website against <Wcag /> 2.2 standards
+							and get tailored reports for developers, designers,
 							auditors, and end-users.
 						</p>
 
@@ -180,7 +189,10 @@ export default async function Home() {
 							</Link>
 						</div>
 
-						<ul aria-label="Available report views" className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600">
+						<ul
+							aria-label="Available report views"
+							className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600"
+						>
 							<li className="rounded-md bg-white px-2.5 py-1">
 								Developer View
 							</li>
@@ -207,7 +219,11 @@ export default async function Home() {
 			</section>
 
 			{/* ─── Features Section ─── */}
-			<section id="features" aria-label="Features" className="bg-white py-16 sm:py-20">
+			<section
+				id="features"
+				aria-label="Features"
+				className="bg-white py-16 sm:py-20"
+			>
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="mx-auto max-w-2xl text-center">
 						<h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
@@ -219,31 +235,44 @@ export default async function Home() {
 						</p>
 					</div>
 
-					<ul className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3" role="list">
+					<ul
+						className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3"
+						role="list"
+					>
 						{features.map(feature => {
-							const slug = feature.title.toLowerCase().replace(/\s+/g, '-')
+							const slug = feature.title
+								.toLowerCase()
+								.replace(/\s+/g, '-')
 							const cardA11yLabel = `${feature.title}. ${feature.description}`
 							return (
-							<li key={feature.title}>
-								<article
-									tabIndex={0}
-									aria-label={cardA11yLabel}
-									className="group rounded-xl border border-blue-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-								>
-									<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 transition-colors group-hover:bg-blue-100">
-										<feature.icon
-											className="h-5 w-5"
-											aria-hidden="true"
-										/>
-									</div>
-									<h3 id={`feature-title-${slug}`} className="mt-4 text-lg font-semibold text-slate-900">
-										<WcagText>{feature.title}</WcagText>
-									</h3>
-									<p id={`feature-desc-${slug}`} className="mt-1.5 text-sm leading-6 text-slate-600">
-										<WcagText>{feature.description}</WcagText>
-									</p>
-								</article>
-							</li>
+								<li key={feature.title}>
+									<article
+										tabIndex={0}
+										aria-label={cardA11yLabel}
+										className="group rounded-xl border border-blue-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+									>
+										<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 transition-colors group-hover:bg-blue-100">
+											<feature.icon
+												className="h-5 w-5"
+												aria-hidden="true"
+											/>
+										</div>
+										<h3
+											id={`feature-title-${slug}`}
+											className="mt-4 text-lg font-semibold text-slate-900"
+										>
+											<WcagText>{feature.title}</WcagText>
+										</h3>
+										<p
+											id={`feature-desc-${slug}`}
+											className="mt-1.5 text-sm leading-6 text-slate-600"
+										>
+											<WcagText>
+												{feature.description}
+											</WcagText>
+										</p>
+									</article>
+								</li>
 							)
 						})}
 					</ul>
@@ -251,7 +280,10 @@ export default async function Home() {
 			</section>
 
 			{/* ─── How It Works Section ─── */}
-			<section aria-label="How it works" className="bg-linear-to-b from-white to-blue-50/40 py-16 sm:py-20">
+			<section
+				aria-label="How it works"
+				className="bg-linear-to-b from-white to-blue-50/40 py-16 sm:py-20"
+			>
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="mx-auto max-w-2xl text-center">
 						<h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
@@ -262,7 +294,10 @@ export default async function Home() {
 						</p>
 					</div>
 
-					<ol className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3" role="list">
+					<ol
+						className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3"
+						role="list"
+					>
 						{steps.map(step => (
 							<li key={step.number}>
 								<article
@@ -282,10 +317,16 @@ export default async function Home() {
 										Step {step.number}
 									</span>
 
-									<h3 id={`step-title-${step.number}`} className="mt-3 text-lg font-semibold text-slate-900">
+									<h3
+										id={`step-title-${step.number}`}
+										className="mt-3 text-lg font-semibold text-slate-900"
+									>
 										{step.title}
 									</h3>
-									<p id={`step-desc-${step.number}`} className="mt-1.5 text-sm leading-6 text-slate-600">
+									<p
+										id={`step-desc-${step.number}`}
+										className="mt-1.5 text-sm leading-6 text-slate-600"
+									>
 										<WcagText>{step.description}</WcagText>
 									</p>
 								</article>
@@ -296,7 +337,10 @@ export default async function Home() {
 			</section>
 
 			{/* ─── Report Types Section ─── */}
-			<section aria-label="Report types" className="bg-white py-16 sm:py-20">
+			<section
+				aria-label="Report types"
+				className="bg-white py-16 sm:py-20"
+			>
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="mx-auto max-w-2xl text-center">
 						<h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
@@ -308,7 +352,10 @@ export default async function Home() {
 						</p>
 					</div>
 
-					<ul className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4" role="list">
+					<ul
+						className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4"
+						role="list"
+					>
 						{reportTypes.map(report => (
 							<li key={report.role}>
 								<article
@@ -320,13 +367,22 @@ export default async function Home() {
 									)}
 								>
 									<report.icon
-										className={cn('h-7 w-7', report.iconAccent)}
+										className={cn(
+											'h-7 w-7',
+											report.iconAccent
+										)}
 										aria-hidden="true"
 									/>
-									<h3 id={`report-title-${report.role.toLowerCase()}`} className="mt-3 text-lg font-semibold">
+									<h3
+										id={`report-title-${report.role.toLowerCase()}`}
+										className="mt-3 text-lg font-semibold"
+									>
 										{report.role}
 									</h3>
-									<p id={`report-desc-${report.role.toLowerCase()}`} className="mt-1.5 text-sm leading-6 text-slate-700">
+									<p
+										id={`report-desc-${report.role.toLowerCase()}`}
+										className="mt-1.5 text-sm leading-6 text-slate-700"
+									>
 										{report.description}
 									</p>
 								</article>
@@ -337,7 +393,10 @@ export default async function Home() {
 			</section>
 
 			{/* ─── Footer CTA ─── */}
-			<section aria-label="Call to action" className="bg-linear-to-r from-slate-800 via-blue-800 to-blue-700 py-14 sm:py-16">
+			<section
+				aria-label="Call to action"
+				className="bg-linear-to-r from-slate-800 via-blue-800 to-blue-700 py-14 sm:py-16"
+			>
 				<div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
 					<h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
 						Ready to evaluate your website?
@@ -387,7 +446,13 @@ export default async function Home() {
 											href={link.href}
 											className="rounded-sm text-sm font-medium text-slate-600 transition-colors hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
 										>
-											{link.href === '/wcag-cards' ? <><Wcag /> Cards</> : link.label}
+											{link.href === '/wcag-cards' ? (
+												<>
+													<Wcag /> Cards
+												</>
+											) : (
+												link.label
+											)}
 										</Link>
 									</li>
 								))}

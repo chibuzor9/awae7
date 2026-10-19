@@ -1,0 +1,127 @@
+'use client'
+
+import { FormEvent, Suspense, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { client } from '@/auth'
+
+function ResetPasswordForm() {
+	const [email, setEmail] = useState('')
+	const [message, setMessage] = useState<string | null>(null)
+	const [error, setError] = useState<string | null>(null)
+	const [loading, setLoading] = useState(false)
+	const [hasSession, setHasSession] = useState(false)
+	const [password, setPassword] = useState('')
+	const searchParams = useSearchParams()
+
+	useEffect(() => {
+		const address = searchParams.get('email')
+		if (address) setEmail(address)
+		client.auth.getSession().then(({ data }) => {
+			setHasSession(Boolean(data.session))
+		})
+	}, [searchParams])
+
+	async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault()
+		setLoading(true)
+		setError(null)
+		setMessage(null)
+
+		const resetError = hasSession
+			? (await client.auth.updateUser({ password })).error
+			: (
+					await client.auth.resetPasswordForEmail(email, {
+						redirectTo: `${window.location.origin}/reset-password`,
+					})
+				).error
+
+		if (resetError) {
+			setError(resetError.message)
+		} else if (hasSession) {
+			const migrationResponse = await fetch('/api/auth/migrate', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ provider: 'password' }),
+			})
+			const migration = (await migrationResponse.json()) as {
+				showWelcomeBack?: boolean
+			}
+
+			window.location.assign(
+				migration.showWelcomeBack ? '/welcome-back' : '/evaluate'
+			)
+		} else {
+			setMessage('Check your email for a secure password reset link.')
+		}
+		setLoading(false)
+	}
+
+	return (
+		<div className="mx-auto flex min-h-[70vh] max-w-md items-center px-4 py-12">
+			<form
+				onSubmit={handleSubmit}
+				className="w-full rounded-xl border border-(--border) bg-white p-7 shadow-lg"
+			>
+				<h1 className="text-2xl font-semibold text-slate-900">
+					Set a new password
+				</h1>
+				<p className="mt-2 text-sm text-slate-600">
+					{hasSession
+						? 'Choose a new password to finish reconnecting your account.'
+						: 'Enter your email and we&apos;ll send a secure reset link.'}
+				</p>
+				{message && <p className="mt-4 text-sm text-green-700">{message}</p>}
+				{error && <p className="mt-4 text-sm text-red-700">{error}</p>}
+				<label htmlFor="reset-email" className="mt-6 block text-sm font-medium">
+					Email address
+				</label>
+				{hasSession ? (
+					<>
+						<label htmlFor="new-password" className="mt-6 block text-sm font-medium">
+							New password
+						</label>
+						<input
+							id="new-password"
+							type="password"
+							required
+							minLength={8}
+							value={password}
+							onChange={event => setPassword(event.target.value)}
+							className="mt-1.5 block w-full rounded-lg border border-(--border) px-3.5 py-2.5"
+						/>
+					</>
+				) : (
+					<input
+						id="reset-email"
+						type="email"
+						required
+						value={email}
+						onChange={event => setEmail(event.target.value)}
+						className="mt-1.5 block w-full rounded-lg border border-(--border) px-3.5 py-2.5"
+					/>
+				)}
+				<button
+					type="submit"
+					disabled={loading}
+					className="mt-5 w-full rounded-lg bg-(--accent) px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+				>
+					{loading ? 'Sending...' : 'Send reset link'}
+				</button>
+			</form>
+		</div>
+	)
+}
+
+export default function ResetPasswordPage() {
+	return (
+		<Suspense
+			fallback={
+				<div className="flex min-h-[70vh] items-center justify-center">
+					<p className="text-gray-500">Loading...</p>
+				</div>
+			}
+		>
+			<ResetPasswordForm />
+		</Suspense>
+	)
+}

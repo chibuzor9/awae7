@@ -1,6 +1,6 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
+import { client } from '@/auth'
 import { useState } from 'react'
 
 export function OAuthButtons() {
@@ -8,8 +8,7 @@ export function OAuthButtons() {
 
 	const handleOAuthSignIn = async (provider: 'google' | 'github') => {
 		setLoading(provider)
-		const supabase = createClient()
-		const { error } = await supabase.auth.signInWithOAuth({
+		const { error } = await client.auth.signInWithOAuth({
 			provider,
 			options: {
 				redirectTo: `${window.location.origin}/auth/callback`,

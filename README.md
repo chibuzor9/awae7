@@ -7,7 +7,7 @@ AWAE7 is a Next.js 16 web accessibility evaluation platform that analyzes pages 
 - Auditors
 - End users
 
-The app uses `axe-core` for automated accessibility analysis, Supabase for authentication, and Prisma + PostgreSQL for persistence.
+The app uses `axe-core` for automated accessibility analysis, Neon Auth for authentication, and Prisma + Neon PostgreSQL for persistence.
 
 ## Core Features
 
@@ -21,7 +21,7 @@ The app uses `axe-core` for automated accessibility analysis, Supabase for authe
 
 - Next.js (App Router) + React + TypeScript
 - Tailwind CSS
-- Supabase Auth (`@supabase/ssr`)
+- Neon Auth (`@neondatabase/auth`)
 - Prisma with PostgreSQL
 - axe-core + Playwright
 
@@ -30,7 +30,7 @@ The app uses `axe-core` for automated accessibility analysis, Supabase for authe
 - Node.js 20+
 - npm 10+
 - PostgreSQL database
-- Supabase project (URL + anon key)
+- Neon project with Neon Auth enabled
 
 ## Quick Start
 
@@ -44,7 +44,7 @@ npm install
 
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DB_NAME"
-NEXT_PUBLIC_SUPABASE_URL="https://YOUR_PROJECT_REF.supabase.co"
+NEXT_PUBLIC_SUPABASE_URL="https://YOUR_PROJECT_REF.client.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"
 ```
 
@@ -76,10 +76,17 @@ npm run dev
 - `src/components`: UI and report components
 - `src/lib/axe`: accessibility evaluation and report transformation
 - `src/lib/email`: email template rendering + email sending integration points
-- `src/lib/supabase`: browser/server/middleware Supabase clients
+- `src/lib/neon-auth.ts`: server-side Neon Auth integration
 - `prisma/schema.prisma`: database schema
 
 ## Environment Variables
+
+Neon deployments also require:
+
+- `DATABASE_URL_UNPOOLED`
+- `NEXT_PUBLIC_NEON_AUTH_URL`
+- `NEON_AUTH_BASE_URL`
+- `NEON_AUTH_COOKIE_SECRET` (at least 32 random characters)
 
 Required today:
 
@@ -95,9 +102,17 @@ Optional (only if you implement SMTP provider integration in `src/lib/email/inde
 
 ## Email Architecture
 
+For the preview deployment, set the OAuth application callback URLs through
+Neon Auth. GitHub should use the Neon-managed callback URL:
+
+`https://ep-soft-bread-zabarv9f.neonauth.c-2.eu-west-2.aws.neon.tech/neondb/auth/callback/github`
+
+Neon Auth then returns users to the application callback at
+`https://awae7-preview.vercel.app/auth/callback`.
+
 AWAE7 uses a dual approach:
 
-- Supabase handles authentication emails (confirmation, password reset, magic links, OTP).
+- Neon Auth handles authentication emails, password resets, and OAuth callbacks.
 - Application SMTP integration handles non-auth emails such as welcome or engagement messaging.
 
 The SMTP implementation is intentionally a placeholder in `src/lib/email/index.ts`. In development, it logs outgoing email payload details; in production, it throws until a provider is wired.
