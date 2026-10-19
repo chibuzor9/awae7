@@ -48,7 +48,10 @@ function ResetPasswordForm() {
 			const migrationResponse = await fetch('/api/auth/migrate', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ provider: 'password' }),
+				body: JSON.stringify({
+					provider: 'password',
+					completePasswordReset: true,
+				}),
 			})
 			const migration = (await migrationResponse.json()) as {
 				showWelcomeBack?: boolean

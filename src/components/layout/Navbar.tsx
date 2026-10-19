@@ -103,7 +103,12 @@ export default function Navbar() {
 	async function handleLogout() {
 		setLoggingOut(true)
 		try {
-			await client.auth.signOut()
+			const { error } = await client.auth.signOut()
+			if (error) {
+				throw new Error(error.message)
+			}
+			setUser(null)
+			setProfileOpen(false)
 			router.push('/login')
 			router.refresh()
 		} finally {

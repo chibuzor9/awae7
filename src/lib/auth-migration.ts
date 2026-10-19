@@ -23,26 +23,11 @@ export async function resolveApplicationUser(authUser: AuthUser) {
 	})
 
 	if (existing) {
-		if (
-			existing.authUserId !== authUser.id ||
-			existing.lastLogin === null ||
-			existing.migrationRequired
-		) {
-			return prisma.user.update({
-				where: { id: existing.id },
-				data: {
-					authUserId: authUser.id,
-					lastLogin: new Date(),
-					migrationRequired: false,
-				},
-			})
-		}
 		return existing
 	}
 
 	return prisma.user.create({
 		data: {
-			id: authUser.id,
 			email: authUser.email,
 			username: authUser.email.split('@')[0] || 'user',
 			authUserId: authUser.id,
@@ -55,14 +40,17 @@ export async function resolveApplicationUser(authUser: AuthUser) {
 
 export async function linkMigratedAccount(
 	authUser: AuthUser,
-	provider: MigrationProvider
+	provider: MigrationProvider,
+	options: { completePasswordReset?: boolean } = {}
 ) {
 	if (!authUser.email) {
 		throw new Error('The authenticated account does not have an email address.')
 	}
 
-	const existing = await prisma.user.findUnique({
-		where: { email: authUser.email },
+	const existing = await prisma.user.findFirst({
+		where: {
+			OR: [{ authUserId: authUser.id }, { email: authUser.email }],
+		},
 		select: {
 			id: true,
 			authUserId: true,
@@ -73,18 +61,41 @@ export async function linkMigratedAccount(
 	})
 
 	if (!existing) {
-		return {
-			isExistingAccount: false,
-			requiresPasswordReset: false,
-			showWelcomeBack: false,
-		}
+		await prisma.user.create({
+			data: {
+				email: authUser.email,
+				username: authUser.email.split('@')[0] || 'user',
+				authUserId: authUser.id,
+				authProvider: provider,
+				migrationRequired: false,
+				lastLogin: new Date(),
+			},
+		})
+		return { isExistingAccount: false, requiresPasswordReset: false, showWelcomeBack: false }
 	}
 
 	const shouldResetPassword =
 		provider === 'password' &&
 		existing.migrationRequired &&
 		existing.lastLogin !== null &&
-		existing.lastLogin > AUTH_MIGRATION_CUTOFF
+		existing.lastLogin >= AUTH_MIGRATION_CUTOFF
+
+	if (shouldResetPassword && !options.completePasswordReset) {
+		await prisma.user.update({
+			where: { id: existing.id },
+			data: {
+				authUserId: authUser.id,
+				authProvider: provider,
+				lastLogin: new Date(),
+			},
+		})
+
+		return {
+			isExistingAccount: true,
+			requiresPasswordReset: true,
+			showWelcomeBack: false,
+		}
+	}
 
 	const showWelcomeBack = existing.migrationRequired
 

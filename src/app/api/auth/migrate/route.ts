@@ -18,9 +18,12 @@ export async function POST(request: Request) {
 
 		const body = (await request.json().catch(() => ({}))) as {
 			provider?: unknown
+			completePasswordReset?: unknown
 		}
 		const provider = isProvider(body.provider) ? body.provider : 'oauth'
-		const result = await linkMigratedAccount(user, provider)
+		const result = await linkMigratedAccount(user, provider, {
+			completePasswordReset: body.completePasswordReset === true,
+		})
 
 		return NextResponse.json(result)
 	} catch (error) {
