@@ -13,6 +13,17 @@ type AuthResult<T> = {
 	error: { message: string } | null
 }
 
+type BetterAuthPasswordClient = {
+	changePassword(input: {
+		newPassword: string
+		currentPassword: string
+	}): Promise<{ data?: unknown; error?: { message: string } | null }>
+	resetPassword(input: {
+		newPassword: string
+		token: string
+	}): Promise<{ data?: unknown; error?: { message: string } | null }>
+}
+
 export type NeonAuthClient = {
 	getUser(): Promise<AuthResult<{ user: AuthUser | null }>>
 	getSession(): Promise<AuthResult<{ session: AuthSession }>>
@@ -35,6 +46,8 @@ export type NeonAuthClient = {
 	): Promise<{ error: { message: string } | null }>
 	changePassword(input: {
 		newPassword: string
+		currentPassword?: string
+		token?: string
 	}): Promise<{ error: { message: string } | null }>
 	signOut(): Promise<{ error: { message: string } | null }>
 	onAuthStateChange(
@@ -45,8 +58,32 @@ export type NeonAuthClient = {
 	): { data: { subscription: { unsubscribe(): void } } }
 }
 
+const authClient = createAuthClient(process.env.NEXT_PUBLIC_NEON_AUTH_URL!, {
+	adapter: SupabaseAuthAdapter(),
+}) as unknown as NeonAuthClient & {
+	getBetterAuthInstance(): BetterAuthPasswordClient
+}
+
 export const client = {
-	auth: createAuthClient(process.env.NEXT_PUBLIC_NEON_AUTH_URL!, {
-		adapter: SupabaseAuthAdapter(),
-	}) as unknown as NeonAuthClient,
+	auth: {
+		...authClient,
+		changePassword: async ({
+			newPassword,
+			currentPassword,
+			token,
+		}: {
+			newPassword: string
+			currentPassword?: string
+			token?: string
+		}) => {
+			const betterAuth = authClient.getBetterAuthInstance()
+			const result = token
+				? await betterAuth.resetPassword({ newPassword, token })
+				: await betterAuth.changePassword({
+						newPassword,
+						currentPassword: currentPassword ?? '',
+					})
+			return { error: result.error ?? null }
+		},
+	} satisfies NeonAuthClient,
 }

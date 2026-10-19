@@ -12,6 +12,8 @@ function ResetPasswordForm() {
 	const [hasSession, setHasSession] = useState(false)
 	const [password, setPassword] = useState('')
 	const searchParams = useSearchParams()
+	const resetToken = searchParams.get('token')
+	const canSetPassword = hasSession || Boolean(resetToken)
 
 	useEffect(() => {
 		const address = searchParams.get('email')
@@ -27,8 +29,13 @@ function ResetPasswordForm() {
 		setError(null)
 		setMessage(null)
 
-		const resetError = hasSession
-			? (await client.auth.changePassword({ newPassword: password })).error
+		const resetError = canSetPassword
+			? (
+					await client.auth.changePassword({
+						newPassword: password,
+						...(resetToken ? { token: resetToken } : {}),
+					})
+				).error
 			: (
 					await client.auth.resetPasswordForEmail(email, {
 						redirectTo: `${window.location.origin}/reset-password`,
@@ -37,7 +44,7 @@ function ResetPasswordForm() {
 
 		if (resetError) {
 			setError(resetError.message)
-		} else if (hasSession) {
+		} else if (canSetPassword) {
 			const migrationResponse = await fetch('/api/auth/migrate', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json' },
@@ -63,21 +70,21 @@ function ResetPasswordForm() {
 				className="w-full rounded-xl border border-(--border) bg-white p-7 shadow-lg"
 			>
 				<h1 className="text-2xl font-semibold text-slate-900">
-					{hasSession ? 'Set a new password' : 'Reset your password'}
+					{canSetPassword ? 'Set a new password' : 'Reset your password'}
 				</h1>
 				<p className="mt-2 text-sm text-slate-600">
-					{hasSession
+					{canSetPassword
 						? 'Choose a new password to finish reconnecting your account.'
 						: "Enter your email and we'll send a secure reset link."}
 				</p>
 				{message && <p className="mt-4 text-sm text-green-700">{message}</p>}
 				{error && <p className="mt-4 text-sm text-red-700">{error}</p>}
-				{!hasSession && (
+				{!canSetPassword && (
 					<label htmlFor="reset-email" className="mt-6 block text-sm font-medium">
 						Email address
 					</label>
 				)}
-				{hasSession ? (
+				{canSetPassword ? (
 					<>
 						<label htmlFor="new-password" className="mt-6 block text-sm font-medium">
 							New password
@@ -108,10 +115,10 @@ function ResetPasswordForm() {
 					className="mt-5 w-full rounded-lg bg-(--accent) px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
 				>
 					{loading
-						? hasSession
+						? canSetPassword
 							? 'Updating password...'
 							: 'Sending...'
-						: hasSession
+						: canSetPassword
 							? 'Set new password'
 							: 'Send reset link'}
 				</button>
