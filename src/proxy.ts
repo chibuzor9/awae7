@@ -10,6 +10,7 @@ export const config = {
 		 * - _next/image (image optimization files)
 		 * - favicon.ico (favicon file)
 		 */
+		'/auth/callback',
 		'/history/:path*',
 	],
 }
