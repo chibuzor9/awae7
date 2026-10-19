@@ -64,26 +64,25 @@ const authClient = createAuthClient(process.env.NEXT_PUBLIC_NEON_AUTH_URL!, {
 	getBetterAuthInstance(): BetterAuthPasswordClient
 }
 
+authClient.changePassword = async ({
+	newPassword,
+	currentPassword,
+	token,
+}: {
+	newPassword: string
+	currentPassword?: string
+	token?: string
+}) => {
+	const betterAuth = authClient.getBetterAuthInstance()
+	const result = token
+		? await betterAuth.resetPassword({ newPassword, token })
+		: await betterAuth.changePassword({
+				newPassword,
+				currentPassword: currentPassword ?? '',
+			})
+	return { error: result.error ?? null }
+}
+
 export const client = {
-	auth: {
-		...authClient,
-		changePassword: async ({
-			newPassword,
-			currentPassword,
-			token,
-		}: {
-			newPassword: string
-			currentPassword?: string
-			token?: string
-		}) => {
-			const betterAuth = authClient.getBetterAuthInstance()
-			const result = token
-				? await betterAuth.resetPassword({ newPassword, token })
-				: await betterAuth.changePassword({
-						newPassword,
-						currentPassword: currentPassword ?? '',
-					})
-			return { error: result.error ?? null }
-		},
-	} satisfies NeonAuthClient,
+	auth: authClient,
 }
