@@ -44,8 +44,10 @@ npm install
 
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DB_NAME"
-NEXT_PUBLIC_SUPABASE_URL="https://YOUR_PROJECT_REF.client.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"
+DATABASE_URL_UNPOOLED="postgresql://...neon.tech/neondb?sslmode=require"
+NEXT_PUBLIC_NEON_AUTH_URL="https://...neonauth.../neondb/auth"
+NEON_AUTH_BASE_URL="https://...neonauth.../neondb/auth"
+NEON_AUTH_COOKIE_SECRET="at-least-32-random-characters"
 ```
 
 3. Generate Prisma client and apply schema:
@@ -91,8 +93,10 @@ Neon deployments also require:
 Required today:
 
 - `DATABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `DATABASE_URL_UNPOOLED`
+- `NEXT_PUBLIC_NEON_AUTH_URL`
+- `NEON_AUTH_BASE_URL`
+- `NEON_AUTH_COOKIE_SECRET`
 
 Optional (only if you implement SMTP provider integration in `src/lib/email/index.ts`):
 

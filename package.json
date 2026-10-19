@@ -13,7 +13,6 @@
 	"dependencies": {
 		"@axe-core/playwright": "^4.11.1",
 		"@neondatabase/auth": "^0.6.0-beta",
-		"@neondatabase/neon-js": "^0.8.0-beta",
 		"@prisma/adapter-pg": "^7.3.0",
 		"@prisma/client": "^7.3.0",
 		"@sparticuz/chromium": "^133.0.0",

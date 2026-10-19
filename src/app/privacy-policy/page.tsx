@@ -265,6 +265,15 @@ export default function PrivacyPolicyPage() {
 							<strong>Email:</strong> privacy@awae.app
 						</p>
 						<p className="mb-2">
+							<strong>General inquiries:</strong>{' '}
+							<a
+								href="mailto:hello@chibuzor.app"
+								className="text-indigo-600 hover:text-indigo-800 underline"
+							>
+								hello@chibuzor.app
+							</a>
+						</p>
+						<p className="mb-2">
 							<strong>Repository:</strong>{' '}
 							<a
 								href="https://github.com/chibuzor9/awae7"
